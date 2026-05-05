@@ -23,4 +23,4 @@ echo "Running admin seed..."
 node dist/prisma/seed.js
 
 echo "Starting API server..."
-node dist/main.js
+node dist/src/main.js
