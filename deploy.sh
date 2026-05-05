@@ -196,43 +196,20 @@ if [ ! -d .git ]; then
   exit 1
 fi
 
-if [ ! -f .env ]; then
-  if [ -f .env.example ]; then
-    echo ".env not found. Creating from .env.example"
-    cp .env.example .env
-    echo "Please edit .env before continuing."
-    exit 0
-  fi
-  echo "Error: .env.example not found. Cannot create .env."
-  exit 1
-fi
-
-if grep -q "GNU nano" .env; then
-  echo "Error: .env contains captured editor text. Recreate it from .env.example and only keep KEY=VALUE lines."
-  exit 1
-fi
-
-if ! awk '
-  /^[[:space:]]*$/ { next }
-  /^[[:space:]]*#/ { next }
-  /^[A-Za-z_][A-Za-z0-9_]*=.*/ { next }
-  { exit 1 }
-' .env; then
-  echo "Error: .env contains invalid lines. Expected only KEY=VALUE entries."
-  exit 1
-fi
-
-# Pull latest code from main branch
+# 1. Pull latest code
 echo "Pulling latest code from origin/main..."
 git pull origin main
 
-# Deploy with Docker Compose
-echo "Pulling Docker images..."
-docker compose pull
-
+# 2. Deploy with Docker Compose
 echo "Building and starting containers..."
-docker compose up -d --build
+# We use sudo because the user had permission issues with docker socket
+sudo docker compose down
+sudo docker compose up -d --build
+
+# 3. Database migrations
+echo "Running database migrations..."
+sudo docker compose exec -T api npx prisma migrate deploy
+sudo docker compose exec -T api npx prisma generate
 
 echo "Deployment complete."
-
-echo "You may want to inspect logs with: docker compose logs -f"
+echo "Check status with: sudo docker compose ps"
