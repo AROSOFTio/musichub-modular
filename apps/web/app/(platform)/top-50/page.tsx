@@ -1,26 +1,46 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { Trophy } from "lucide-react";
+import { getTop50, CatalogSong } from "@/lib/api";
+import { RankedSongList } from "@/components/catalog/ranked-song-list";
 
-import { PageHeader } from "@/components/ui/page-header";
-import { SectionCard } from "@/components/ui/section-card";
+export default function Top50Page() {
+  const [songs, setSongs] = useState<CatalogSong[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-export default function TopFiftyPage() {
+  useEffect(() => {
+    getTop50()
+      .then(setSongs)
+      .catch(console.error)
+      .finally(() => setIsLoading(false));
+  }, []);
+
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Top 50"
-        description="A dedicated chart route is already available for the future ranking pipeline."
-      />
-      <SectionCard
-        eyebrow="Charting"
-        title="Top 50 will be computed from real engagement signals."
-        description="The scoring layer is deferred until streaming and download events are tracked end to end."
-      >
-        <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-borderSoft bg-surface px-4 py-2 text-sm font-medium text-slate-600">
-          <Trophy className="h-4 w-4 text-violet-700" />
-          Ranking data becomes meaningful after track ingestion and analytics.
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-yellow-100">
+          <Trophy className="h-5 w-5 text-yellow-600" />
         </div>
-      </SectionCard>
+        <div>
+          <h1 className="text-2xl font-extrabold text-slate-950">Top 50</h1>
+          <p className="text-sm text-slate-500">Most downloaded &amp; streamed songs</p>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-2">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <div key={i} className="h-16 animate-pulse rounded-2xl bg-slate-100" />
+          ))}
+        </div>
+      ) : songs.length === 0 ? (
+        <div className="rounded-3xl border border-borderSoft bg-white p-10 text-center text-slate-500 shadow-card">
+          No songs ranked yet. Downloads and plays drive this chart.
+        </div>
+      ) : (
+        <RankedSongList songs={songs} showRank showDownloads />
+      )}
     </div>
   );
 }
-

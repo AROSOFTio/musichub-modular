@@ -26,6 +26,7 @@ export type CatalogArtist = {
   avatar?: string | null;
   coverImage?: string | null;
   verified?: boolean;
+  _count?: { songs: number; followers: number };
 };
 
 export type CatalogGenre = {
@@ -34,6 +35,7 @@ export type CatalogGenre = {
   slug: string;
   icon?: string | null;
   color?: string | null;
+  _count?: { songs: number };
 };
 
 export type CatalogSong = {
@@ -51,17 +53,30 @@ export type CatalogSong = {
   isPublished: boolean;
   allowDownload: boolean;
   allowRemix: boolean;
+  isEditorPick: boolean;
   downloadCount: number;
   playCount: number;
   createdAt: string;
   updatedAt: string;
 };
 
-type JsonBody =
-  | BodyInit
-  | Record<string, unknown>
-  | null
-  | undefined;
+export type HomeFeed = {
+  featured: CatalogSong | null;
+  trending: CatalogSong[];
+  latest: CatalogSong[];
+  editorPicks: CatalogSong[];
+  topDownloads: CatalogSong[];
+  popularArtists: CatalogArtist[];
+  genres: CatalogGenre[];
+};
+
+export type SearchResult = {
+  songs: CatalogSong[];
+  artists: CatalogArtist[];
+  genres: CatalogGenre[];
+};
+
+type JsonBody = BodyInit | Record<string, unknown> | null | undefined;
 
 function getApiBaseUrl() {
   return process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") || "/api";
@@ -88,7 +103,6 @@ async function apiRequest<T>(
 
   if (!response.ok) {
     let message = "Request failed.";
-
     try {
       const errorPayload = (await response.json()) as { message?: string | string[] };
       if (Array.isArray(errorPayload.message)) {
@@ -99,18 +113,15 @@ async function apiRequest<T>(
     } catch {
       message = response.statusText || message;
     }
-
     throw new Error(message);
   }
 
   return (await response.json()) as T;
 }
 
+// Auth
 export function loginRequest(payload: { email: string; password: string }) {
-  return apiRequest<AuthResponse>("/auth/login", {
-    method: "POST",
-    body: payload,
-  });
+  return apiRequest<AuthResponse>("/auth/login", { method: "POST", body: payload });
 }
 
 export function registerRequest(payload: {
@@ -120,10 +131,7 @@ export function registerRequest(payload: {
   username?: string;
   role?: UserRole;
 }) {
-  return apiRequest<AuthResponse>("/auth/register", {
-    method: "POST",
-    body: payload,
-  });
+  return apiRequest<AuthResponse>("/auth/register", { method: "POST", body: payload });
 }
 
 export function refreshRequest(refreshToken?: string) {
@@ -136,13 +144,116 @@ export function refreshRequest(refreshToken?: string) {
 export function logoutRequest(accessToken: string, refreshToken?: string) {
   return apiRequest<{ success: boolean }>("/auth/logout", {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
+    headers: { Authorization: `Bearer ${accessToken}` },
     body: refreshToken ? { refreshToken } : {},
   });
 }
 
+// Home Feed
+export function getHomeFeed() {
+  return apiRequest<HomeFeed>("/home", { cache: "no-store" });
+}
+
+// Discovery
+export function getTrending(limit?: number) {
+  const params = limit ? `?limit=${limit}` : "";
+  return apiRequest<CatalogSong[]>(`/discover/trending${params}`, { cache: "no-store" });
+}
+
+export function getLatest(limit?: number) {
+  const params = limit ? `?limit=${limit}` : "";
+  return apiRequest<CatalogSong[]>(`/discover/latest${params}`, { cache: "no-store" });
+}
+
+export function getTop50() {
+  return apiRequest<CatalogSong[]>("/discover/top-50", { cache: "no-store" });
+}
+
+export function getAllTime() {
+  return apiRequest<CatalogSong[]>("/discover/all-time", { cache: "no-store" });
+}
+
+export function getEditorPicks() {
+  return apiRequest<CatalogSong[]>("/discover/editor-picks", { cache: "no-store" });
+}
+
+export function searchAll(query: string) {
+  return apiRequest<SearchResult>(`/discover/search?q=${encodeURIComponent(query)}`, {
+    cache: "no-store",
+  });
+}
+
+// Genres
+export function listGenres() {
+  return apiRequest<CatalogGenre[]>("/genres", { cache: "no-store" });
+}
+
+export function getGenre(slug: string) {
+  return apiRequest<CatalogGenre & { songs: CatalogSong[] }>(`/genres/${encodeURIComponent(slug)}`, {
+    cache: "no-store",
+  });
+}
+
+// Artists
+export function listArtists() {
+  return apiRequest<CatalogArtist[]>("/artists", { cache: "no-store" });
+}
+
+export function getArtist(slug: string) {
+  return apiRequest<CatalogArtist & { songs: CatalogSong[] }>(`/artists/${encodeURIComponent(slug)}`, {
+    cache: "no-store",
+  });
+}
+
+// Songs
+export function listSongs(query?: string) {
+  const params = query ? `?q=${encodeURIComponent(query)}` : "";
+  return apiRequest<CatalogSong[]>(`/songs${params}`, { cache: "no-store" });
+}
+
+export function getSong(slug: string) {
+  return apiRequest<CatalogSong>(`/songs/${encodeURIComponent(slug)}`, { cache: "no-store" });
+}
+
+export function listManageableSongs(accessToken: string) {
+  return apiRequest<CatalogSong[]>("/songs/manage", {
+    cache: "no-store",
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+}
+
+export function uploadSong(accessToken: string, payload: FormData) {
+  return apiRequest<CatalogSong>("/songs", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${accessToken}` },
+    body: payload,
+  });
+}
+
+export function updateSong(accessToken: string, id: string, payload: FormData) {
+  return apiRequest<CatalogSong>(`/songs/${id}`, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${accessToken}` },
+    body: payload,
+  });
+}
+
+export function deleteSong(accessToken: string, id: string) {
+  return apiRequest<{ success: boolean }>(`/songs/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+}
+
+export function setEditorPick(accessToken: string, songId: string, pick: boolean) {
+  return apiRequest<CatalogSong>(`/songs/${songId}/editor-pick`, {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${accessToken}` },
+    body: { pick },
+  });
+}
+
+// Admin
 export function getAdminOverview(accessToken: string) {
   return apiRequest<{
     totalUsers: number;
@@ -153,59 +264,6 @@ export function getAdminOverview(accessToken: string) {
     freeDownloadsEnabled: boolean;
     remixPaymentsEnabled: boolean;
   }>("/admin/overview", {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-}
-
-export function listSongs(query?: string) {
-  const params = query ? `?q=${encodeURIComponent(query)}` : "";
-  return apiRequest<CatalogSong[]>(`/songs${params}`, {
-    cache: "no-store",
-  });
-}
-
-export function getSong(slug: string) {
-  return apiRequest<CatalogSong>(`/songs/${encodeURIComponent(slug)}`, {
-    cache: "no-store",
-  });
-}
-
-export function listManageableSongs(accessToken: string) {
-  return apiRequest<CatalogSong[]>("/songs/manage", {
-    cache: "no-store",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-}
-
-export function uploadSong(accessToken: string, payload: FormData) {
-  return apiRequest<CatalogSong>("/songs", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body: payload,
-  });
-}
-
-export function updateSong(accessToken: string, id: string, payload: FormData) {
-  return apiRequest<CatalogSong>(`/songs/${id}`, {
-    method: "PATCH",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body: payload,
-  });
-}
-
-export function deleteSong(accessToken: string, id: string) {
-  return apiRequest<{ success: boolean }>(`/songs/${id}`, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
+    headers: { Authorization: `Bearer ${accessToken}` },
   });
 }

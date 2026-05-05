@@ -36,7 +36,7 @@ export const primaryNavigation: NavItem[] = [
 ];
 
 export const secondaryNavigation: NavItem[] = [
-  { href: "/artist", label: "Artist", icon: Mic2 },
+  { href: "/artists", label: "Artists", icon: Mic2 },
   { href: "/admin", label: "Admin", icon: Shield },
 ];
 

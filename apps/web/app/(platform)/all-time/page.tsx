@@ -1,26 +1,46 @@
-import { BarChart3 } from "lucide-react";
+"use client";
 
-import { PageHeader } from "@/components/ui/page-header";
-import { SectionCard } from "@/components/ui/section-card";
+import { useEffect, useState } from "react";
+import { Award } from "lucide-react";
+import { getAllTime, CatalogSong } from "@/lib/api";
+import { RankedSongList } from "@/components/catalog/ranked-song-list";
 
 export default function AllTimePage() {
+  const [songs, setSongs] = useState<CatalogSong[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    getAllTime()
+      .then(setSongs)
+      .catch(console.error)
+      .finally(() => setIsLoading(false));
+  }, []);
+
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="All Time"
-        description="The all-time leaderboard route is prepared for long-term ranking data."
-      />
-      <SectionCard
-        eyebrow="History"
-        title="Long-horizon charts arrive after the catalog, metrics, and moderation workflows."
-        description="For now, the route exists so the navigation and responsive layout stay stable as features grow."
-      >
-        <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-borderSoft bg-surface px-4 py-2 text-sm font-medium text-slate-600">
-          <BarChart3 className="h-4 w-4 text-violet-700" />
-          No historical ranking baseline exists in Phase 1.
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-violet-100">
+          <Award className="h-5 w-5 text-violet-600" />
         </div>
-      </SectionCard>
+        <div>
+          <h1 className="text-2xl font-extrabold text-slate-950">All Time</h1>
+          <p className="text-sm text-slate-500">The greatest performing songs of all time</p>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-2">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <div key={i} className="h-16 animate-pulse rounded-2xl bg-slate-100" />
+          ))}
+        </div>
+      ) : songs.length === 0 ? (
+        <div className="rounded-3xl border border-borderSoft bg-white p-10 text-center text-slate-500 shadow-card">
+          No songs ranked yet. Plays and downloads build this chart over time.
+        </div>
+      ) : (
+        <RankedSongList songs={songs} showRank showDownloads />
+      )}
     </div>
   );
 }
-

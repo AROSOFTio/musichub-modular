@@ -84,6 +84,246 @@ export class CatalogService {
     return this.toSongResponse(song);
   }
 
+  // ── Discovery ──────────────────────────────────────────────────────────
+
+  /** Trending: score = plays*0.5 + downloads*0.4 + recency_boost*0.1 */
+  async getTrending(limit = 50) {
+    const songs = await this.prisma.song.findMany({
+      where: { isPublished: true },
+      include: songInclude,
+      orderBy: { createdAt: "desc" },
+      take: 200,
+    });
+
+    const now = Date.now();
+    const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
+    const scored = songs.map((song) => {
+      const ageMs = now - new Date(song.createdAt).getTime();
+      const recentBoost = Math.max(0, 1 - ageMs / ONE_WEEK_MS);
+      const score =
+        song.playCount * 0.5 + song.downloadCount * 0.4 + recentBoost * 1000 * 0.1;
+      return { song, score };
+    });
+
+    scored.sort((a, b) => b.score - a.score);
+    return scored.slice(0, limit).map(({ song }) => this.toSongResponse(song));
+  }
+
+  async getLatest(limit = 50) {
+    const songs = await this.prisma.song.findMany({
+      where: { isPublished: true },
+      include: songInclude,
+      orderBy: [{ releaseDate: "desc" }, { createdAt: "desc" }],
+      take: limit,
+    });
+    return songs.map((song) => this.toSongResponse(song));
+  }
+
+  async getTop50() {
+    const songs = await this.prisma.song.findMany({
+      where: { isPublished: true },
+      include: songInclude,
+      orderBy: [{ downloadCount: "desc" }, { playCount: "desc" }],
+      take: 50,
+    });
+    return songs.map((song) => this.toSongResponse(song));
+  }
+
+  async getAllTime() {
+    const songs = await this.prisma.song.findMany({
+      where: { isPublished: true },
+      include: songInclude,
+      orderBy: [{ playCount: "desc" }, { downloadCount: "desc" }],
+      take: 100,
+    });
+    return songs.map((song) => this.toSongResponse(song));
+  }
+
+  async getEditorPicks(limit = 20) {
+    const songs = await this.prisma.song.findMany({
+      where: { isPublished: true, isEditorPick: true },
+      include: songInclude,
+      orderBy: { updatedAt: "desc" },
+      take: limit,
+    });
+    return songs.map((song) => this.toSongResponse(song));
+  }
+
+  async search(query: string) {
+    const q = query?.trim();
+    if (!q) return { songs: [], artists: [], genres: [] };
+
+    const [songs, artists, genres] = await Promise.all([
+      this.prisma.song.findMany({
+        where: {
+          isPublished: true,
+          OR: [
+            { title: { contains: q, mode: "insensitive" } },
+            { description: { contains: q, mode: "insensitive" } },
+            { artist: { name: { contains: q, mode: "insensitive" } } },
+          ],
+        },
+        include: songInclude,
+        orderBy: { playCount: "desc" },
+        take: 20,
+      }),
+      this.prisma.artist.findMany({
+        where: {
+          OR: [
+            { name: { contains: q, mode: "insensitive" } },
+            { bio: { contains: q, mode: "insensitive" } },
+          ],
+        },
+        include: { _count: { select: { songs: true } } },
+        take: 10,
+      }),
+      this.prisma.genre.findMany({
+        where: { name: { contains: q, mode: "insensitive" } },
+        include: { _count: { select: { songs: true } } },
+        take: 10,
+      }),
+    ]);
+
+    return {
+      songs: songs.map((s) => this.toSongResponse(s)),
+      artists,
+      genres,
+    };
+  }
+
+  // ── Genres ─────────────────────────────────────────────────────────────
+
+  async listGenres() {
+    return this.prisma.genre.findMany({
+      orderBy: { name: "asc" },
+      include: { _count: { select: { songs: true } } },
+    });
+  }
+
+  async getGenreBySlug(slug: string) {
+    const genre = await this.prisma.genre.findUnique({
+      where: { slug },
+      include: {
+        _count: { select: { songs: true } },
+        songs: {
+          where: { isPublished: true },
+          include: songInclude,
+          orderBy: { playCount: "desc" },
+          take: 50,
+        },
+      },
+    });
+
+    if (!genre) throw new NotFoundException("Genre not found.");
+
+    return {
+      ...genre,
+      songs: genre.songs.map((s) => this.toSongResponse(s)),
+    };
+  }
+
+  // ── Artists ────────────────────────────────────────────────────────────
+
+  async listArtists() {
+    return this.prisma.artist.findMany({
+      orderBy: { name: "asc" },
+      include: {
+        _count: { select: { songs: true, followers: true } },
+      },
+    });
+  }
+
+  async getArtistBySlug(slug: string) {
+    const artist = await this.prisma.artist.findUnique({
+      where: { slug },
+      include: {
+        _count: { select: { songs: true, followers: true } },
+        songs: {
+          where: { isPublished: true },
+          include: songInclude,
+          orderBy: { playCount: "desc" },
+          take: 50,
+        },
+      },
+    });
+
+    if (!artist) throw new NotFoundException("Artist not found.");
+
+    return {
+      ...artist,
+      songs: artist.songs.map((s) => this.toSongResponse(s)),
+    };
+  }
+
+  // ── Editor pick toggle (admin) ─────────────────────────────────────────
+
+  async setEditorPick(user: AuthenticatedUser, songId: string, pick: boolean) {
+    if (user.role !== Role.ADMIN) {
+      throw new ForbiddenException("Only admins can manage editor picks.");
+    }
+
+    const song = await this.prisma.song.findUnique({ where: { id: songId } });
+    if (!song) throw new NotFoundException("Song not found.");
+
+    const updated = await this.prisma.song.update({
+      where: { id: songId },
+      data: { isEditorPick: pick },
+      include: songInclude,
+    });
+
+    return this.toSongResponse(updated);
+  }
+
+  // ── Home feed ─────────────────────────────────────────────────────────
+
+  async getHomeFeed() {
+    const [featured, trending, latest, editorPicks, topDownloads, popularArtists, genres] =
+      await Promise.all([
+        // Featured: latest editor pick or most played song
+        this.prisma.song.findFirst({
+          where: { isPublished: true, isEditorPick: true },
+          include: songInclude,
+          orderBy: { updatedAt: "desc" },
+        }).then((s) => s ?? this.prisma.song.findFirst({
+          where: { isPublished: true },
+          include: songInclude,
+          orderBy: { playCount: "desc" },
+        })),
+        this.getTrending(8),
+        this.getLatest(8),
+        this.getEditorPicks(6),
+        this.prisma.song.findMany({
+          where: { isPublished: true },
+          include: songInclude,
+          orderBy: { downloadCount: "desc" },
+          take: 8,
+        }),
+        this.prisma.artist.findMany({
+          orderBy: { songs: { _count: "desc" } },
+          include: { _count: { select: { songs: true, followers: true } } },
+          take: 8,
+        }),
+        this.prisma.genre.findMany({
+          orderBy: { name: "asc" },
+          include: { _count: { select: { songs: true } } },
+          take: 12,
+        }),
+      ]);
+
+    return {
+      featured: featured ? this.toSongResponse(featured as any) : null,
+      trending,
+      latest,
+      editorPicks,
+      topDownloads: topDownloads.map((s) => this.toSongResponse(s)),
+      popularArtists,
+      genres,
+    };
+  }
+
+  // ── Existing CRUD ─────────────────────────────────────────────────────
+
   async uploadSong(user: AuthenticatedUser, dto: SongUploadDto, files: SongFiles) {
     const audioFile = await this.storage.saveAudio(files.audio?.[0]);
     const coverFile = await this.storage.saveCover(files.cover?.[0]);
@@ -238,14 +478,6 @@ export class CatalogService {
     return this.storage.resolve(relativePath);
   }
 
-  async listGenres() {
-    return this.prisma.genre.findMany({ orderBy: { name: "asc" } });
-  }
-
-  async listArtists() {
-    return this.prisma.artist.findMany({ orderBy: { name: "asc" } });
-  }
-
   private async findManageableSong(user: AuthenticatedUser, id: string) {
     const song = await this.prisma.song.findUnique({ where: { id } });
     if (!song) {
@@ -342,7 +574,7 @@ export class CatalogService {
     return value === "true" || value === "1" || value === "on";
   }
 
-  private toSongResponse(song: Song & { artist: { name: string; slug: string }; genre: { name: string; slug: string } }) {
+  private toSongResponse(song: Song & { artist: any; genre: any }) {
     return {
       id: song.id,
       title: song.title,
@@ -358,6 +590,7 @@ export class CatalogService {
       isPublished: song.isPublished,
       allowDownload: song.allowDownload,
       allowRemix: song.allowRemix,
+      isEditorPick: (song as any).isEditorPick ?? false,
       downloadCount: song.downloadCount,
       playCount: song.playCount,
       createdAt: song.createdAt,

@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   Query,
   Res,
   UploadedFiles,
@@ -48,6 +49,66 @@ type UploadedSongFiles = {
 export class CatalogController {
   constructor(private readonly catalogService: CatalogService) {}
 
+  // ── Home Feed ───────────────────────────────────────────────────────────
+  @Get("home")
+  getHomeFeed() {
+    return this.catalogService.getHomeFeed();
+  }
+
+  // ── Discovery ───────────────────────────────────────────────────────────
+  @Get("discover/trending")
+  getTrending(@Query("limit") limit?: string) {
+    return this.catalogService.getTrending(limit ? parseInt(limit) : 50);
+  }
+
+  @Get("discover/latest")
+  getLatest(@Query("limit") limit?: string) {
+    return this.catalogService.getLatest(limit ? parseInt(limit) : 50);
+  }
+
+  @Get("discover/top-50")
+  getTop50() {
+    return this.catalogService.getTop50();
+  }
+
+  @Get("discover/all-time")
+  getAllTime() {
+    return this.catalogService.getAllTime();
+  }
+
+  @Get("discover/editor-picks")
+  getEditorPicks() {
+    return this.catalogService.getEditorPicks();
+  }
+
+  @Get("discover/search")
+  search(@Query("q") query: string) {
+    return this.catalogService.search(query);
+  }
+
+  // ── Genres ──────────────────────────────────────────────────────────────
+  @Get("genres")
+  listGenres() {
+    return this.catalogService.listGenres();
+  }
+
+  @Get("genres/:slug")
+  getGenre(@Param("slug") slug: string) {
+    return this.catalogService.getGenreBySlug(slug);
+  }
+
+  // ── Artists ─────────────────────────────────────────────────────────────
+  @Get("artists")
+  listArtists() {
+    return this.catalogService.listArtists();
+  }
+
+  @Get("artists/:slug")
+  getArtist(@Param("slug") slug: string) {
+    return this.catalogService.getArtistBySlug(slug);
+  }
+
+  // ── Songs CRUD ──────────────────────────────────────────────────────────
   @Get("songs")
   listSongs(@Query("q") query?: string) {
     return this.catalogService.listPublished(query);
@@ -97,6 +158,19 @@ export class CatalogController {
     return this.catalogService.deleteSong(user, id);
   }
 
+  // Admin: toggle editor pick
+  @Put("songs/:id/editor-pick")
+  @UseGuards(AccessTokenGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  setEditorPick(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param("id") id: string,
+    @Body("pick") pick: boolean,
+  ) {
+    return this.catalogService.setEditorPick(user, id, pick);
+  }
+
+  // ── Streaming / Download / Uploads ─────────────────────────────────────
   @Get("songs/:id/stream")
   @Header("Accept-Ranges", "bytes")
   async streamSong(@Param("id") id: string, @Res() response: Response) {
@@ -118,15 +192,5 @@ export class CatalogController {
   ) {
     const filePath = await this.catalogService.resolveUpload(`${kind}/${filename}`);
     return response.sendFile(filePath);
-  }
-
-  @Get("genres")
-  listGenres() {
-    return this.catalogService.listGenres();
-  }
-
-  @Get("artists")
-  listArtists() {
-    return this.catalogService.listArtists();
   }
 }
