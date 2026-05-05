@@ -1,10 +1,18 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, Suspense, useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 export function SearchBox() {
+  return (
+    <Suspense fallback={<SearchBoxFallback />}>
+      <SearchBoxForm />
+    </Suspense>
+  );
+}
+
+function SearchBoxForm() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -37,6 +45,20 @@ export function SearchBox() {
         placeholder={pathname === "/search" ? "Search tracks, artists, genres" : "Search Musichub"}
         type="search"
         value={query}
+      />
+    </form>
+  );
+}
+
+function SearchBoxFallback() {
+  return (
+    <form className="relative">
+      <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+      <input
+        className="input-shell pl-11"
+        disabled
+        placeholder="Search Musichub"
+        type="search"
       />
     </form>
   );
