@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getFavorites } from "@/lib/api-engagement";
+import { getPlayHistory } from "@/lib/api-engagement";
 import { useAuth } from "@/lib/auth-context";
 import { PageHeader } from "@/components/ui/page-header";
 import { SongList } from "@/components/catalog/song-list";
 
-export default function FavoritesPage() {
+export default function HistoryPage() {
   const { accessToken } = useAuth();
   const [songs, setSongs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -17,9 +17,9 @@ export default function FavoritesPage() {
       return;
     }
 
-    getFavorites(accessToken)
+    getPlayHistory(accessToken)
       .then((data) => {
-        // Map favorite objects to CatalogSong format
+        // Map history objects to CatalogSong format
         const mappedSongs = data.map((item) => item.song);
         setSongs(mappedSongs);
       })
@@ -28,16 +28,16 @@ export default function FavoritesPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Favorites" description="Your liked tracks." />
+      <PageHeader title="Recently Played" description="Your listening history." />
       {isLoading ? (
         <div className="h-64 animate-pulse rounded-3xl bg-slate-100" />
       ) : !accessToken ? (
         <div className="rounded-3xl border border-borderSoft bg-white p-8 text-center text-slate-500 shadow-card">
-          Please log in to view your favorites.
+          Please log in to view your play history.
         </div>
       ) : songs.length === 0 ? (
         <div className="rounded-3xl border border-borderSoft bg-white p-8 text-center text-slate-500 shadow-card">
-          You haven't favorited any songs yet.
+          You haven't played any songs yet.
         </div>
       ) : (
         <SongList songs={songs} />
@@ -45,4 +45,3 @@ export default function FavoritesPage() {
     </div>
   );
 }
-

@@ -4,6 +4,8 @@ import { useEffect, useRef } from "react";
 import { Pause, Play, SkipBack, SkipForward, Volume2, X } from "lucide-react";
 
 import { usePlayerStore } from "@/lib/stores/player-store";
+import { useAuth } from "@/lib/auth-context";
+import { recordPlayHistory } from "@/lib/api-engagement";
 
 function formatSeconds(value: number) {
   const safeValue = Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
@@ -35,6 +37,8 @@ export function AudioPlayerBar() {
   const hasPrevious = currentIndex > 0;
   const hasNext = currentIndex > -1 && currentIndex < queue.length - 1;
 
+  const { accessToken } = useAuth();
+  
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume;
@@ -53,6 +57,14 @@ export function AudioPlayerBar() {
       audio.pause();
     }
   }, [currentTrack?.streamUrl, isPlaying, setPlaying]);
+
+  // Record play history
+  useEffect(() => {
+    if (isPlaying && currentTrack?.id && accessToken) {
+      // Only record once per track selection to avoid spamming
+      recordPlayHistory(accessToken, currentTrack.id).catch(console.error);
+    }
+  }, [currentTrack?.id, accessToken]); // Deliberately omit isPlaying to only trigger on track change or initial play
 
   return (
     <div className="fixed inset-x-0 bottom-20 z-30 px-4 lg:bottom-0 lg:left-72 lg:px-8">

@@ -110,7 +110,31 @@ export class CatalogService {
       include: songInclude,
     });
 
+    if (song.isPublished) {
+      await this.notifyFollowers(song.artist.id, song.id, song.title, song.artist.name, song.slug);
+    }
+
     return this.toSongResponse(song);
+  }
+
+  private async notifyFollowers(artistId: string, songId: string, songTitle: string, artistName: string, songSlug: string) {
+    const followers = await this.prisma.follow.findMany({
+      where: { artistId },
+      select: { userId: true },
+    });
+
+    if (followers.length === 0) return;
+
+    const notifications = followers.map((f) => ({
+      userId: f.userId,
+      title: 'New Release',
+      message: `${artistName} just released a new song: ${songTitle}`,
+      link: `/songs/${songSlug}`,
+    }));
+
+    await this.prisma.notification.createMany({
+      data: notifications,
+    });
   }
 
   async updateSong(

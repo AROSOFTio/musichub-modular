@@ -1,25 +1,36 @@
-import { Library } from "lucide-react";
-
+import { Heart, ListMusic, History, Download } from "lucide-react";
+import Link from "next/link";
 import { PageHeader } from "@/components/ui/page-header";
-import { SectionCard } from "@/components/ui/section-card";
 
 export default function LibraryPage() {
+  const libraryLinks = [
+    { name: "Favorites", href: "/favorites", icon: Heart, description: "Songs you've favorited" },
+    { name: "Playlists", href: "/playlists", icon: ListMusic, description: "Your custom playlists" },
+    { name: "Recently Played", href: "/library/history", icon: History, description: "Your listening history" },
+    { name: "Downloads", href: "/downloads", icon: Download, description: "Your downloaded tracks" },
+  ];
+
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Library"
-        description="Library management will come online when saved tracks and playlists are persisted."
+        title="Your Library"
+        description="Manage your favorites, playlists, and listening history."
       />
-      <SectionCard
-        eyebrow="User content"
-        title="Personal library data is not created until the song model exists."
-        description="The route is live now so user-facing navigation remains stable while the backend grows."
-      >
-        <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-borderSoft bg-surface px-4 py-2 text-sm font-medium text-slate-600">
-          <Library className="h-4 w-4 text-violet-700" />
-          Sign in now, then add saved content in a later phase.
-        </div>
-      </SectionCard>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {libraryLinks.map((link) => (
+          <Link
+            key={link.name}
+            href={link.href}
+            className="group block rounded-3xl border border-borderSoft bg-white p-6 shadow-card transition-shadow hover:shadow-card-hover"
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-50 text-violet-700 transition-colors group-hover:bg-violet-100 group-hover:text-violet-800">
+              <link.icon className="h-6 w-6" />
+            </div>
+            <h3 className="mt-4 text-lg font-semibold text-slate-950">{link.name}</h3>
+            <p className="mt-1 text-sm text-slate-500">{link.description}</p>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }

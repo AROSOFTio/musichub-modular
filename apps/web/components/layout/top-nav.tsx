@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 
 import { SearchBox } from "../ui/search-box";
+import { NotificationsDropdown } from "./notifications";
 
 export function TopNav() {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
@@ -21,6 +22,7 @@ export function TopNav() {
             <div className="h-11 w-52 animate-pulse rounded-2xl bg-violet-100" />
           ) : isAuthenticated && user ? (
             <>
+              <NotificationsDropdown />
               <div className="rounded-2xl border border-borderSoft bg-white px-4 py-2">
                 <p className="text-sm font-semibold text-slate-950">{user.displayName}</p>
                 <p className="text-xs uppercase tracking-[0.18em] text-slate-400">

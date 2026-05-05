@@ -5,6 +5,10 @@ import { Download, Play } from "lucide-react";
 
 import { CatalogSong, getSong } from "@/lib/api";
 import { usePlayerStore } from "@/lib/stores/player-store";
+import { EngagementButtons } from "./engagement-buttons";
+import { CommentsSection } from "./comments-section";
+import { AddToPlaylist } from "./add-to-playlist";
+import { ShareButton } from "./share-button";
 
 type SongDetailProps = {
   slug: string;
@@ -79,10 +83,10 @@ export function SongDetail({ slug }: SongDetailProps) {
           <p className="mt-4 text-sm leading-7 text-slate-500">{song.description}</p>
         ) : null}
 
-        <div className="mt-6 flex flex-wrap gap-3">
+        <div className="mt-6 flex flex-wrap items-center gap-3">
           <button
             className="button-primary"
-            onClick={() =>
+            onClick={() => {
               playTrack({
                 id: song.id,
                 title: song.title,
@@ -91,8 +95,10 @@ export function SongDetail({ slug }: SongDetailProps) {
                 streamUrl: song.streamUrl,
                 downloadUrl: song.downloadUrl,
                 duration: song.duration ?? undefined,
-              })
-            }
+              });
+              // Note: We'd normally want to record play history here,
+              // but it's better handled in the player store when the song actually plays.
+            }}
             type="button"
           >
             <Play className="h-4 w-4" />
@@ -104,6 +110,11 @@ export function SongDetail({ slug }: SongDetailProps) {
               Free download
             </a>
           ) : null}
+          <AddToPlaylist songId={song.id} />
+          <ShareButton songUrl={`/songs/${song.slug}`} title={song.title} />
+          
+          <div className="flex-1 min-w-[20px]" />
+          <EngagementButtons songId={song.id} initialLikeCount={0} />
         </div>
 
         <div className="mt-6 grid gap-3 text-sm text-slate-500 sm:grid-cols-3">
@@ -122,6 +133,8 @@ export function SongDetail({ slug }: SongDetailProps) {
             <p>Remix</p>
           </div>
         </div>
+
+        <CommentsSection songId={song.id} />
       </section>
     </div>
   );
