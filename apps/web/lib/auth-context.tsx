@@ -84,12 +84,12 @@ export function AuthProvider({
       return;
     }
 
-    const storedRefreshToken = storedSession.refreshToken;
+    const token = storedSession.refreshToken;
     let cancelled = false;
 
     async function restoreSession() {
       try {
-        const refreshedSession = await refreshRequest(storedRefreshToken);
+        const refreshedSession = await refreshRequest(token);
         if (!cancelled) {
           setSession(refreshedSession);
           persistSession(refreshedSession);

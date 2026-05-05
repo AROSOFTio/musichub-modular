@@ -3,7 +3,7 @@ import { IsString, IsNotEmpty, IsOptional, IsBoolean } from 'class-validator';
 export class CreatePlaylistDto {
   @IsString()
   @IsNotEmpty()
-  name: string;
+  name!: string;
 
   @IsString()
   @IsOptional()
@@ -17,11 +17,11 @@ export class CreatePlaylistDto {
 export class AddSongToPlaylistDto {
   @IsString()
   @IsNotEmpty()
-  songId: string;
+  songId!: string;
 }
 
 export class CreateCommentDto {
   @IsString()
   @IsNotEmpty()
-  content: string;
+  content!: string;
 }
