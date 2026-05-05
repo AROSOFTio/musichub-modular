@@ -23,6 +23,21 @@ if [ ! -f .env ]; then
   exit 1
 fi
 
+if grep -q "GNU nano" .env; then
+  echo "Error: .env contains captured editor text. Recreate it from .env.example and only keep KEY=VALUE lines."
+  exit 1
+fi
+
+if ! awk '
+  /^[[:space:]]*$/ { next }
+  /^[[:space:]]*#/ { next }
+  /^[A-Za-z_][A-Za-z0-9_]*=.*/ { next }
+  { exit 1 }
+' .env; then
+  echo "Error: .env contains invalid lines. Expected only KEY=VALUE entries."
+  exit 1
+fi
+
 # Pull latest code from main branch
 echo "Pulling latest code from origin/main..."
 git pull origin main

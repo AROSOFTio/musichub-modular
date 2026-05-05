@@ -50,6 +50,7 @@ cp .env.example .env
 ```
 
 2. Update secrets and admin credentials in `.env`.
+   If your database password contains `@`, `:`, `/`, `?`, or `#`, URL-encode that password inside `DATABASE_URL` or use a URL-safe password.
 
 3. Install dependencies.
 
@@ -169,12 +170,15 @@ docker compose up -d --build
 Recommended sequence:
 
 ```bash
+sudo chown -R $USER:$USER /www/wwwroot/musichub.arosoft.io
 cp .env.example .env
 nano .env
 docker compose pull
 docker compose up -d --build
 docker ps
 ```
+
+If `.env` is ever corrupted by pasted terminal or editor header text, delete it and recreate it from `.env.example` before rerunning Compose.
 
 ## Nginx reverse proxy
 
