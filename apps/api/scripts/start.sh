@@ -1,9 +1,12 @@
 #!/bin/sh
 set -eu
 
+echo "Starting Musichub API container."
+
 attempt=1
 max_attempts=10
 
+echo "Running Prisma migrations..."
 until npx prisma migrate deploy; do
   if [ "$attempt" -ge "$max_attempts" ]; then
     echo "Prisma migrations failed after $max_attempts attempts."
@@ -15,6 +18,9 @@ until npx prisma migrate deploy; do
   sleep 5
 done
 
-npm run seed
-node dist/main.js
+echo "Prisma migrations complete."
+echo "Running admin seed..."
+node dist/prisma/seed.js
 
+echo "Starting API server..."
+node dist/main.js
