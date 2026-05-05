@@ -18,7 +18,7 @@ services:
       api:
         condition: service_healthy
     ports:
-      - "4008:3000"
+      - "4010:3000"
     healthcheck:
       test:
         [
@@ -42,7 +42,7 @@ services:
       NODE_ENV: production
       PORT: 4000
       DATABASE_URL: ${DATABASE_URL}
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:4008}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:4010}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
       JWT_SECRET: ${JWT_SECRET}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
