@@ -84,11 +84,12 @@ export function AuthProvider({
       return;
     }
 
+    const storedRefreshToken = storedSession.refreshToken;
     let cancelled = false;
 
     async function restoreSession() {
       try {
-        const refreshedSession = await refreshRequest(storedSession.refreshToken);
+        const refreshedSession = await refreshRequest(storedRefreshToken);
         if (!cancelled) {
           setSession(refreshedSession);
           persistSession(refreshedSession);
@@ -164,4 +165,3 @@ export function useAuth() {
 
   return context;
 }
-
