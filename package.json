@@ -1,0 +1,22 @@
+{
+  "name": "musichub",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:web": "npm --prefix apps/web run dev",
+    "dev:api": "npm --prefix apps/api run dev",
+    "build": "npm --prefix apps/api run build && npm --prefix apps/web run build",
+    "typecheck": "npm --prefix apps/api run typecheck && npm --prefix apps/web run typecheck",
+    "db:generate": "npm --prefix apps/api run prisma:generate",
+    "db:migrate": "npm --prefix apps/api run prisma:migrate:dev",
+    "db:deploy": "npm --prefix apps/api run prisma:migrate:deploy",
+    "seed": "npm --prefix apps/api run seed"
+  },
+  "engines": {
+    "node": ">=20.10.0",
+    "npm": ">=10.0.0"
+  }
+}
+

@@ -1,0 +1,83 @@
+@import "@fontsource/manrope/400.css";
+@import "@fontsource/manrope/500.css";
+@import "@fontsource/manrope/600.css";
+@import "@fontsource/manrope/700.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #fcfbff;
+  --foreground: #0f172a;
+  --muted: #64748b;
+  --surface: #faf8ff;
+  --surface-strong: #ffffff;
+  --accent: #6d28d9;
+  --accent-soft: #f3ebff;
+  --border-soft: #e7def8;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+@layer base {
+  button,
+  input,
+  select {
+    font: inherit;
+  }
+}
+
+@layer components {
+  .surface-card {
+    @apply rounded-3xl border border-borderSoft bg-white shadow-card;
+  }
+
+  .input-shell {
+    @apply h-11 w-full rounded-2xl border border-borderSoft bg-white px-4 text-sm text-slate-900 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100;
+  }
+
+  .button-primary {
+    @apply inline-flex items-center justify-center rounded-2xl bg-violet-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-800 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .button-secondary {
+    @apply inline-flex items-center justify-center rounded-2xl border border-borderSoft bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 transition hover:border-violet-300 hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .pill {
+    @apply inline-flex items-center rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-violet-700;
+  }
+
+  .sidebar-link {
+    @apply flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-slate-600 transition hover:bg-violet-50 hover:text-violet-700;
+  }
+
+  .sidebar-link-active {
+    @apply bg-violet-700 text-white hover:bg-violet-700 hover:text-white;
+  }
+
+  .muted-copy {
+    @apply text-sm leading-6 text-slate-500;
+  }
+}
+
