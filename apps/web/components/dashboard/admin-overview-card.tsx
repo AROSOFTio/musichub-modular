@@ -27,11 +27,12 @@ export function AdminOverviewCard() {
       return;
     }
 
+    const adminAccessToken = accessToken;
     let cancelled = false;
 
     async function loadOverview() {
       try {
-        const payload = await getAdminOverview(accessToken);
+        const payload = await getAdminOverview(adminAccessToken);
         if (!cancelled) {
           setOverview(payload);
           setError(null);
@@ -69,6 +70,10 @@ export function AdminOverviewCard() {
         <p className="text-sm leading-6 text-slate-500">
           Sign in with the seeded admin account to verify role-based access on this
           route.
+        </p>
+      ) : !accessToken ? (
+        <p className="text-sm leading-6 text-slate-500">
+          Admin session unavailable. Sign in again to load the protected overview.
         </p>
       ) : error ? (
         <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
