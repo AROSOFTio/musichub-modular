@@ -1,5 +1,4 @@
-import { Search } from "lucide-react";
-
+import { SongList } from "@/components/catalog/song-list";
 import { PageHeader } from "@/components/ui/page-header";
 import { SectionCard } from "@/components/ui/section-card";
 
@@ -16,17 +15,18 @@ export default function SearchPage({ searchParams }: SearchPageProps) {
     <div className="space-y-6">
       <PageHeader
         title="Search"
-        description="The search route is ready to accept real query traffic once songs, artists, and playlists exist."
+        description={
+          query
+            ? `Results for "${query}" from the live catalog.`
+            : "Search songs, artists, and genres from the live catalog."
+        }
       />
       <SectionCard
-        eyebrow="Query capture"
-        title={query ? `Search prepared for "${query}".` : "Search input is connected to the shell."}
-        description="Phase 1 captures the route and query string cleanly. Actual search indexing lands with the catalog modules."
+        eyebrow="Catalog search"
+        title={query ? "Matching songs" : "All published songs"}
+        description="Search results are loaded from the API and PostgreSQL catalog."
       >
-        <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-borderSoft bg-surface px-4 py-2 text-sm font-medium text-slate-600">
-          <Search className="h-4 w-4 text-violet-700" />
-          {query ? "Query received and routed." : "Use the search bar to test routing."}
-        </div>
+        <SongList emptyTitle="No matching songs found." query={query} />
       </SectionCard>
     </div>
   );

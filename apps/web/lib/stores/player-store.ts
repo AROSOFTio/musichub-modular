@@ -21,6 +21,7 @@ type PlayerState = {
   playPrevious: () => void;
   playNext: () => void;
   togglePlayback: () => void;
+  setPlaying: (value: boolean) => void;
   setVolume: (value: number) => void;
   setProgress: (value: number) => void;
   clearQueue: () => void;
@@ -93,6 +94,10 @@ export const usePlayerStore = create<PlayerState>((set) => ({
 
       return { isPlaying: !state.isPlaying };
     }),
+  setPlaying: (value) =>
+    set((state) => ({
+      isPlaying: state.currentTrack ? value : false,
+    })),
   setVolume: (value) =>
     set({
       volume: Math.min(1, Math.max(0, value)),

@@ -25,7 +25,66 @@ model User {
   refreshTokenHash String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+  songs            Song[]
 
   @@map("users")
 }
 
+model Artist {
+  id         String   @id @default(uuid())
+  name       String
+  slug       String   @unique
+  bio        String?
+  avatar     String?
+  coverImage String?
+  verified   Boolean  @default(false)
+  songs      Song[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("artists")
+}
+
+model Genre {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  icon      String?
+  color     String?
+  songs     Song[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("genres")
+}
+
+model Song {
+  id            String   @id @default(uuid())
+  title         String
+  slug          String   @unique
+  artistId      String
+  genreId       String
+  uploaderId    String
+  coverImage    String?
+  audioFile     String
+  duration      Int?
+  description   String?
+  releaseDate   DateTime?
+  isPublished   Boolean  @default(false)
+  allowDownload Boolean  @default(true)
+  allowRemix    Boolean  @default(false)
+  downloadCount Int      @default(0)
+  playCount      Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  artist   Artist @relation(fields: [artistId], references: [id], onDelete: Restrict)
+  genre    Genre  @relation(fields: [genreId], references: [id], onDelete: Restrict)
+  uploader User   @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+
+  @@index([artistId])
+  @@index([genreId])
+  @@index([uploaderId])
+  @@index([isPublished, releaseDate])
+  @@map("songs")
+}

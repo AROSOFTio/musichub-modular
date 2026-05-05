@@ -1,4 +1,5 @@
 import { AdminOverviewCard } from "@/components/dashboard/admin-overview-card";
+import { SongManager } from "@/components/dashboard/song-manager";
 import { PageHeader } from "@/components/ui/page-header";
 import { SectionCard } from "@/components/ui/section-card";
 
@@ -7,8 +8,9 @@ export default function AdminPage() {
     <div className="space-y-6">
       <PageHeader
         title="Admin dashboard"
-        description="Use the seeded admin account to verify protected overview access against the NestJS API."
+        description="Upload songs, publish releases, and verify protected catalog controls."
       />
+      <SongManager />
       <div className="grid gap-6 xl:grid-cols-[1.1fr,0.9fr]">
         <AdminOverviewCard />
         <SectionCard
@@ -26,4 +28,3 @@ export default function AdminPage() {
     </div>
   );
 }
-

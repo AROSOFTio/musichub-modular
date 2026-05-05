@@ -14,16 +14,20 @@ export class AdminController {
 
   @Get("overview")
   async getOverview() {
-    const [totalUsers, totalArtists, totalAdmins] = await Promise.all([
+    const [totalUsers, totalArtists, totalAdmins, totalSongs, publishedSongs] = await Promise.all([
       this.prisma.user.count(),
       this.prisma.user.count({ where: { role: Role.ARTIST } }),
       this.prisma.user.count({ where: { role: Role.ADMIN } }),
+      this.prisma.song.count(),
+      this.prisma.song.count({ where: { isPublished: true } }),
     ]);
 
     return {
       totalUsers,
       totalArtists,
       totalAdmins,
+      totalSongs,
+      publishedSongs,
       freeDownloadsEnabled: true,
       remixPaymentsEnabled: false,
     };

@@ -11,6 +11,7 @@ type EnvShape = {
   ADMIN_EMAIL?: string;
   ADMIN_PASSWORD?: string;
   ADMIN_DISPLAY_NAME?: string;
+  UPLOAD_DIR?: string;
 };
 
 export function validateEnv(config: EnvShape) {
@@ -35,5 +36,6 @@ export function validateEnv(config: EnvShape) {
     ADMIN_EMAIL: config.ADMIN_EMAIL,
     ADMIN_PASSWORD: config.ADMIN_PASSWORD,
     ADMIN_DISPLAY_NAME: config.ADMIN_DISPLAY_NAME || "Musichub Admin",
+    UPLOAD_DIR: config.UPLOAD_DIR || "/app/uploads",
   };
 }

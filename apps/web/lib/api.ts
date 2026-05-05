@@ -18,6 +18,45 @@ export type AuthResponse = {
   refreshToken: string;
 };
 
+export type CatalogArtist = {
+  id: string;
+  name: string;
+  slug: string;
+  bio?: string | null;
+  avatar?: string | null;
+  coverImage?: string | null;
+  verified?: boolean;
+};
+
+export type CatalogGenre = {
+  id: string;
+  name: string;
+  slug: string;
+  icon?: string | null;
+  color?: string | null;
+};
+
+export type CatalogSong = {
+  id: string;
+  title: string;
+  slug: string;
+  artist: CatalogArtist;
+  genre: CatalogGenre;
+  coverImage: string | null;
+  streamUrl: string;
+  downloadUrl: string | null;
+  duration: number | null;
+  description: string | null;
+  releaseDate: string | null;
+  isPublished: boolean;
+  allowDownload: boolean;
+  allowRemix: boolean;
+  downloadCount: number;
+  playCount: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
 type JsonBody =
   | BodyInit
   | Record<string, unknown>
@@ -109,6 +148,8 @@ export function getAdminOverview(accessToken: string) {
     totalUsers: number;
     totalArtists: number;
     totalAdmins: number;
+    totalSongs: number;
+    publishedSongs: number;
     freeDownloadsEnabled: boolean;
     remixPaymentsEnabled: boolean;
   }>("/admin/overview", {
@@ -118,3 +159,53 @@ export function getAdminOverview(accessToken: string) {
   });
 }
 
+export function listSongs(query?: string) {
+  const params = query ? `?q=${encodeURIComponent(query)}` : "";
+  return apiRequest<CatalogSong[]>(`/songs${params}`, {
+    cache: "no-store",
+  });
+}
+
+export function getSong(slug: string) {
+  return apiRequest<CatalogSong>(`/songs/${encodeURIComponent(slug)}`, {
+    cache: "no-store",
+  });
+}
+
+export function listManageableSongs(accessToken: string) {
+  return apiRequest<CatalogSong[]>("/songs/manage", {
+    cache: "no-store",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+}
+
+export function uploadSong(accessToken: string, payload: FormData) {
+  return apiRequest<CatalogSong>("/songs", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: payload,
+  });
+}
+
+export function updateSong(accessToken: string, id: string, payload: FormData) {
+  return apiRequest<CatalogSong>(`/songs/${id}`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: payload,
+  });
+}
+
+export function deleteSong(accessToken: string, id: string) {
+  return apiRequest<{ success: boolean }>(`/songs/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+}

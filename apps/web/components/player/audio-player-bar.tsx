@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { Pause, Play, SkipBack, SkipForward, Volume2, X } from "lucide-react";
 
 import { usePlayerStore } from "@/lib/stores/player-store";
@@ -12,6 +13,7 @@ function formatSeconds(value: number) {
 }
 
 export function AudioPlayerBar() {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const queue = usePlayerStore((state) => state.queue);
   const currentTrack = usePlayerStore((state) => state.currentTrack);
   const isPlaying = usePlayerStore((state) => state.isPlaying);
@@ -23,6 +25,7 @@ export function AudioPlayerBar() {
   const clearQueue = usePlayerStore((state) => state.clearQueue);
   const setProgress = usePlayerStore((state) => state.setProgress);
   const setVolume = usePlayerStore((state) => state.setVolume);
+  const setPlaying = usePlayerStore((state) => state.setPlaying);
 
   const maxProgress = currentTrack?.duration ?? 0;
   const hasTrack = Boolean(currentTrack);
@@ -32,8 +35,40 @@ export function AudioPlayerBar() {
   const hasPrevious = currentIndex > 0;
   const hasNext = currentIndex > -1 && currentIndex < queue.length - 1;
 
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !currentTrack?.streamUrl) {
+      return;
+    }
+
+    if (isPlaying) {
+      void audio.play().catch(() => setPlaying(false));
+    } else {
+      audio.pause();
+    }
+  }, [currentTrack?.streamUrl, isPlaying, setPlaying]);
+
   return (
     <div className="fixed inset-x-0 bottom-20 z-30 px-4 lg:bottom-0 lg:left-72 lg:px-8">
+      <audio
+        ref={audioRef}
+        src={currentTrack?.streamUrl ?? undefined}
+        onEnded={() => {
+          if (hasNext) {
+            playNext();
+            return;
+          }
+
+          setPlaying(false);
+        }}
+        onTimeUpdate={(event) => setProgress(event.currentTarget.currentTime)}
+      />
       <div className="mx-auto max-w-7xl rounded-[1.75rem] border border-borderSoft bg-white/95 p-4 shadow-card backdrop-blur">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
@@ -46,7 +81,7 @@ export function AudioPlayerBar() {
               </p>
               <p className="truncate text-sm text-slate-500">
                 {currentTrack
-                  ? `${currentTrack.artist} - playback state is ready for streaming URLs`
+                  ? `${currentTrack.artist} - streaming from uploaded audio`
                   : "The player store is active and waiting for real catalog tracks."}
               </p>
             </div>
@@ -111,7 +146,13 @@ export function AudioPlayerBar() {
                 disabled={!hasTrack}
                 max={maxProgress || 100}
                 min={0}
-                onChange={(event) => setProgress(Number(event.target.value))}
+                onChange={(event) => {
+                  const nextProgress = Number(event.target.value);
+                  setProgress(nextProgress);
+                  if (audioRef.current) {
+                    audioRef.current.currentTime = nextProgress;
+                  }
+                }}
                 step={1}
                 type="range"
                 value={hasTrack ? progress : 0}
