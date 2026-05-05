@@ -17,7 +17,7 @@ export default function FavoritesPage() {
       return;
     }
 
-    getFavorites(accessToken)
+    getFavorites(accessToken ?? undefined)
       .then((data) => {
         // Map favorite objects to CatalogSong format
         const mappedSongs = data.map((item) => item.song);

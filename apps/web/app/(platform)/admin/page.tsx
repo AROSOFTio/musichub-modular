@@ -12,7 +12,7 @@ function EditorPicksManager({ accessToken }: { accessToken: string }) {
   const [updating, setUpdating] = useState<string | null>(null);
 
   useEffect(() => {
-    listManageableSongs(accessToken)
+    listManageableSongs(accessToken ?? undefined)
       .then(setSongs)
       .catch(console.error)
       .finally(() => setIsLoading(false));
@@ -21,7 +21,7 @@ function EditorPicksManager({ accessToken }: { accessToken: string }) {
   const togglePick = async (song: CatalogSong) => {
     setUpdating(song.id);
     try {
-      const updated = await setEditorPick(accessToken, song.id, !song.isEditorPick);
+      const updated = await setEditorPick(accessToken ?? undefined, song.id, !song.isEditorPick);
       setSongs((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
     } catch (e: any) {
       alert(e.message);

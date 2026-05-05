@@ -22,7 +22,7 @@ export function SongManager() {
 
   const canManage = user?.role === "ADMIN" || user?.role === "ARTIST";
 
-  async function refreshSongs(token: string) {
+  async function refreshSongs(token: string | undefined) {
     const payload = await listManageableSongs(token);
     setSongs(payload);
   }
@@ -38,7 +38,7 @@ export function SongManager() {
 
     async function loadSongs() {
       try {
-        const payload = await listManageableSongs(token);
+        const payload = await listManageableSongs(token ?? undefined);
         if (!cancelled) {
           setSongs(payload);
           setError(null);
@@ -71,9 +71,9 @@ export function SongManager() {
     setError(null);
 
     try {
-      await uploadSong(accessToken, formData);
+      await uploadSong(accessToken ?? undefined, formData);
       form.reset();
-      await refreshSongs(accessToken);
+      await refreshSongs(accessToken ?? undefined);
       setMessage("Song uploaded and saved.");
     } catch (songError) {
       setError(songError instanceof Error ? songError.message : "Upload failed.");
@@ -90,8 +90,8 @@ export function SongManager() {
     const formData = new FormData();
     formData.set("isPublished", String(!song.isPublished));
     try {
-      await updateSong(accessToken, song.id, formData);
-      await refreshSongs(accessToken);
+      await updateSong(accessToken ?? undefined, song.id, formData);
+      await refreshSongs(accessToken ?? undefined);
     } catch (songError) {
       setError(songError instanceof Error ? songError.message : "Unable to update song.");
     }
@@ -105,8 +105,8 @@ export function SongManager() {
 
     const formData = new FormData(event.currentTarget);
     try {
-      await updateSong(accessToken, song.id, formData);
-      await refreshSongs(accessToken);
+      await updateSong(accessToken ?? undefined, song.id, formData);
+      await refreshSongs(accessToken ?? undefined);
       setEditingId(null);
       setMessage("Song updated.");
     } catch (songError) {
@@ -120,8 +120,8 @@ export function SongManager() {
     }
 
     try {
-      await deleteSong(accessToken, song.id);
-      await refreshSongs(accessToken);
+      await deleteSong(accessToken ?? undefined, song.id);
+      await refreshSongs(accessToken ?? undefined);
     } catch (songError) {
       setError(songError instanceof Error ? songError.message : "Unable to delete song.");
     }

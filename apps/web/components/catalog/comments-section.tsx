@@ -34,7 +34,7 @@ export function CommentsSection({ songId }: { songId: string }) {
 
     setIsSubmitting(true);
     try {
-      const newComment = await addComment(accessToken, songId, content);
+      const newComment = await addComment(accessToken ?? undefined, songId, content);
       setComments([newComment, ...comments]);
       setContent("");
     } catch (e: any) {
@@ -49,7 +49,7 @@ export function CommentsSection({ songId }: { songId: string }) {
     if (!confirm("Delete this comment?")) return;
 
     try {
-      await deleteComment(accessToken, id);
+      await deleteComment(accessToken ?? undefined, id);
       setComments(comments.filter((c) => c.id !== id));
     } catch (e: any) {
       alert(e.message || "Could not delete comment");

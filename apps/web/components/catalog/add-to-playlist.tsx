@@ -21,7 +21,7 @@ export function AddToPlaylist({ songId }: { songId: string }) {
   const loadPlaylists = async () => {
     try {
       setIsLoading(true);
-      const data = await getUserPlaylists(accessToken!);
+      const data = await getUserPlaylists(accessToken ?? undefined);
       setPlaylists(data);
     } catch (e) {
       console.error(e);
@@ -34,7 +34,7 @@ export function AddToPlaylist({ songId }: { songId: string }) {
     if (!accessToken) return;
     try {
       setAddingId(playlistId);
-      await addSongToPlaylist(accessToken, playlistId, songId);
+      await addSongToPlaylist(accessToken ?? undefined, playlistId, songId);
       alert("Added to playlist!");
       setIsOpen(false);
     } catch (e: any) {

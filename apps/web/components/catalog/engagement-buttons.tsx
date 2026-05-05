@@ -18,11 +18,11 @@ export function EngagementButtons({ songId, initialLikeCount = 0 }: { songId: st
     setIsLikeLoading(true);
     try {
       if (isLiked) {
-        await unlikeSong(accessToken, songId);
+        await unlikeSong(accessToken ?? undefined, songId);
         setIsLiked(false);
         setLikeCount(prev => Math.max(0, prev - 1));
       } else {
-        await likeSong(accessToken, songId);
+        await likeSong(accessToken ?? undefined, songId);
         setIsLiked(true);
         setLikeCount(prev => prev + 1);
       }
@@ -38,10 +38,10 @@ export function EngagementButtons({ songId, initialLikeCount = 0 }: { songId: st
     setIsFavLoading(true);
     try {
       if (isFavorited) {
-        await removeFavorite(accessToken, songId);
+        await removeFavorite(accessToken ?? undefined, songId);
         setIsFavorited(false);
       } else {
-        await addFavorite(accessToken, songId);
+        await addFavorite(accessToken ?? undefined, songId);
         setIsFavorited(true);
       }
     } catch (e: any) {

@@ -32,7 +32,7 @@ export function AdminOverviewCard() {
 
     async function loadOverview() {
       try {
-        const payload = await getAdminOverview(adminAccessToken);
+        const payload = await getAdminOverview(adminAccessToken ?? undefined);
         if (!cancelled) {
           setOverview(payload);
           setError(null);

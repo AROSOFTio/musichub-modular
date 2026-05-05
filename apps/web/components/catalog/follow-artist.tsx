@@ -15,10 +15,10 @@ export function FollowArtistButton({ artistId }: { artistId: string }) {
     setIsLoading(true);
     try {
       if (isFollowing) {
-        await unfollowArtist(accessToken, artistId);
+        await unfollowArtist(accessToken ?? undefined, artistId);
         setIsFollowing(false);
       } else {
-        await followArtist(accessToken, artistId);
+        await followArtist(accessToken ?? undefined, artistId);
         setIsFollowing(true);
       }
     } catch (e: any) {

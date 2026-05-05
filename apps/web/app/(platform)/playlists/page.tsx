@@ -27,7 +27,7 @@ export default function PlaylistsPage() {
     if (!accessToken) return;
     try {
       setIsLoading(true);
-      const data = await getUserPlaylists(accessToken);
+      const data = await getUserPlaylists(accessToken ?? undefined);
       setPlaylists(data);
     } catch (e) {
       console.error(e);
@@ -42,7 +42,7 @@ export default function PlaylistsPage() {
 
     try {
       setIsCreating(true);
-      await createPlaylist(accessToken, { name: newPlaylistName });
+      await createPlaylist(accessToken ?? undefined, { name: newPlaylistName });
       setNewPlaylistName("");
       await loadPlaylists();
     } catch (e: any) {

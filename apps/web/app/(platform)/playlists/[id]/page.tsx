@@ -21,7 +21,7 @@ export default function PlaylistDetailPage({ params }: { params: { id: string } 
   const loadPlaylist = async () => {
     try {
       setIsLoading(true);
-      const data = await getPlaylist(params.id, accessToken);
+      const data = await getPlaylist(params.id, accessToken ?? undefined);
       setPlaylist(data);
     } catch (e) {
       console.error(e);
@@ -35,7 +35,7 @@ export default function PlaylistDetailPage({ params }: { params: { id: string } 
     if (!confirm("Are you sure you want to delete this playlist?")) return;
 
     try {
-      await deletePlaylist(accessToken, playlist.id);
+      await deletePlaylist(accessToken ?? undefined, playlist.id);
       router.push("/playlists");
     } catch (e: any) {
       alert(e.message || "Failed to delete playlist");

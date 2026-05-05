@@ -19,7 +19,7 @@ export function NotificationsDropdown() {
 
   const loadNotifications = async () => {
     try {
-      const data = await getNotifications(accessToken!);
+      const data = await getNotifications(accessToken ?? undefined);
       setNotifications(data);
     } catch (e) {
       console.error(e);
@@ -28,7 +28,7 @@ export function NotificationsDropdown() {
 
   const handleRead = async (id: string) => {
     try {
-      await markNotificationRead(accessToken!, id);
+      await markNotificationRead(accessToken ?? undefined, id);
       setNotifications((prev) =>
         prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
       );

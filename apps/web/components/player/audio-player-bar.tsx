@@ -62,7 +62,7 @@ export function AudioPlayerBar() {
   useEffect(() => {
     if (isPlaying && currentTrack?.id && accessToken) {
       // Only record once per track selection to avoid spamming
-      recordPlayHistory(accessToken, currentTrack.id).catch(console.error);
+      recordPlayHistory(accessToken ?? undefined, currentTrack.id).catch(console.error);
     }
   }, [currentTrack?.id, accessToken]); // Deliberately omit isPlaying to only trigger on track change or initial play
 

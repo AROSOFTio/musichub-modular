@@ -17,7 +17,7 @@ export default function HistoryPage() {
       return;
     }
 
-    getPlayHistory(accessToken)
+    getPlayHistory(accessToken ?? undefined)
       .then((data) => {
         // Map history objects to CatalogSong format
         const mappedSongs = data.map((item) => item.song);

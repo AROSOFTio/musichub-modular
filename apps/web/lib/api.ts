@@ -215,46 +215,46 @@ export function getSong(slug: string) {
   return apiRequest<CatalogSong>(`/songs/${encodeURIComponent(slug)}`, { cache: "no-store" });
 }
 
-export function listManageableSongs(accessToken: string) {
+export function listManageableSongs(accessToken: string | undefined) {
   return apiRequest<CatalogSong[]>("/songs/manage", {
     cache: "no-store",
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
   });
 }
 
-export function uploadSong(accessToken: string, payload: FormData) {
+export function uploadSong(accessToken: string | undefined, payload: FormData) {
   return apiRequest<CatalogSong>("/songs", {
     method: "POST",
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
     body: payload,
   });
 }
 
-export function updateSong(accessToken: string, id: string, payload: FormData) {
+export function updateSong(accessToken: string | undefined, id: string, payload: FormData) {
   return apiRequest<CatalogSong>(`/songs/${id}`, {
     method: "PATCH",
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
     body: payload,
   });
 }
 
-export function deleteSong(accessToken: string, id: string) {
+export function deleteSong(accessToken: string | undefined, id: string) {
   return apiRequest<{ success: boolean }>(`/songs/${id}`, {
     method: "DELETE",
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
   });
 }
 
-export function setEditorPick(accessToken: string, songId: string, pick: boolean) {
+export function setEditorPick(accessToken: string | undefined, songId: string, pick: boolean) {
   return apiRequest<CatalogSong>(`/songs/${songId}/editor-pick`, {
     method: "PUT",
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
     body: { pick },
   });
 }
 
 // Admin
-export function getAdminOverview(accessToken: string) {
+export function getAdminOverview(accessToken: string | undefined) {
   return apiRequest<{
     totalUsers: number;
     totalArtists: number;
@@ -264,6 +264,6 @@ export function getAdminOverview(accessToken: string) {
     freeDownloadsEnabled: boolean;
     remixPaymentsEnabled: boolean;
   }>("/admin/overview", {
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
   });
 }

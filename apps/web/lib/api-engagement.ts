@@ -77,53 +77,53 @@ async function apiRequest<T>(
 }
 
 // Likes
-export function likeSong(accessToken: string, songId: string) {
+export function likeSong(accessToken: string | undefined, songId: string) {
   return apiRequest<{ id: string }>(`/engagement/likes/${songId}`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
   });
 }
 
-export function unlikeSong(accessToken: string, songId: string) {
+export function unlikeSong(accessToken: string | undefined, songId: string) {
   return apiRequest<{ success: boolean }>(`/engagement/likes/${songId}`, {
     method: "DELETE",
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
   });
 }
 
 // Favorites
-export function addFavorite(accessToken: string, songId: string) {
+export function addFavorite(accessToken: string | undefined, songId: string) {
   return apiRequest<{ id: string }>(`/engagement/favorites/${songId}`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
   });
 }
 
-export function removeFavorite(accessToken: string, songId: string) {
+export function removeFavorite(accessToken: string | undefined, songId: string) {
   return apiRequest<{ success: boolean }>(`/engagement/favorites/${songId}`, {
     method: "DELETE",
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
   });
 }
 
-export function getFavorites(accessToken: string) {
+export function getFavorites(accessToken: string | undefined) {
   return apiRequest<any[]>(`/engagement/favorites`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
   });
 }
 
 // Playlists
-export function createPlaylist(accessToken: string, payload: { name: string; description?: string; isPublic?: boolean }) {
+export function createPlaylist(accessToken: string | undefined, payload: { name: string; description?: string; isPublic?: boolean }) {
   return apiRequest<Playlist>(`/engagement/playlists`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
     body: payload,
   });
 }
 
-export function getUserPlaylists(accessToken: string) {
+export function getUserPlaylists(accessToken: string | undefined) {
   return apiRequest<Playlist[]>(`/engagement/playlists`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
   });
 }
 
@@ -133,70 +133,70 @@ export function getPlaylist(id: string, accessToken?: string) {
   });
 }
 
-export function addSongToPlaylist(accessToken: string, playlistId: string, songId: string) {
+export function addSongToPlaylist(accessToken: string | undefined, playlistId: string, songId: string) {
   return apiRequest<any>(`/engagement/playlists/${playlistId}/songs`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
     body: { songId },
   });
 }
 
-export function removeSongFromPlaylist(accessToken: string, playlistId: string, songId: string) {
+export function removeSongFromPlaylist(accessToken: string | undefined, playlistId: string, songId: string) {
   return apiRequest<{ success: boolean }>(`/engagement/playlists/${playlistId}/songs/${songId}`, {
     method: "DELETE",
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
   });
 }
 
-export function deletePlaylist(accessToken: string, playlistId: string) {
+export function deletePlaylist(accessToken: string | undefined, playlistId: string) {
   return apiRequest<{ success: boolean }>(`/engagement/playlists/${playlistId}`, {
     method: "DELETE",
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
   });
 }
 
 // Follows
-export function followArtist(accessToken: string, artistId: string) {
+export function followArtist(accessToken: string | undefined, artistId: string) {
   return apiRequest<any>(`/engagement/follows/${artistId}`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
   });
 }
 
-export function unfollowArtist(accessToken: string, artistId: string) {
+export function unfollowArtist(accessToken: string | undefined, artistId: string) {
   return apiRequest<{ success: boolean }>(`/engagement/follows/${artistId}`, {
     method: "DELETE",
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
   });
 }
 
 // History
-export function recordPlayHistory(accessToken: string, songId: string) {
+export function recordPlayHistory(accessToken: string | undefined, songId: string) {
   return apiRequest<any>(`/engagement/history/${songId}`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
   });
 }
 
-export function getPlayHistory(accessToken: string) {
+export function getPlayHistory(accessToken: string | undefined) {
   return apiRequest<any[]>(`/engagement/history`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
   });
 }
 
 // Comments
-export function addComment(accessToken: string, songId: string, content: string) {
+export function addComment(accessToken: string | undefined, songId: string, content: string) {
   return apiRequest<Comment>(`/engagement/comments/${songId}`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
     body: { content },
   });
 }
 
-export function deleteComment(accessToken: string, commentId: string) {
+export function deleteComment(accessToken: string | undefined, commentId: string) {
   return apiRequest<{ success: boolean }>(`/engagement/comments/${commentId}`, {
     method: "DELETE",
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
   });
 }
 
@@ -205,15 +205,15 @@ export function getSongComments(songId: string) {
 }
 
 // Notifications
-export function getNotifications(accessToken: string) {
+export function getNotifications(accessToken: string | undefined) {
   return apiRequest<Notification[]>(`/engagement/notifications`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
   });
 }
 
-export function markNotificationRead(accessToken: string, notificationId: string) {
+export function markNotificationRead(accessToken: string | undefined, notificationId: string) {
   return apiRequest<any>(`/engagement/notifications/${notificationId}/read`, {
     method: "PUT",
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
   });
 }
