@@ -7,11 +7,44 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─── Enums ──────────────────────────────────────────────────────────────────
+
 enum Role {
   USER
   ARTIST
   ADMIN
 }
+
+enum SongStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+  DISABLED
+  REPORTED
+}
+
+enum VerificationStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum MusicTypeCategory {
+  MOOD
+  PURPOSE
+  STYLE
+  AUDIENCE
+}
+
+enum BannerStatus {
+  DRAFT
+  ACTIVE
+  SCHEDULED
+  EXPIRED
+}
+
+// ─── Core Models ────────────────────────────────────────────────────────────
 
 model User {
   id               String   @id @default(uuid())
@@ -25,87 +58,198 @@ model User {
   refreshTokenHash String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
-  
-  songs            Song[]
-  likes            Like[]
-  favorites        Favorite[]
-  playlists        Playlist[]
-  follows          Follow[]
-  playHistory      PlayHistory[]
-  comments         Comment[]
-  notifications    Notification[]
+
+  songs         Song[]
+  likes         Like[]
+  favorites     Favorite[]
+  playlists     Playlist[]
+  follows       Follow[]
+  playHistory   PlayHistory[]
+  comments      Comment[]
+  notifications Notification[]
 
   @@map("users")
 }
 
 model Artist {
-  id         String   @id @default(uuid())
-  name       String
-  slug       String   @unique
-  bio        String?
-  avatar     String?
-  coverImage String?
-  verified   Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id                 String             @id @default(uuid())
+  name               String
+  slug               String             @unique
+  bio                String?
+  avatar             String?
+  coverImage         String?
+  verified           Boolean            @default(false)
+  verificationStatus VerificationStatus @default(UNVERIFIED)
+  seoTitle           String?
+  seoDescription     String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
 
-  songs      Song[]
-  followers  Follow[]
+  songs     Song[]
+  followers Follow[]
+  albums    Album[]
 
   @@map("artists")
 }
 
 model Genre {
-  id        String   @id @default(uuid())
-  name      String
-  slug      String   @unique
-  icon      String?
-  color     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String   @id @default(uuid())
+  name           String
+  slug           String   @unique
+  icon           String?
+  color          String?
+  description    String?
+  seoTitle       String?
+  seoDescription String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  songs     Song[]
+  songs Song[]
 
   @@map("genres")
 }
 
+model MusicType {
+  id           String            @id @default(uuid())
+  name         String
+  slug         String            @unique
+  description  String?
+  icon         String?
+  color        String?
+  typeCategory MusicTypeCategory @default(MOOD)
+  isActive     Boolean           @default(true)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  songs Song[]
+
+  @@map("music_types")
+}
+
+model Album {
+  id             String    @id @default(uuid())
+  title          String
+  slug           String    @unique
+  artistId       String
+  coverImage     String?
+  releaseDate    DateTime?
+  description    String?
+  isPublished    Boolean   @default(false)
+  seoTitle       String?
+  seoDescription String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  artist Artist @relation(fields: [artistId], references: [id], onDelete: Restrict)
+  songs  Song[]
+
+  @@index([artistId])
+  @@map("albums")
+}
+
 model Song {
-  id            String   @id @default(uuid())
-  title         String
-  slug          String   @unique
-  artistId      String
-  genreId       String
-  uploaderId    String
-  coverImage    String?
-  audioFile     String
-  duration      Int?
-  description   String?
-  releaseDate   DateTime?
-  isPublished   Boolean  @default(false)
-  allowDownload Boolean  @default(true)
-  allowRemix    Boolean  @default(false)
-  downloadCount Int      @default(0)
-  playCount     Int      @default(0)
-  isEditorPick  Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id                   String     @id @default(uuid())
+  title                String
+  slug                 String     @unique
+  artistId             String
+  genreId              String
+  albumId              String?
+  musicTypeId          String?
+  uploaderId           String
+  coverImage           String?
+  audioFile            String
+  duration             Int?
+  description          String?
+  releaseDate          DateTime?
+  isPublished          Boolean    @default(false)
+  status               SongStatus @default(DRAFT)
+  scheduledAt          DateTime?
+  allowDownload        Boolean    @default(true)
+  allowRemix           Boolean    @default(false)
+  downloadCount        Int        @default(0)
+  playCount            Int        @default(0)
+  isEditorPick         Boolean    @default(false)
+  manualTrendingBoost  Int        @default(0)
+  seoTitle             String?
+  seoDescription       String?
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
 
-  artist   Artist @relation(fields: [artistId], references: [id], onDelete: Restrict)
-  genre    Genre  @relation(fields: [genreId], references: [id], onDelete: Restrict)
-  uploader User   @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+  artist    Artist     @relation(fields: [artistId], references: [id], onDelete: Restrict)
+  genre     Genre      @relation(fields: [genreId], references: [id], onDelete: Restrict)
+  uploader  User       @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+  album     Album?     @relation(fields: [albumId], references: [id], onDelete: SetNull)
+  musicType MusicType? @relation(fields: [musicTypeId], references: [id], onDelete: SetNull)
 
-  likes         Like[]
-  favorites     Favorite[]
-  playlists     PlaylistSong[]
-  playHistory   PlayHistory[]
-  comments      Comment[]
+  likes        Like[]
+  favorites    Favorite[]
+  playlists    PlaylistSong[]
+  playHistory  PlayHistory[]
+  comments     Comment[]
+  editorPicks  EditorPick[]
 
   @@index([artistId])
   @@index([genreId])
   @@index([uploaderId])
+  @@index([albumId])
+  @@index([musicTypeId])
   @@index([isPublished, releaseDate])
+  @@index([status])
   @@map("songs")
 }
+
+// ─── Discovery / Editorial Models ───────────────────────────────────────────
+
+model EditorPick {
+  id           String    @id @default(uuid())
+  songId       String
+  priority     Int       @default(0)
+  sectionLabel String?
+  startDate    DateTime?
+  endDate      DateTime?
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  song Song @relation(fields: [songId], references: [id], onDelete: Cascade)
+
+  @@index([songId])
+  @@index([isActive, priority])
+  @@map("editor_picks")
+}
+
+model HeroBanner {
+  id              String       @id @default(uuid())
+  title           String
+  subtitle        String?
+  image           String?
+  linkedSongId    String?
+  linkedArtistId  String?
+  ctaLabel        String?
+  ctaUrl          String?
+  startDate       DateTime?
+  endDate         DateTime?
+  status          BannerStatus @default(DRAFT)
+  priority        Int          @default(0)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([status, priority])
+  @@map("hero_banners")
+}
+
+model TrendingSettings {
+  id            String   @id @default(uuid())
+  playsWeight   Float    @default(0.5)
+  downloadsWeight Float   @default(0.3)
+  recencyWeight Float    @default(0.1)
+  editorBoost   Float    @default(0.1)
+  updatedAt     DateTime @updatedAt
+
+  @@map("trending_settings")
+}
+
+// ─── Engagement Models ───────────────────────────────────────────────────────
 
 model Like {
   id        String   @id @default(uuid())
@@ -175,10 +319,10 @@ model Follow {
 }
 
 model PlayHistory {
-  id        String   @id @default(uuid())
-  userId    String
-  songId    String
-  playedAt  DateTime @default(now())
+  id       String   @id @default(uuid())
+  userId   String
+  songId   String
+  playedAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   song Song @relation(fields: [songId], references: [id], onDelete: Cascade)

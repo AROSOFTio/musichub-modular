@@ -26,6 +26,9 @@ export type CatalogArtist = {
   avatar?: string | null;
   coverImage?: string | null;
   verified?: boolean;
+  verificationStatus?: string;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
   _count?: { songs: number; followers: number };
 };
 
@@ -39,11 +42,82 @@ export type CatalogGenre = {
   slug: string;
   icon?: string | null;
   color?: string | null;
+  description?: string | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
   _count?: { songs: number };
 };
 
-export type AdminGenre = CatalogGenre & {
+export type AdminGenre = CatalogGenre & { _count: { songs: number } };
+
+export type AdminAlbum = {
+  id: string;
+  title: string;
+  slug: string;
+  artistId: string;
+  artist: { id: string; name: string; slug: string };
+  coverImage: string | null;
+  releaseDate: string | null;
+  description: string | null;
+  isPublished: boolean;
+  seoTitle: string | null;
+  seoDescription: string | null;
+  createdAt: string;
+  updatedAt: string;
   _count: { songs: number };
+};
+
+export type AdminMusicType = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  icon: string | null;
+  color: string | null;
+  typeCategory: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  _count: { songs: number };
+};
+
+export type AdminEditorPick = {
+  id: string;
+  songId: string;
+  song: AdminSong;
+  priority: number;
+  sectionLabel: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AdminHeroBanner = {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  image: string | null;
+  linkedSongId: string | null;
+  linkedArtistId: string | null;
+  ctaLabel: string | null;
+  ctaUrl: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  status: string;
+  priority: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type TrendingSettings = {
+  id: string;
+  playsWeight: number;
+  downloadsWeight: number;
+  recencyWeight: number;
+  editorBoost: number;
+  updatedAt: string;
 };
 
 export type CatalogSong = {
@@ -68,6 +142,52 @@ export type CatalogSong = {
   updatedAt: string;
 };
 
+export type AdminSong = {
+  id: string;
+  title: string;
+  slug: string;
+  status: string;
+  artist: { id: string; name: string; slug: string };
+  genre: { id: string; name: string; slug: string };
+  album: { id: string; title: string } | null;
+  musicType: { id: string; name: string } | null;
+  coverImage: string | null;
+  audioFile: string;
+  duration: number | null;
+  description: string | null;
+  releaseDate: string | null;
+  isPublished: boolean;
+  allowDownload: boolean;
+  allowRemix: boolean;
+  downloadCount: number;
+  playCount: number;
+  isEditorPick: boolean;
+  manualTrendingBoost: number;
+  seoTitle: string | null;
+  seoDescription: string | null;
+  scheduledAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AdminOverview = {
+  totalUsers: number;
+  totalArtistAccounts: number;
+  totalAdmins: number;
+  totalArtistProfiles: number;
+  totalGenres: number;
+  totalSongs: number;
+  publishedSongs: number;
+  draftSongs: number;
+  disabledSongs: number;
+  totalAlbums: number;
+  totalMusicTypes: number;
+  totalPlays: number;
+  totalDownloads: number;
+  topSongs: AdminSong[];
+  latestSongs: AdminSong[];
+};
+
 export type HomeFeed = {
   featured: CatalogSong | null;
   trending: CatalogSong[];
@@ -82,19 +202,6 @@ export type SearchResult = {
   songs: CatalogSong[];
   artists: CatalogArtist[];
   genres: CatalogGenre[];
-};
-
-export type AdminOverview = {
-  totalUsers: number;
-  totalArtistAccounts: number;
-  totalAdmins: number;
-  totalArtistProfiles: number;
-  totalGenres: number;
-  totalSongs: number;
-  publishedSongs: number;
-  draftSongs: number;
-  freeDownloadsEnabled: boolean;
-  remixPaymentsEnabled: boolean;
 };
 
 type JsonBody = BodyInit | Record<string, unknown> | null | undefined;
@@ -140,7 +247,11 @@ async function apiRequest<T>(
   return (await response.json()) as T;
 }
 
-// Auth
+function authHeader(token: string | undefined) {
+  return token ? { Authorization: `Bearer ${token}` } : undefined;
+}
+
+// ─── Auth ──────────────────────────────────────────────────────────────────
 export function loginRequest(payload: { email: string; password: string }) {
   return apiRequest<AuthResponse>("/auth/login", { method: "POST", body: payload });
 }
@@ -160,12 +271,12 @@ export function logoutRequest(accessToken: string, refreshToken?: string) {
   });
 }
 
-// Home Feed
+// ─── Home Feed ─────────────────────────────────────────────────────────────
 export function getHomeFeed() {
   return apiRequest<HomeFeed>("/home", { cache: "no-store" });
 }
 
-// Discovery
+// ─── Discovery ─────────────────────────────────────────────────────────────
 export function getTrending(limit?: number) {
   const params = limit ? `?limit=${limit}` : "";
   return apiRequest<CatalogSong[]>(`/discover/trending${params}`, { cache: "no-store" });
@@ -189,34 +300,28 @@ export function getEditorPicks() {
 }
 
 export function searchAll(query: string) {
-  return apiRequest<SearchResult>(`/discover/search?q=${encodeURIComponent(query)}`, {
-    cache: "no-store",
-  });
+  return apiRequest<SearchResult>(`/discover/search?q=${encodeURIComponent(query)}`, { cache: "no-store" });
 }
 
-// Genres
+// ─── Public Genres ─────────────────────────────────────────────────────────
 export function listGenres() {
   return apiRequest<CatalogGenre[]>("/genres", { cache: "no-store" });
 }
 
 export function getGenre(slug: string) {
-  return apiRequest<CatalogGenre & { songs: CatalogSong[] }>(`/genres/${encodeURIComponent(slug)}`, {
-    cache: "no-store",
-  });
+  return apiRequest<CatalogGenre & { songs: CatalogSong[] }>(`/genres/${encodeURIComponent(slug)}`, { cache: "no-store" });
 }
 
-// Artists
+// ─── Public Artists ────────────────────────────────────────────────────────
 export function listArtists() {
   return apiRequest<CatalogArtist[]>("/artists", { cache: "no-store" });
 }
 
 export function getArtist(slug: string) {
-  return apiRequest<CatalogArtist & { songs: CatalogSong[] }>(`/artists/${encodeURIComponent(slug)}`, {
-    cache: "no-store",
-  });
+  return apiRequest<CatalogArtist & { songs: CatalogSong[] }>(`/artists/${encodeURIComponent(slug)}`, { cache: "no-store" });
 }
 
-// Songs
+// ─── Public Songs ──────────────────────────────────────────────────────────
 export function listSongs(query?: string) {
   const params = query ? `?q=${encodeURIComponent(query)}` : "";
   return apiRequest<CatalogSong[]>(`/songs${params}`, { cache: "no-store" });
@@ -229,14 +334,14 @@ export function getSong(slug: string) {
 export function listManageableSongs(accessToken: string | undefined) {
   return apiRequest<CatalogSong[]>("/songs/manage", {
     cache: "no-store",
-    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+    headers: authHeader(accessToken),
   });
 }
 
 export function uploadSong(accessToken: string | undefined, payload: FormData) {
   return apiRequest<CatalogSong>("/songs", {
     method: "POST",
-    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+    headers: authHeader(accessToken),
     body: payload,
   });
 }
@@ -244,7 +349,7 @@ export function uploadSong(accessToken: string | undefined, payload: FormData) {
 export function updateSong(accessToken: string | undefined, id: string, payload: FormData) {
   return apiRequest<CatalogSong>(`/songs/${id}`, {
     method: "PATCH",
-    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+    headers: authHeader(accessToken),
     body: payload,
   });
 }
@@ -252,46 +357,74 @@ export function updateSong(accessToken: string | undefined, id: string, payload:
 export function deleteSong(accessToken: string | undefined, id: string) {
   return apiRequest<{ success: boolean }>(`/songs/${id}`, {
     method: "DELETE",
-    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+    headers: authHeader(accessToken),
   });
 }
 
 export function setEditorPick(accessToken: string | undefined, songId: string, pick: boolean) {
   return apiRequest<CatalogSong>(`/songs/${songId}/editor-pick`, {
     method: "PUT",
-    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+    headers: authHeader(accessToken),
     body: { pick },
   });
 }
 
-// Admin
+// ─── Admin Overview ────────────────────────────────────────────────────────
 export function getAdminOverview(accessToken: string | undefined) {
   return apiRequest<AdminOverview>("/admin/overview", {
-    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+    cache: "no-store",
+    headers: authHeader(accessToken),
   });
 }
 
-export function listAdminArtists(accessToken: string | undefined) {
-  return apiRequest<AdminArtist[]>("/admin/artists", {
+// ─── Admin Songs ───────────────────────────────────────────────────────────
+export function listAdminSongs(accessToken: string | undefined, status?: string) {
+  const params = status ? `?status=${encodeURIComponent(status)}` : "";
+  return apiRequest<AdminSong[]>(`/admin/songs${params}`, {
     cache: "no-store",
-    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+    headers: authHeader(accessToken),
+  });
+}
+
+export function updateAdminSong(accessToken: string | undefined, id: string, payload: Record<string, unknown>) {
+  return apiRequest<AdminSong>(`/admin/songs/${id}`, {
+    method: "PATCH",
+    headers: authHeader(accessToken),
+    body: payload,
+  });
+}
+
+export function deleteAdminSong(accessToken: string | undefined, id: string) {
+  return apiRequest<{ success: boolean }>(`/admin/songs/${id}`, {
+    method: "DELETE",
+    headers: authHeader(accessToken),
+  });
+}
+
+export function boostSong(accessToken: string | undefined, id: string, boost: number) {
+  return apiRequest<AdminSong>(`/admin/songs/${id}/boost`, {
+    method: "PATCH",
+    headers: authHeader(accessToken),
+    body: { boost },
+  });
+}
+
+// ─── Admin Artists ─────────────────────────────────────────────────────────
+export function listAdminArtists(accessToken: string | undefined, verificationStatus?: string) {
+  const params = verificationStatus ? `?verificationStatus=${encodeURIComponent(verificationStatus)}` : "";
+  return apiRequest<AdminArtist[]>(`/admin/artists${params}`, {
+    cache: "no-store",
+    headers: authHeader(accessToken),
   });
 }
 
 export function createAdminArtist(
   accessToken: string | undefined,
-  payload: {
-    name: string;
-    slug?: string;
-    bio?: string;
-    avatar?: string;
-    coverImage?: string;
-    verified?: boolean;
-  },
+  payload: Record<string, unknown>,
 ) {
   return apiRequest<AdminArtist>("/admin/artists", {
     method: "POST",
-    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+    headers: authHeader(accessToken),
     body: payload,
   });
 }
@@ -299,18 +432,11 @@ export function createAdminArtist(
 export function updateAdminArtist(
   accessToken: string | undefined,
   id: string,
-  payload: {
-    name: string;
-    slug?: string;
-    bio?: string;
-    avatar?: string;
-    coverImage?: string;
-    verified?: boolean;
-  },
+  payload: Record<string, unknown>,
 ) {
   return apiRequest<AdminArtist>(`/admin/artists/${id}`, {
     method: "PATCH",
-    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+    headers: authHeader(accessToken),
     body: payload,
   });
 }
@@ -318,46 +444,42 @@ export function updateAdminArtist(
 export function deleteAdminArtist(accessToken: string | undefined, id: string) {
   return apiRequest<{ success: boolean }>(`/admin/artists/${id}`, {
     method: "DELETE",
-    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+    headers: authHeader(accessToken),
   });
 }
 
+export function verifyAdminArtist(
+  accessToken: string | undefined,
+  id: string,
+  verificationStatus: string,
+) {
+  return apiRequest<AdminArtist>(`/admin/artists/${id}/verify`, {
+    method: "PATCH",
+    headers: authHeader(accessToken),
+    body: { verificationStatus },
+  });
+}
+
+// ─── Admin Genres ──────────────────────────────────────────────────────────
 export function listAdminGenres(accessToken: string | undefined) {
   return apiRequest<AdminGenre[]>("/admin/genres", {
     cache: "no-store",
-    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+    headers: authHeader(accessToken),
   });
 }
 
-export function createAdminGenre(
-  accessToken: string | undefined,
-  payload: {
-    name: string;
-    slug?: string;
-    color?: string;
-    icon?: string;
-  },
-) {
+export function createAdminGenre(accessToken: string | undefined, payload: Record<string, unknown>) {
   return apiRequest<AdminGenre>("/admin/genres", {
     method: "POST",
-    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+    headers: authHeader(accessToken),
     body: payload,
   });
 }
 
-export function updateAdminGenre(
-  accessToken: string | undefined,
-  id: string,
-  payload: {
-    name: string;
-    slug?: string;
-    color?: string;
-    icon?: string;
-  },
-) {
+export function updateAdminGenre(accessToken: string | undefined, id: string, payload: Record<string, unknown>) {
   return apiRequest<AdminGenre>(`/admin/genres/${id}`, {
     method: "PATCH",
-    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+    headers: authHeader(accessToken),
     body: payload,
   });
 }
@@ -365,6 +487,169 @@ export function updateAdminGenre(
 export function deleteAdminGenre(accessToken: string | undefined, id: string) {
   return apiRequest<{ success: boolean }>(`/admin/genres/${id}`, {
     method: "DELETE",
-    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+    headers: authHeader(accessToken),
+  });
+}
+
+// ─── Admin Albums ──────────────────────────────────────────────────────────
+export function listAdminAlbums(accessToken: string | undefined) {
+  return apiRequest<AdminAlbum[]>("/admin/albums", {
+    cache: "no-store",
+    headers: authHeader(accessToken),
+  });
+}
+
+export function createAdminAlbum(accessToken: string | undefined, payload: Record<string, unknown>) {
+  return apiRequest<AdminAlbum>("/admin/albums", {
+    method: "POST",
+    headers: authHeader(accessToken),
+    body: payload,
+  });
+}
+
+export function updateAdminAlbum(accessToken: string | undefined, id: string, payload: Record<string, unknown>) {
+  return apiRequest<AdminAlbum>(`/admin/albums/${id}`, {
+    method: "PATCH",
+    headers: authHeader(accessToken),
+    body: payload,
+  });
+}
+
+export function deleteAdminAlbum(accessToken: string | undefined, id: string) {
+  return apiRequest<{ success: boolean }>(`/admin/albums/${id}`, {
+    method: "DELETE",
+    headers: authHeader(accessToken),
+  });
+}
+
+// ─── Admin Music Types ─────────────────────────────────────────────────────
+export function listAdminMusicTypes(accessToken: string | undefined, category?: string) {
+  const params = category ? `?category=${encodeURIComponent(category)}` : "";
+  return apiRequest<AdminMusicType[]>(`/admin/music-types${params}`, {
+    cache: "no-store",
+    headers: authHeader(accessToken),
+  });
+}
+
+export function createAdminMusicType(accessToken: string | undefined, payload: Record<string, unknown>) {
+  return apiRequest<AdminMusicType>("/admin/music-types", {
+    method: "POST",
+    headers: authHeader(accessToken),
+    body: payload,
+  });
+}
+
+export function updateAdminMusicType(accessToken: string | undefined, id: string, payload: Record<string, unknown>) {
+  return apiRequest<AdminMusicType>(`/admin/music-types/${id}`, {
+    method: "PATCH",
+    headers: authHeader(accessToken),
+    body: payload,
+  });
+}
+
+export function deleteAdminMusicType(accessToken: string | undefined, id: string) {
+  return apiRequest<{ success: boolean }>(`/admin/music-types/${id}`, {
+    method: "DELETE",
+    headers: authHeader(accessToken),
+  });
+}
+
+// ─── Admin Trending ────────────────────────────────────────────────────────
+export function listAdminTrending(accessToken: string | undefined) {
+  return apiRequest<AdminSong[]>("/admin/trending", {
+    cache: "no-store",
+    headers: authHeader(accessToken),
+  });
+}
+
+export function listAdminTop50(accessToken: string | undefined) {
+  return apiRequest<AdminSong[]>("/admin/trending/top-50", {
+    cache: "no-store",
+    headers: authHeader(accessToken),
+  });
+}
+
+export function listAdminAllTime(accessToken: string | undefined) {
+  return apiRequest<AdminSong[]>("/admin/trending/all-time", {
+    cache: "no-store",
+    headers: authHeader(accessToken),
+  });
+}
+
+export function getAdminTrendingSettings(accessToken: string | undefined) {
+  return apiRequest<TrendingSettings>("/admin/trending/settings", {
+    cache: "no-store",
+    headers: authHeader(accessToken),
+  });
+}
+
+export function updateAdminTrendingSettings(accessToken: string | undefined, payload: Record<string, unknown>) {
+  return apiRequest<TrendingSettings>("/admin/trending/settings", {
+    method: "PATCH",
+    headers: authHeader(accessToken),
+    body: payload,
+  });
+}
+
+// ─── Admin Editor Picks ────────────────────────────────────────────────────
+export function listAdminEditorPicks(accessToken: string | undefined) {
+  return apiRequest<AdminEditorPick[]>("/admin/editor-picks", {
+    cache: "no-store",
+    headers: authHeader(accessToken),
+  });
+}
+
+export function createAdminEditorPick(accessToken: string | undefined, payload: Record<string, unknown>) {
+  return apiRequest<AdminEditorPick>("/admin/editor-picks", {
+    method: "POST",
+    headers: authHeader(accessToken),
+    body: payload,
+  });
+}
+
+export function updateAdminEditorPick(accessToken: string | undefined, id: string, payload: Record<string, unknown>) {
+  return apiRequest<AdminEditorPick>(`/admin/editor-picks/${id}`, {
+    method: "PATCH",
+    headers: authHeader(accessToken),
+    body: payload,
+  });
+}
+
+export function deleteAdminEditorPick(accessToken: string | undefined, id: string) {
+  return apiRequest<{ success: boolean }>(`/admin/editor-picks/${id}`, {
+    method: "DELETE",
+    headers: authHeader(accessToken),
+  });
+}
+
+// ─── Admin Hero Banners ────────────────────────────────────────────────────
+export function listAdminHeroBanners(accessToken: string | undefined, status?: string) {
+  const params = status ? `?status=${encodeURIComponent(status)}` : "";
+  return apiRequest<AdminHeroBanner[]>(`/admin/hero-banners${params}`, {
+    cache: "no-store",
+    headers: authHeader(accessToken),
+  });
+}
+
+export function createAdminHeroBanner(accessToken: string | undefined, payload: Record<string, unknown>) {
+  return apiRequest<AdminHeroBanner>("/admin/hero-banners", {
+    method: "POST",
+    headers: authHeader(accessToken),
+    body: payload,
+  });
+}
+
+export function updateAdminHeroBanner(accessToken: string | undefined, id: string, payload: Record<string, unknown>) {
+  return apiRequest<AdminHeroBanner>(`/admin/hero-banners/${id}`, {
+    method: "PATCH",
+    headers: authHeader(accessToken),
+    body: payload,
+  });
+}
+
+export function deleteAdminHeroBanner(accessToken: string | undefined, id: string) {
+  return apiRequest<{ success: boolean }>(`/admin/hero-banners/${id}`, {
+    method: "DELETE",
+    headers: authHeader(accessToken),
   });
 }

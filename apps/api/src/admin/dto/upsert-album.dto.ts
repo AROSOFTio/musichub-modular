@@ -1,36 +1,34 @@
-import { IsBoolean, IsEnum, IsOptional, IsString, MaxLength } from "class-validator";
+import { IsBoolean, IsOptional, IsString, MaxLength } from "class-validator";
 import { Transform } from "class-transformer";
-import { VerificationStatus } from "@prisma/client";
 
-export class UpsertArtistDto {
+export class UpsertAlbumDto {
   @IsString()
-  @MaxLength(100)
-  name!: string;
+  @MaxLength(140)
+  title!: string;
 
   @IsOptional()
   @IsString()
   slug?: string;
 
-  @IsOptional()
   @IsString()
-  bio?: string;
-
-  @IsOptional()
-  @IsString()
-  avatar?: string;
+  artistId!: string;
 
   @IsOptional()
   @IsString()
   coverImage?: string;
 
   @IsOptional()
-  @Transform(({ value }) => value === "true" || value === true)
-  @IsBoolean()
-  verified?: boolean;
+  @IsString()
+  releaseDate?: string;
 
   @IsOptional()
-  @IsEnum(VerificationStatus)
-  verificationStatus?: VerificationStatus;
+  @IsString()
+  description?: string;
+
+  @IsOptional()
+  @Transform(({ value }) => value === "true" || value === true)
+  @IsBoolean()
+  isPublished?: boolean;
 
   @IsOptional()
   @IsString()
