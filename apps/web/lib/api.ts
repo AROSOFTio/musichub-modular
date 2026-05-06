@@ -733,7 +733,10 @@ export function listAdminUsers(accessToken: string | undefined) {
   });
 }
 
-export function createAdminUser(accessToken: string | undefined, payload: Record<string, unknown>) {
+export function createAdminUser(
+  accessToken: string | undefined, 
+  payload: { email: string; displayName: string; username?: string; password?: string; role: UserRole }
+) {
   return apiRequest<AdminUser>("/admin/users", {
     method: "POST",
     headers: authHeader(accessToken),
@@ -741,7 +744,7 @@ export function createAdminUser(accessToken: string | undefined, payload: Record
   });
 }
 
-export function updateAdminUserRole(accessToken: string | undefined, id: string, role: string) {
+export function updateAdminUserRole(accessToken: string | undefined, id: string, role: UserRole) {
   return apiRequest<AdminUser>(`/admin/users/${id}/role`, {
     method: "PATCH",
     headers: authHeader(accessToken),

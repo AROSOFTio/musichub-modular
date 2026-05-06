@@ -4,7 +4,15 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { UserPlus, Mail, User, Shield, Key, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
-import { createAdminUser } from "@/lib/api";
+import { createAdminUser, type UserRole } from "@/lib/api";
+
+type CreateAdminUserFormData = {
+  email: string;
+  displayName: string;
+  username: string;
+  password?: string;
+  role: UserRole;
+};
 
 export default function NewUserPage() {
   const { accessToken } = useAuth();
@@ -13,12 +21,12 @@ export default function NewUserPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CreateAdminUserFormData>({
     email: "",
     displayName: "",
     username: "",
     password: "",
-    role: "USER" as const,
+    role: "USER",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -133,7 +141,7 @@ export default function NewUserPage() {
         <div className="space-y-2">
           <label className="text-xs font-black uppercase tracking-widest text-[var(--muted)]">System Role</label>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            {(["USER", "ARTIST", "EDITOR", "ADMIN"] as const).map((role) => (
+            {(["USER", "ARTIST", "EDITOR", "ADMIN"] as UserRole[]).map((role) => (
               <button
                 key={role}
                 type="button"
