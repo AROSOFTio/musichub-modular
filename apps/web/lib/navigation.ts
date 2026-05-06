@@ -13,6 +13,9 @@ import {
   Tags,
   Trophy,
   Mic2,
+  Info,
+  Mail,
+  HelpCircle,
 } from "lucide-react";
 
 export type NavItem = {
@@ -37,7 +40,10 @@ export const primaryNavigation: NavItem[] = [
 
 export const secondaryNavigation: NavItem[] = [
   { href: "/artists", label: "Artists", icon: Mic2 },
-  { href: "/admin", label: "Admin", icon: Shield },
+  { href: "/about", label: "About", icon: Info },
+  { href: "/contact", label: "Contact", icon: Mail },
+  { href: "/privacy", label: "Privacy", icon: Shield },
+  { href: "/admin", label: "Admin", icon: HelpCircle },
 ];
 
 export const mobileNavigation: NavItem[] = [

@@ -21,6 +21,7 @@ import {
   ChevronDown,
   Moon,
   Sun,
+  Mail,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/ui/logo";
@@ -132,6 +133,12 @@ const NAV: { section: string; items: NavItem[] }[] = [
           { label: "Scheduled", href: "/admin/hero-banners/scheduled" },
         ],
       },
+    ],
+  },
+  {
+    section: "Support",
+    items: [
+      { label: "Messages", href: "/admin/messages", icon: Mail },
     ],
   },
 ];

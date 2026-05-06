@@ -8,6 +8,7 @@ import { EngagementModule } from "./engagement/engagement.module";
 import { validateEnv } from "./config/env.validation";
 import { HealthModule } from "./health/health.module";
 import { PrismaModule } from "./prisma/prisma.module";
+import { SupportModule } from "./support/support.module";
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { PrismaModule } from "./prisma/prisma.module";
     AdminModule,
     CatalogModule,
     EngagementModule,
+    SupportModule,
   ],
 })
 export class AppModule {}
