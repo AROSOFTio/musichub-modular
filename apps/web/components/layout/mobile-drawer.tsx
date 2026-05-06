@@ -2,16 +2,17 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { X, Home, Compass, Clock, Star, Info, Shield, Mail, Menu, LayoutDashboard } from "lucide-react";
+import { X, Home, Compass, Clock, Star, Info, Shield, Mail, Menu, LayoutDashboard, LogOut } from "lucide-react";
 import { Logo } from "../ui/logo";
 import { cn } from "@/lib/utils";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 
 export function MobileDrawer() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
-  const { isAuthenticated } = useAuth();
+  const router = useRouter();
+  const { isAuthenticated, user, logout } = useAuth();
 
   useEffect(() => {
     setIsOpen(false);
@@ -28,6 +29,12 @@ export function MobileDrawer() {
     };
   }, [isOpen]);
 
+  function handleLogout() {
+    logout();
+    setIsOpen(false);
+    router.push("/");
+  }
+
   const navItems = [
     { label: "Home", href: "/", icon: Home },
     { label: "Trending", href: "/trending", icon: Compass },
@@ -40,6 +47,7 @@ export function MobileDrawer() {
 
   return (
     <>
+      {/* Hamburger button */}
       <button
         onClick={() => setIsOpen(true)}
         className="flex h-10 w-10 items-center justify-center rounded-xl border border-borderSoft bg-[var(--card-bg)] text-[var(--foreground)]"
@@ -47,7 +55,7 @@ export function MobileDrawer() {
         <Menu className="h-5 w-5" />
       </button>
 
-      {/* Overlay */}
+      {/* Backdrop overlay */}
       <div
         className={cn(
           "fixed inset-0 z-50 bg-black/60 transition-opacity duration-300 lg:hidden",
@@ -56,14 +64,15 @@ export function MobileDrawer() {
         onClick={() => setIsOpen(false)}
       />
 
-      {/* Drawer - Solid background */}
+      {/* Drawer panel — flex column so footer is always at bottom */}
       <div
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] transform bg-white dark:bg-slate-950 px-6 py-6 shadow-2xl transition-transform duration-300 ease-in-out lg:hidden",
+          "fixed inset-y-0 left-0 z-50 flex w-80 max-w-[85vw] flex-col bg-white dark:bg-slate-950 shadow-2xl transition-transform duration-300 ease-in-out lg:hidden",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="flex items-center justify-between">
+        {/* ── Header ───────────────────────────────────────────── */}
+        <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-6 py-5 dark:border-slate-800">
           <Logo />
           <button
             onClick={() => setIsOpen(false)}
@@ -73,23 +82,21 @@ export function MobileDrawer() {
           </button>
         </div>
 
-        <div className="mt-10 space-y-2">
+        {/* ── Nav links — grows & scrolls ───────────────────────── */}
+        <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
           {isAuthenticated && (
-             <Link
-                href="/admin/dashboard"
-                className={cn(
-                  "flex items-center gap-4 rounded-2xl px-4 py-3.5 text-base font-bold transition-colors bg-violet-50 text-violet-700 dark:bg-violet-900/20 dark:text-violet-300 mb-4"
-                )}
-              >
-                <LayoutDashboard className="h-5 w-5" />
-                Admin Dashboard
-              </Link>
+            <Link
+              href="/admin/dashboard"
+              className="mb-3 flex items-center gap-4 rounded-2xl bg-violet-50 px-4 py-3.5 text-base font-bold text-violet-700 transition-colors dark:bg-violet-900/20 dark:text-violet-300"
+            >
+              <LayoutDashboard className="h-5 w-5" />
+              Admin Dashboard
+            </Link>
           )}
 
           {navItems.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
-
             return (
               <Link
                 key={item.href}
@@ -98,7 +105,7 @@ export function MobileDrawer() {
                   "flex items-center gap-4 rounded-2xl px-4 py-3.5 text-base font-medium transition-colors",
                   isActive
                     ? "bg-violet-600 text-white"
-                    : "text-[var(--foreground)] hover:bg-violet-50 dark:hover:bg-violet-900/10"
+                    : "text-slate-700 hover:bg-violet-50 dark:text-slate-200 dark:hover:bg-violet-900/10"
                 )}
               >
                 <Icon className={cn("h-5 w-5", isActive ? "text-white" : "text-violet-600")} />
@@ -106,15 +113,37 @@ export function MobileDrawer() {
               </Link>
             );
           })}
-        </div>
+        </nav>
 
-        <div className="absolute bottom-10 left-6 right-6">
-          <div className="rounded-3xl border border-borderSoft bg-[var(--surface)] p-5">
-            <p className="text-sm font-semibold text-[var(--foreground)]">MusicHub</p>
-            <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
-              Developed & Maintained by AROSOFT
-            </p>
-          </div>
+        {/* ── Footer — pinned, fully opaque ─────────────────────── */}
+        <div className="shrink-0 border-t border-slate-100 bg-white px-4 py-4 space-y-2 dark:border-slate-800 dark:bg-slate-950">
+          {isAuthenticated ? (
+            <>
+              {user && (
+                <p className="truncate px-1 text-sm text-slate-500 dark:text-slate-400">
+                  Signed in as{" "}
+                  <span className="font-semibold text-slate-700 dark:text-slate-200">
+                    {user.displayName || user.email}
+                  </span>
+                </p>
+              )}
+              <button
+                onClick={handleLogout}
+                className="flex w-full items-center gap-3 rounded-2xl bg-red-50 px-4 py-3.5 text-base font-semibold text-red-600 transition-colors hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40"
+              >
+                <LogOut className="h-5 w-5" />
+                Log Out
+              </button>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-violet-600 px-4 py-3.5 text-base font-semibold text-white transition-colors hover:bg-violet-700"
+            >
+              Log In
+            </Link>
+          )}
+          <p className="text-center text-xs text-slate-400 pt-1">MusicHub by AROSOFT</p>
         </div>
       </div>
     </>
