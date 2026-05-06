@@ -12,7 +12,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed inset-y-0 left-0 hidden w-72 border-r border-borderSoft bg-white px-5 py-6 lg:flex lg:flex-col">
+    <aside className="fixed inset-y-0 left-0 hidden w-72 border-r border-borderSoft bg-[var(--card-bg)] px-5 py-6 lg:flex lg:flex-col">
       <Logo />
       <div className="mt-8 space-y-2">
         {primaryNavigation.map((item) => {
@@ -32,7 +32,7 @@ export function Sidebar() {
       </div>
 
       <div className="mt-8 border-t border-borderSoft pt-6">
-        <p className="px-4 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+        <p className="px-4 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
           Dashboards
         </p>
         <div className="mt-3 space-y-2">
@@ -53,9 +53,9 @@ export function Sidebar() {
         </div>
       </div>
 
-      <div className="mt-auto rounded-3xl border border-borderSoft bg-surface p-5">
-        <p className="text-sm font-semibold text-slate-950">Platform rule</p>
-        <p className="mt-2 text-sm leading-6 text-slate-500">
+      <div className="mt-auto rounded-3xl border border-borderSoft bg-[var(--surface)] p-5">
+        <p className="text-sm font-semibold text-[var(--foreground)]">Platform rule</p>
+        <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
           Normal song downloads stay free. Remix monetization comes later, after the
           core catalog and upload pipeline are in place.
         </p>
@@ -63,4 +63,3 @@ export function Sidebar() {
     </aside>
   );
 }
-

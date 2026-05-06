@@ -465,7 +465,7 @@ export function createAdminArtist(
 export function updateAdminArtist(
   accessToken: string | undefined,
   id: string,
-  payload: Record<string, unknown>,
+  payload: FormData | Record<string, unknown>,
 ) {
   return apiRequest<AdminArtist>(`/admin/artists/${id}`, {
     method: "PATCH",

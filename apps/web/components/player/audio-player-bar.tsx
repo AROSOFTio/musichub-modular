@@ -83,17 +83,17 @@ export function AudioPlayerBar() {
         }}
         onTimeUpdate={(event) => setProgress(event.currentTarget.currentTime)}
       />
-      <div className="mx-auto max-w-7xl rounded-[1.75rem] border border-borderSoft bg-white/95 p-4 shadow-card backdrop-blur">
+      <div className="mx-auto max-w-7xl rounded-[1.75rem] border border-borderSoft bg-[var(--card-bg)]/95 p-4 shadow-card backdrop-blur">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">
               Audio player
             </p>
             <div className="mt-1">
-              <p className="truncate text-sm font-semibold text-slate-950">
+              <p className="truncate text-sm font-semibold text-[var(--foreground)]">
                 {currentTrack?.title ?? "No track selected yet"}
               </p>
-              <p className="truncate text-sm text-slate-500">
+              <p className="truncate text-sm text-[var(--muted)]">
                 {currentTrack
                   ? `${currentTrack.artist} - streaming from uploaded audio`
                   : "The player store is active and waiting for real catalog tracks."}
@@ -127,7 +127,7 @@ export function AudioPlayerBar() {
               >
                 <SkipForward className="h-4 w-4" />
               </button>
-              <div className="ml-auto flex items-center gap-2 rounded-full border border-borderSoft bg-surface px-3 py-2">
+              <div className="ml-auto flex items-center gap-2 rounded-full border border-borderSoft bg-[var(--surface)] px-3 py-2">
                 <Volume2 className="h-4 w-4 text-violet-700" />
                 <input
                   aria-label="Volume"
@@ -151,7 +151,7 @@ export function AudioPlayerBar() {
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="w-10 text-xs font-medium text-slate-500">
+              <span className="w-10 text-xs font-medium text-[var(--muted)]">
                 {formatSeconds(progress)}
               </span>
               <input
@@ -171,7 +171,7 @@ export function AudioPlayerBar() {
                 type="range"
                 value={hasTrack ? progress : 0}
               />
-              <span className="w-10 text-right text-xs font-medium text-slate-500">
+              <span className="w-10 text-right text-xs font-medium text-[var(--muted)]">
                 {formatSeconds(maxProgress)}
               </span>
             </div>
