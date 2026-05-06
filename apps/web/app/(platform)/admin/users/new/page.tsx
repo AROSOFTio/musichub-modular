@@ -27,7 +27,7 @@ export default function NewUserPage() {
     setError(null);
 
     try {
-      await createAdminUser(accessToken, formData);
+      await createAdminUser(accessToken ?? undefined, formData);
       setSuccess(true);
       setTimeout(() => {
         router.push("/admin/users");

@@ -15,7 +15,7 @@ export default function UsersListPage() {
   const loadUsers = async () => {
     setIsLoading(true);
     try {
-      const data = await listAdminUsers(accessToken);
+      const data = await listAdminUsers(accessToken ?? undefined);
       setUsers(data);
     } catch (err) {
       console.error(err);
@@ -31,7 +31,7 @@ export default function UsersListPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this user? This action cannot be undone.")) return;
     try {
-      await deleteAdminUser(accessToken, id);
+      await deleteAdminUser(accessToken ?? undefined, id);
       setUsers(users.filter((u) => u.id !== id));
     } catch (err) {
       alert("Failed to delete user.");
