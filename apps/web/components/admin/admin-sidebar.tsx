@@ -16,6 +16,7 @@ import {
   Tag,
   TrendingUp,
   X,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/ui/logo";
@@ -32,6 +33,7 @@ const NAV: { section: string; items: NavItem[] }[] = [
     section: "Dashboard",
     items: [
       { label: "Overview", href: "/admin/overview", icon: LayoutDashboard },
+      { label: "Users", href: "/admin/users", icon: Users },
     ],
   },
   {

@@ -79,14 +79,23 @@ export default function AlbumsPage() {
                   </td>
                   <td className="px-4 py-3 text-slate-500">{album.releaseDate ? new Date(album.releaseDate).toLocaleDateString() : "—"}</td>
                   <td className="px-4 py-3 text-right">
-                    <ConfirmDeleteDialog
-                      title="Delete album"
-                      description={`Delete "${album.title}"? All songs must be removed first.`}
-                      onConfirm={() => handleDelete(album.id)}
-                      trigger={(open) => (
-                        <button onClick={open} className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"><Trash2 className="h-4 w-4" /></button>
-                      )}
-                    />
+                    <div className="flex items-center justify-end gap-1">
+                      <Link
+                        href={`/admin/albums/${album.id}/edit`}
+                        className="rounded-lg p-1.5 text-slate-400 hover:bg-violet-50 hover:text-violet-600"
+                        title="Edit"
+                      >
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                      </Link>
+                      <ConfirmDeleteDialog
+                        title="Delete album"
+                        description={`Delete "${album.title}"? All songs must be removed first.`}
+                        onConfirm={() => handleDelete(album.id)}
+                        trigger={(open) => (
+                          <button onClick={open} className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"><Trash2 className="h-4 w-4" /></button>
+                        )}
+                      />
+                    </div>
                   </td>
                 </tr>
               ))}

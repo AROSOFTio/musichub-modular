@@ -66,6 +66,8 @@ export function AudioPlayerBar() {
     }
   }, [currentTrack?.id, accessToken]); // Deliberately omit isPlaying to only trigger on track change or initial play
 
+  if (!hasTrack) return null;
+
   return (
     <div className="fixed inset-x-0 bottom-20 z-30 px-4 lg:bottom-0 lg:left-72 lg:px-8">
       <audio

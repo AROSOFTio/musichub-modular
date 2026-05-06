@@ -107,6 +107,13 @@ export function AdminArtistsTable({ verificationStatus, title, description }: Ar
                       {artist.verificationStatus !== "VERIFIED" && artist.verificationStatus !== "PENDING" && (
                         <button onClick={() => void handleVerify(artist.id, "VERIFIED")} className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-50">Verify</button>
                       )}
+                      <Link
+                        href={`/admin/artists/${artist.id}/edit`}
+                        className="rounded-lg p-1.5 text-slate-400 hover:bg-violet-50 hover:text-violet-600"
+                        title="Edit"
+                      >
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                      </Link>
                       <ConfirmDeleteDialog
                         title="Delete artist"
                         description={`Delete "${artist.name}"? All songs must be removed first.`}

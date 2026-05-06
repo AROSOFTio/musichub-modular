@@ -170,6 +170,17 @@ export type AdminSong = {
   updatedAt: string;
 };
 
+export type AdminUser = {
+  id: string;
+  email: string;
+  displayName: string;
+  username: string | null;
+  role: string;
+  avatarUrl: string | null;
+  createdAt: string;
+  _count: { songs: number; playlists: number };
+};
+
 export type AdminOverview = {
   totalUsers: number;
   totalArtistAccounts: number;
@@ -386,6 +397,13 @@ export function listAdminSongs(accessToken: string | undefined, status?: string)
   });
 }
 
+export function getAdminSong(accessToken: string | undefined, id: string) {
+  return apiRequest<AdminSong>(`/admin/songs/${id}`, {
+    cache: "no-store",
+    headers: authHeader(accessToken),
+  });
+}
+
 export function updateAdminSong(accessToken: string | undefined, id: string, payload: Record<string, unknown>) {
   return apiRequest<AdminSong>(`/admin/songs/${id}`, {
     method: "PATCH",
@@ -413,6 +431,13 @@ export function boostSong(accessToken: string | undefined, id: string, boost: nu
 export function listAdminArtists(accessToken: string | undefined, verificationStatus?: string) {
   const params = verificationStatus ? `?verificationStatus=${encodeURIComponent(verificationStatus)}` : "";
   return apiRequest<AdminArtist[]>(`/admin/artists${params}`, {
+    cache: "no-store",
+    headers: authHeader(accessToken),
+  });
+}
+
+export function getAdminArtist(accessToken: string | undefined, id: string) {
+  return apiRequest<AdminArtist>(`/admin/artists/${id}`, {
     cache: "no-store",
     headers: authHeader(accessToken),
   });
@@ -468,6 +493,13 @@ export function listAdminGenres(accessToken: string | undefined) {
   });
 }
 
+export function getAdminGenre(accessToken: string | undefined, id: string) {
+  return apiRequest<AdminGenre>(`/admin/genres/${id}`, {
+    cache: "no-store",
+    headers: authHeader(accessToken),
+  });
+}
+
 export function createAdminGenre(accessToken: string | undefined, payload: Record<string, unknown>) {
   return apiRequest<AdminGenre>("/admin/genres", {
     method: "POST",
@@ -494,6 +526,13 @@ export function deleteAdminGenre(accessToken: string | undefined, id: string) {
 // ─── Admin Albums ──────────────────────────────────────────────────────────
 export function listAdminAlbums(accessToken: string | undefined) {
   return apiRequest<AdminAlbum[]>("/admin/albums", {
+    cache: "no-store",
+    headers: authHeader(accessToken),
+  });
+}
+
+export function getAdminAlbum(accessToken: string | undefined, id: string) {
+  return apiRequest<AdminAlbum>(`/admin/albums/${id}`, {
     cache: "no-store",
     headers: authHeader(accessToken),
   });
@@ -526,6 +565,13 @@ export function deleteAdminAlbum(accessToken: string | undefined, id: string) {
 export function listAdminMusicTypes(accessToken: string | undefined, category?: string) {
   const params = category ? `?category=${encodeURIComponent(category)}` : "";
   return apiRequest<AdminMusicType[]>(`/admin/music-types${params}`, {
+    cache: "no-store",
+    headers: authHeader(accessToken),
+  });
+}
+
+export function getAdminMusicType(accessToken: string | undefined, id: string) {
+  return apiRequest<AdminMusicType>(`/admin/music-types/${id}`, {
     cache: "no-store",
     headers: authHeader(accessToken),
   });
@@ -649,6 +695,29 @@ export function updateAdminHeroBanner(accessToken: string | undefined, id: strin
 
 export function deleteAdminHeroBanner(accessToken: string | undefined, id: string) {
   return apiRequest<{ success: boolean }>(`/admin/hero-banners/${id}`, {
+    method: "DELETE",
+    headers: authHeader(accessToken),
+  });
+}
+
+// ─── Admin Users ───────────────────────────────────────────────────────────
+export function listAdminUsers(accessToken: string | undefined) {
+  return apiRequest<AdminUser[]>("/admin/users", {
+    cache: "no-store",
+    headers: authHeader(accessToken),
+  });
+}
+
+export function updateAdminUserRole(accessToken: string | undefined, id: string, role: string) {
+  return apiRequest<AdminUser>(`/admin/users/${id}/role`, {
+    method: "PATCH",
+    headers: authHeader(accessToken),
+    body: { role },
+  });
+}
+
+export function deleteAdminUser(accessToken: string | undefined, id: string) {
+  return apiRequest<{ success: boolean }>(`/admin/users/${id}`, {
     method: "DELETE",
     headers: authHeader(accessToken),
   });

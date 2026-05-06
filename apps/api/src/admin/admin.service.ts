@@ -102,6 +102,13 @@ export class AdminService {
     });
   }
 
+  async getSong(id: string) {
+    const song = await this.prisma.song.findUnique({ where: { id }, include: SONG_INCLUDE });
+    if (!song) throw new NotFoundException("Song not found.");
+    return song;
+  }
+
+
   async updateAdminSong(id: string, dto: AdminSongDto) {
     const existing = await this.prisma.song.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException("Song not found.");
@@ -148,6 +155,12 @@ export class AdminService {
       orderBy: { name: "asc" },
       include: { _count: { select: { songs: true, followers: true } } },
     });
+  }
+
+  async getArtist(id: string) {
+    const artist = await this.prisma.artist.findUnique({ where: { id } });
+    if (!artist) throw new NotFoundException("Artist not found.");
+    return artist;
   }
 
   async createArtist(dto: UpsertArtistDto) {
@@ -228,6 +241,12 @@ export class AdminService {
     });
   }
 
+  async getGenre(id: string) {
+    const genre = await this.prisma.genre.findUnique({ where: { id } });
+    if (!genre) throw new NotFoundException("Genre not found.");
+    return genre;
+  }
+
   async createGenre(dto: UpsertGenreDto) {
     const slug = await this.uniqueGenreSlug(dto.slug || dto.name);
     return this.prisma.genre.create({
@@ -290,6 +309,12 @@ export class AdminService {
         _count: { select: { songs: true } },
       },
     });
+  }
+
+  async getAlbum(id: string) {
+    const album = await this.prisma.album.findUnique({ where: { id } });
+    if (!album) throw new NotFoundException("Album not found.");
+    return album;
   }
 
   async createAlbum(dto: UpsertAlbumDto) {
@@ -362,6 +387,12 @@ export class AdminService {
       orderBy: { name: "asc" },
       include: { _count: { select: { songs: true } } },
     });
+  }
+
+  async getMusicType(id: string) {
+    const musicType = await this.prisma.musicType.findUnique({ where: { id } });
+    if (!musicType) throw new NotFoundException("Music type not found.");
+    return musicType;
   }
 
   async createMusicType(dto: UpsertMusicTypeDto) {
@@ -599,6 +630,40 @@ export class AdminService {
   }
 
   // ─── Slug helpers ─────────────────────────────────────────────────────────
+
+  // ─── Users ────────────────────────────────────────────────────────────────
+  
+  listUsers() {
+    return this.prisma.user.findMany({
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        email: true,
+        displayName: true,
+        username: true,
+        role: true,
+        avatarUrl: true,
+        createdAt: true,
+        _count: { select: { songs: true, playlists: true } }
+      }
+    });
+  }
+
+  async updateUserRole(id: string, role: Role) {
+    return this.prisma.user.update({
+      where: { id },
+      data: { role },
+      select: {
+        id: true, email: true, displayName: true, username: true, role: true, avatarUrl: true, createdAt: true, _count: { select: { songs: true, playlists: true } }
+      }
+    });
+  }
+
+  async deleteUser(id: string) {
+    await this.prisma.user.delete({ where: { id } });
+    return { success: true };
+  }
+
 
   private async uniqueArtistSlug(value: string, existingId?: string) {
     return this.uniqueSlug(value, async (slug) => {

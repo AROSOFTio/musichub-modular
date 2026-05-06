@@ -45,6 +45,11 @@ export class AdminController {
     return this.adminService.listSongs(s);
   }
 
+  @Get("songs/:id")
+  getSong(@Param("id") id: string) {
+    return this.adminService.getSong(id);
+  }
+
   @Patch("songs/:id")
   updateSong(@Param("id") id: string, @Body() dto: AdminSongDto) {
     return this.adminService.updateAdminSong(id, dto);
@@ -67,6 +72,11 @@ export class AdminController {
       ? (vs as VerificationStatus)
       : undefined;
     return this.adminService.listArtists(status);
+  }
+
+  @Get("artists/:id")
+  getArtist(@Param("id") id: string) {
+    return this.adminService.getArtist(id);
   }
 
   @Post("artists")
@@ -98,6 +108,11 @@ export class AdminController {
     return this.adminService.listGenres();
   }
 
+  @Get("genres/:id")
+  getGenre(@Param("id") id: string) {
+    return this.adminService.getGenre(id);
+  }
+
   @Post("genres")
   createGenre(@Body() dto: UpsertGenreDto) {
     return this.adminService.createGenre(dto);
@@ -119,6 +134,11 @@ export class AdminController {
     return this.adminService.listAlbums();
   }
 
+  @Get("albums/:id")
+  getAlbum(@Param("id") id: string) {
+    return this.adminService.getAlbum(id);
+  }
+
   @Post("albums")
   createAlbum(@Body() dto: UpsertAlbumDto) {
     return this.adminService.createAlbum(dto);
@@ -138,6 +158,11 @@ export class AdminController {
   @Get("music-types")
   listMusicTypes(@Query("category") category?: string) {
     return this.adminService.listMusicTypes(category);
+  }
+
+  @Get("music-types/:id")
+  getMusicType(@Param("id") id: string) {
+    return this.adminService.getMusicType(id);
   }
 
   @Post("music-types")
@@ -224,5 +249,21 @@ export class AdminController {
   @Delete("hero-banners/:id")
   deleteHeroBanner(@Param("id") id: string) {
     return this.adminService.deleteHeroBanner(id);
+  }
+
+  // ─── Users ────────────────────────────────────────────────────────────────
+  @Get("users")
+  listUsers() {
+    return this.adminService.listUsers();
+  }
+
+  @Patch("users/:id/role")
+  updateUserRole(@Param("id") id: string, @Body("role") role: Role) {
+    return this.adminService.updateUserRole(id, role);
+  }
+
+  @Delete("users/:id")
+  deleteUser(@Param("id") id: string) {
+    return this.adminService.deleteUser(id);
   }
 }

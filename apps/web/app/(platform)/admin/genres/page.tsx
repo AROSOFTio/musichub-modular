@@ -56,14 +56,23 @@ export default function GenresPage() {
                 <p className="text-xs text-slate-400">{genre._count.songs} songs · /{genre.slug}</p>
                 {genre.description && <p className="mt-0.5 truncate text-xs text-slate-500">{genre.description}</p>}
               </div>
-              <ConfirmDeleteDialog
-                title="Delete genre"
-                description={`Delete "${genre.name}"? Songs must be removed first.`}
-                onConfirm={() => handleDelete(genre.id)}
-                trigger={(open) => (
-                  <button onClick={open} className="rounded-lg p-1.5 text-slate-300 hover:bg-red-50 hover:text-red-600"><Trash2 className="h-4 w-4" /></button>
-                )}
-              />
+              <div className="flex shrink-0 flex-col gap-1 sm:flex-row">
+                <Link
+                  href={`/admin/genres/${genre.id}/edit`}
+                  className="rounded-lg p-1.5 text-slate-300 hover:bg-violet-50 hover:text-violet-600"
+                  title="Edit"
+                >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                </Link>
+                <ConfirmDeleteDialog
+                  title="Delete genre"
+                  description={`Delete "${genre.name}"? Songs must be removed first.`}
+                  onConfirm={() => handleDelete(genre.id)}
+                  trigger={(open) => (
+                    <button onClick={open} className="rounded-lg p-1.5 text-slate-300 hover:bg-red-50 hover:text-red-600"><Trash2 className="h-4 w-4" /></button>
+                  )}
+                />
+              </div>
             </div>
           ))}
         </div>
