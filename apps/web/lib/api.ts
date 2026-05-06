@@ -76,6 +76,13 @@ export type AdminMusicType = {
   color: string | null;
   typeCategory: string;
   isActive: boolean;
+  updatedAt: string;
+  _count: { songs: number };
+};
+
+export type AdminLanguage = {
+  id: string;
+  name: string;
   createdAt: string;
   updatedAt: string;
   _count: { songs: number };
@@ -151,6 +158,7 @@ export type AdminSong = {
   genre: { id: string; name: string; slug: string };
   album: { id: string; title: string } | null;
   musicType: { id: string; name: string } | null;
+  language: { id: string; name: string } | null;
   coverImage: string | null;
   audioFile: string;
   duration: number | null;
@@ -445,7 +453,7 @@ export function getAdminArtist(accessToken: string | undefined, id: string) {
 
 export function createAdminArtist(
   accessToken: string | undefined,
-  payload: Record<string, unknown>,
+  payload: FormData | Record<string, unknown>,
 ) {
   return apiRequest<AdminArtist>("/admin/artists", {
     method: "POST",
@@ -597,6 +605,22 @@ export function deleteAdminMusicType(accessToken: string | undefined, id: string
   return apiRequest<{ success: boolean }>(`/admin/music-types/${id}`, {
     method: "DELETE",
     headers: authHeader(accessToken),
+  });
+}
+
+// ─── Admin Languages ───────────────────────────────────────────────────────
+export function listAdminLanguages(accessToken: string | undefined) {
+  return apiRequest<AdminLanguage[]>("/admin/languages", {
+    cache: "no-store",
+    headers: authHeader(accessToken),
+  });
+}
+
+export function createAdminLanguage(accessToken: string | undefined, name: string) {
+  return apiRequest<AdminLanguage>("/admin/languages", {
+    method: "POST",
+    headers: authHeader(accessToken),
+    body: { name },
   });
 }
 

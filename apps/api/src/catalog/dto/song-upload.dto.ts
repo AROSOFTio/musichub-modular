@@ -63,4 +63,31 @@ export class SongUploadDto {
   @IsOptional()
   @IsBooleanString()
   allowRemix?: string;
+
+  @IsOptional()
+  @IsString()
+  albumId?: string;
+
+  @IsOptional()
+  @IsString()
+  musicTypeId?: string;
+
+  @IsOptional()
+  @IsString()
+  languageId?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  languageName?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  seoTitle?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  seoDescription?: string;
 }

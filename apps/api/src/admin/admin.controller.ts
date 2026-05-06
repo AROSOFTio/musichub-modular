@@ -7,9 +7,13 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors,
 } from "@nestjs/common";
+import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { BannerStatus, Role, SongStatus, VerificationStatus } from "@prisma/client";
+import { LocalStorageService } from "../catalog/local-storage.service";
 
 import { Roles } from "../auth/decorators/roles.decorator";
 import { AccessTokenGuard } from "../auth/guards/access-token.guard";
@@ -28,7 +32,10 @@ import { UpdateTrendingSettingsDto } from "./dto/update-trending-settings.dto";
 @UseGuards(AccessTokenGuard, RolesGuard)
 @Roles(Role.ADMIN)
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly storage: LocalStorageService,
+  ) {}
 
   // ─── Overview ────────────────────────────────────────────────────────────
   @Get("overview")
@@ -80,12 +87,43 @@ export class AdminController {
   }
 
   @Post("artists")
-  createArtist(@Body() dto: UpsertArtistDto) {
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: "avatar", maxCount: 1 },
+    { name: "coverImage", maxCount: 1 },
+  ]))
+  async createArtist(
+    @Body() dto: UpsertArtistDto,
+    @UploadedFiles() files: { avatar?: any[], coverImage?: any[] }
+  ) {
+    if (files?.avatar?.[0]) {
+      const stored = await this.storage.saveCover(files.avatar[0]);
+      if (stored) dto.avatar = stored.publicUrl;
+    }
+    if (files?.coverImage?.[0]) {
+      const stored = await this.storage.saveCover(files.coverImage[0]);
+      if (stored) dto.coverImage = stored.publicUrl;
+    }
     return this.adminService.createArtist(dto);
   }
 
   @Patch("artists/:id")
-  updateArtist(@Param("id") id: string, @Body() dto: UpsertArtistDto) {
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: "avatar", maxCount: 1 },
+    { name: "coverImage", maxCount: 1 },
+  ]))
+  async updateArtist(
+    @Param("id") id: string, 
+    @Body() dto: UpsertArtistDto,
+    @UploadedFiles() files: { avatar?: any[], coverImage?: any[] }
+  ) {
+    if (files?.avatar?.[0]) {
+      const stored = await this.storage.saveCover(files.avatar[0]);
+      if (stored) dto.avatar = stored.publicUrl;
+    }
+    if (files?.coverImage?.[0]) {
+      const stored = await this.storage.saveCover(files.coverImage[0]);
+      if (stored) dto.coverImage = stored.publicUrl;
+    }
     return this.adminService.updateArtist(id, dto);
   }
 
@@ -180,7 +218,33 @@ export class AdminController {
     return this.adminService.deleteMusicType(id);
   }
 
-  // ─── Trending ─────────────────────────────────────────────────────────────
+  // ─── Languages ────────────────────────────────────────────────────────────
+  @Get("languages")
+  listLanguages() {
+    return this.adminService.listLanguages();
+  }
+
+  @Get("languages/:id")
+  getLanguage(@Param("id") id: string) {
+    return this.adminService.getLanguage(id);
+  }
+
+  @Post("languages")
+  createLanguage(@Body("name") name: string) {
+    return this.adminService.createLanguage(name);
+  }
+
+  @Patch("languages/:id")
+  updateLanguage(@Param("id") id: string, @Body("name") name: string) {
+    return this.adminService.updateLanguage(id, name);
+  }
+
+  @Delete("languages/:id")
+  deleteLanguage(@Param("id") id: string) {
+    return this.adminService.deleteLanguage(id);
+  }
+
+  // ─── Discovery / Trending ─────────────────────────────────────────────────────────────
   @Get("trending")
   getTrending() {
     return this.adminService.getTrending();

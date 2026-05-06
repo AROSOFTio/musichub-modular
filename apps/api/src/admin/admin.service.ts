@@ -21,6 +21,7 @@ const SONG_INCLUDE = {
   genre: { select: { id: true, name: true, slug: true } },
   album: { select: { id: true, title: true } },
   musicType: { select: { id: true, name: true } },
+  language: { select: { id: true, name: true } },
 } as const;
 
 @Injectable()
@@ -119,6 +120,7 @@ export class AdminService {
     if (dto.genreId !== undefined) data["genreId"] = dto.genreId;
     if (dto.albumId !== undefined) data["albumId"] = dto.albumId || null;
     if (dto.musicTypeId !== undefined) data["musicTypeId"] = dto.musicTypeId || null;
+    if (dto.languageId !== undefined) data["languageId"] = dto.languageId || null;
     if (dto.description !== undefined) data["description"] = dto.description || null;
     if (dto.status !== undefined) {
       data["status"] = dto.status;
@@ -626,6 +628,34 @@ export class AdminService {
     const existing = await this.prisma.heroBanner.findUnique({ where: { id } });
     if (!existing) throw new NotFoundException("Banner not found.");
     await this.prisma.heroBanner.delete({ where: { id } });
+    return { success: true };
+  }
+
+  // ─── Languages ────────────────────────────────────────────────────────────
+  
+  listLanguages() {
+    return this.prisma.language.findMany({
+      orderBy: { name: "asc" },
+      include: { _count: { select: { songs: true } } },
+    });
+  }
+
+  async getLanguage(id: string) {
+    const language = await this.prisma.language.findUnique({ where: { id } });
+    if (!language) throw new NotFoundException("Language not found.");
+    return language;
+  }
+
+  async createLanguage(name: string) {
+    return this.prisma.language.create({ data: { name } });
+  }
+
+  async updateLanguage(id: string, name: string) {
+    return this.prisma.language.update({ where: { id }, data: { name } });
+  }
+
+  async deleteLanguage(id: string) {
+    await this.prisma.language.delete({ where: { id } });
     return { success: true };
   }
 

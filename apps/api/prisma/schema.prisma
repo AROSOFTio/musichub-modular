@@ -147,6 +147,17 @@ model Album {
   @@map("albums")
 }
 
+model Language {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  songs Song[]
+
+  @@map("languages")
+}
+
 model Song {
   id                   String     @id @default(uuid())
   title                String
@@ -156,6 +167,7 @@ model Song {
   albumId              String?
   musicTypeId          String?
   uploaderId           String
+  languageId           String?
   coverImage           String?
   audioFile            String
   duration             Int?
@@ -180,6 +192,7 @@ model Song {
   uploader  User       @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
   album     Album?     @relation(fields: [albumId], references: [id], onDelete: SetNull)
   musicType MusicType? @relation(fields: [musicTypeId], references: [id], onDelete: SetNull)
+  language  Language?  @relation(fields: [languageId], references: [id], onDelete: SetNull)
 
   likes        Like[]
   favorites    Favorite[]
@@ -193,6 +206,7 @@ model Song {
   @@index([uploaderId])
   @@index([albumId])
   @@index([musicTypeId])
+  @@index([languageId])
   @@index([isPublished, releaseDate])
   @@index([status])
   @@map("songs")

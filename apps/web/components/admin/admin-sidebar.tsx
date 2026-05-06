@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -17,6 +18,9 @@ import {
   TrendingUp,
   X,
   Users,
+  ChevronDown,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/ui/logo";
@@ -135,9 +139,13 @@ const NAV: { section: string; items: NavItem[] }[] = [
 function NavGroup({
   item,
   pathname,
+  isOpen,
+  onToggle,
 }: {
   item: NavItem;
   pathname: string;
+  isOpen: boolean;
+  onToggle: () => void;
 }) {
   const isActive =
     pathname === item.href || pathname.startsWith(item.href + "/");
@@ -150,7 +158,7 @@ function NavGroup({
           "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
           isActive
             ? "bg-violet-700 text-white"
-            : "text-slate-600 hover:bg-violet-50 hover:text-violet-700"
+            : "text-slate-600 dark:text-slate-300 hover:bg-violet-50 dark:hover:bg-violet-900/50 hover:text-violet-700 dark:hover:text-violet-300"
         )}
       >
         <item.icon className="h-4 w-4 shrink-0" />
@@ -161,35 +169,81 @@ function NavGroup({
 
   return (
     <div>
-      <div
+      <button
+        onClick={onToggle}
         className={cn(
-          "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium",
-          isActive ? "text-violet-700" : "text-slate-500"
+          "flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+          isActive || isOpen
+            ? "text-violet-700 dark:text-violet-400 bg-violet-50 dark:bg-violet-900/30"
+            : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
         )}
       >
-        <item.icon className="h-4 w-4 shrink-0" />
-        {item.label}
-      </div>
-      <div className="ml-4 mt-0.5 space-y-0.5 border-l border-slate-200 pl-3">
-        {item.children.map((child) => {
-          const childActive = pathname === child.href;
-          return (
-            <Link
-              key={child.href}
-              href={child.href}
-              className={cn(
-                "block rounded-lg px-3 py-2 text-sm transition-colors",
-                childActive
-                  ? "bg-violet-50 font-semibold text-violet-700"
-                  : "text-slate-500 hover:bg-slate-100 hover:text-slate-800"
-              )}
-            >
-              {child.label}
-            </Link>
-          );
-        })}
-      </div>
+        <div className="flex items-center gap-3">
+          <item.icon className="h-4 w-4 shrink-0" />
+          {item.label}
+        </div>
+        <ChevronDown
+          className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")}
+        />
+      </button>
+      {isOpen && (
+        <div className="ml-4 mt-1 space-y-0.5 border-l border-slate-200 dark:border-slate-700 pl-3">
+          {item.children.map((child) => {
+            const childActive = pathname === child.href;
+            return (
+              <Link
+                key={child.href}
+                href={child.href}
+                className={cn(
+                  "block rounded-lg px-3 py-2 text-sm transition-colors",
+                  childActive
+                    ? "bg-violet-100 dark:bg-violet-900/50 font-semibold text-violet-700 dark:text-violet-300"
+                    : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:hover:text-slate-200"
+                )}
+              >
+                {child.label}
+              </Link>
+            );
+          })}
+        </div>
+      )}
     </div>
+  );
+}
+
+function ThemeToggle() {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const isDarkMode = document.documentElement.classList.contains("dark") || localStorage.theme === "dark";
+    setIsDark(isDarkMode);
+    if (isDarkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    setIsDark(!isDark);
+    if (!isDark) {
+      document.documentElement.classList.add("dark");
+      localStorage.theme = "dark";
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.theme = "light";
+    }
+  };
+
+  return (
+    <button
+      onClick={toggleTheme}
+      className="flex items-center gap-2 rounded-xl p-2 text-xs text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+      title="Toggle theme"
+    >
+      {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+      <span className="lg:hidden">{isDark ? "Light mode" : "Dark mode"}</span>
+    </button>
   );
 }
 
@@ -201,43 +255,71 @@ export function AdminSidebar({
   onClose: () => void;
 }) {
   const pathname = usePathname();
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
+
+  // Automatically open the group containing the active link
+  useEffect(() => {
+    for (const group of NAV) {
+      for (const item of group.items) {
+        if (item.children && (pathname === item.href || pathname.startsWith(item.href + "/"))) {
+          setOpenGroup(item.label);
+        }
+      }
+    }
+  }, [pathname]);
+
+  const handleToggle = (label: string) => {
+    setOpenGroup((prev) => (prev === label ? null : label));
+  };
 
   const content = (
     <div className="flex h-full flex-col">
-      <div className="flex h-16 items-center justify-between border-b border-slate-200 px-5">
+      <div className="flex h-16 items-center justify-between border-b border-slate-200 dark:border-slate-800 px-5">
         <Logo />
-        <button
-          onClick={onClose}
-          className="lg:hidden rounded-lg p-1.5 text-slate-400 hover:bg-slate-100"
-        >
-          <X className="h-5 w-5" />
-        </button>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <button
+            onClick={onClose}
+            className="lg:hidden rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto px-3 py-4">
         {NAV.map((group) => (
-          <div key={group.section} className="mb-4">
-            <p className="mb-1 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+          <div key={group.section} className="mb-6">
+            <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
               {group.section}
             </p>
-            <div className="space-y-0.5">
+            <div className="space-y-1">
               {group.items.map((item) => (
-                <NavGroup key={item.href} item={item} pathname={pathname} />
+                <NavGroup
+                  key={item.href}
+                  item={item}
+                  pathname={pathname}
+                  isOpen={openGroup === item.label}
+                  onToggle={() => handleToggle(item.label)}
+                />
               ))}
             </div>
           </div>
         ))}
       </div>
 
-      <div className="border-t border-slate-200 px-4 py-3">
+      <div className="border-t border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between">
         <Link
           href="/"
           target="_blank"
-          className="flex items-center gap-2 text-xs text-slate-400 hover:text-violet-600"
+          className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500 hover:text-violet-600 dark:hover:text-violet-400"
         >
           <BarChart3 className="h-3.5 w-3.5" />
           View public site
         </Link>
+        <div className="hidden lg:block">
+          <ThemeToggle />
+        </div>
       </div>
     </div>
   );
@@ -245,14 +327,14 @@ export function AdminSidebar({
   return (
     <>
       {/* Desktop */}
-      <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-slate-200 lg:bg-white">
+      <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-slate-200 dark:lg:border-slate-800 bg-slate-50 dark:bg-slate-950">
         {content}
       </aside>
 
       {/* Mobile drawer */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-slate-200 bg-white transition-transform duration-200 lg:hidden",
+          "fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 transition-transform duration-200 lg:hidden",
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >

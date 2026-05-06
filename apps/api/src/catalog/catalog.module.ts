@@ -10,5 +10,6 @@ import { LocalStorageService } from "./local-storage.service";
   imports: [AuthModule, PrismaModule],
   controllers: [CatalogController],
   providers: [CatalogService, LocalStorageService],
+  exports: [LocalStorageService],
 })
 export class CatalogModule {}

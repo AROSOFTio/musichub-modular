@@ -329,6 +329,7 @@ export class CatalogService {
     const coverFile = await this.storage.saveCover(files.cover?.[0]);
     const artist = await this.resolveArtist(dto, user);
     const genre = await this.resolveGenre(dto);
+    const language = await this.resolveLanguage(dto);
     const slug = await this.uniqueSongSlug(dto.slug || dto.title);
 
     const song = await this.prisma.song.create({
@@ -337,11 +338,16 @@ export class CatalogService {
         slug,
         artistId: artist.id,
         genreId: genre.id,
+        albumId: dto.albumId || null,
+        musicTypeId: dto.musicTypeId || null,
+        languageId: language?.id || null,
         uploaderId: user.userId,
         coverImage: coverFile?.publicUrl ?? null,
         audioFile: audioFile.relativePath,
         duration: this.optionalNumber(dto.duration),
         description: dto.description?.trim() || null,
+        seoTitle: dto.seoTitle?.trim() || null,
+        seoDescription: dto.seoDescription?.trim() || null,
         releaseDate: dto.releaseDate ? new Date(dto.releaseDate) : new Date(),
         isPublished: this.booleanFromString(dto.isPublished, true),
         allowDownload: this.booleanFromString(dto.allowDownload, true),
@@ -388,6 +394,7 @@ export class CatalogService {
     const audioFile = files.audio?.[0] ? await this.storage.saveAudio(files.audio[0]) : null;
     const artist = dto.artistId || dto.artistName ? await this.resolveArtist(dto, user) : null;
     const genre = dto.genreId || dto.genreName ? await this.resolveGenre(dto) : null;
+    const language = dto.languageId || dto.languageName ? await this.resolveLanguage(dto) : null;
     const nextSlug =
       dto.slug || (dto.title && dto.title.trim() !== existing.title)
         ? await this.uniqueSongSlug(dto.slug || dto.title || existing.title, existing.id)
@@ -400,12 +407,17 @@ export class CatalogService {
         slug: nextSlug,
         artistId: artist?.id ?? existing.artistId,
         genreId: genre?.id ?? existing.genreId,
+        albumId: dto.albumId === undefined ? existing.albumId : dto.albumId || null,
+        musicTypeId: dto.musicTypeId === undefined ? existing.musicTypeId : dto.musicTypeId || null,
+        languageId: language?.id ?? existing.languageId,
         coverImage: coverFile?.publicUrl ?? existing.coverImage,
         audioFile: audioFile?.relativePath ?? existing.audioFile,
         duration:
           dto.duration === undefined ? existing.duration : this.optionalNumber(dto.duration),
         description:
           dto.description === undefined ? existing.description : dto.description?.trim() || null,
+        seoTitle: dto.seoTitle === undefined ? existing.seoTitle : dto.seoTitle?.trim() || null,
+        seoDescription: dto.seoDescription === undefined ? existing.seoDescription : dto.seoDescription?.trim() || null,
         releaseDate:
           dto.releaseDate === undefined
             ? existing.releaseDate
@@ -526,6 +538,25 @@ export class CatalogService {
       where: { slug },
       update: { name },
       create: { name, slug },
+    });
+  }
+
+  private async resolveLanguage(dto: Partial<SongUploadDto & { languageId?: string, languageName?: string }>) {
+    if (dto.languageId) {
+      const language = await this.prisma.language.findUnique({ where: { id: dto.languageId } });
+      if (!language) {
+        throw new BadRequestException("Language was not found.");
+      }
+      return language;
+    }
+
+    if (!dto.languageName) return null;
+
+    const name = dto.languageName.trim();
+    return this.prisma.language.upsert({
+      where: { name },
+      update: { name },
+      create: { name },
     });
   }
 

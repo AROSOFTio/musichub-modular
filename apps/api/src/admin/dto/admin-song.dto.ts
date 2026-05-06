@@ -23,6 +23,10 @@ export class AdminSongDto {
 
   @IsOptional()
   @IsString()
+  languageId?: string;
+
+  @IsOptional()
+  @IsString()
   description?: string;
 
   @IsOptional()
