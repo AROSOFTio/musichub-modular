@@ -54,9 +54,10 @@ export function Sidebar() {
       </div>
 
       <div className="mt-auto rounded-3xl border border-borderSoft bg-surface p-5">
-        <p className="text-sm font-semibold text-slate-950">Admin workspace</p>
+        <p className="text-sm font-semibold text-slate-950">Platform rule</p>
         <p className="mt-2 text-sm leading-6 text-slate-500">
-          Upload songs, manage publishing, and choose the tracks featured on Musichub.
+          Normal song downloads stay free. Remix monetization comes later, after the
+          core catalog and upload pipeline are in place.
         </p>
       </div>
     </aside>

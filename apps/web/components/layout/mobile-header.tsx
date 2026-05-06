@@ -14,8 +14,11 @@ export function MobileHeader() {
       <div className="flex items-center justify-between gap-4">
         <Logo />
         <div className="flex items-center gap-2">
+          <Link className="button-secondary px-3 py-2" href="/search">
+            Search
+          </Link>
           <Link className="button-primary px-3 py-2" href={isAuthenticated ? "/admin/dashboard" : "/login"}>
-            {isAuthenticated && user ? "Dashboard" : "Admin login"}
+            {isAuthenticated && user ? "Dashboard" : "Admin"}
           </Link>
         </div>
       </div>

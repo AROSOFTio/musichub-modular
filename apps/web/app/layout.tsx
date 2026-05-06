@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     default: "Musichub",
     template: "%s | Musichub",
   },
-  description: "Musichub admin dashboard for uploading and managing music.",
+  description: "Musichub is a public music streaming and free-download platform with an admin dashboard for uploads.",
 };
 
 export default function RootLayout({
