@@ -12,6 +12,7 @@ datasource db {
 enum Role {
   USER
   ARTIST
+  EDITOR
   ADMIN
 }
 

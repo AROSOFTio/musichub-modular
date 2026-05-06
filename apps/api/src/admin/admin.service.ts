@@ -15,6 +15,9 @@ import { UpsertMusicTypeDto } from "./dto/upsert-music-type.dto";
 import { UpsertEditorPickDto } from "./dto/upsert-editor-pick.dto";
 import { UpsertHeroBannerDto } from "./dto/upsert-hero-banner.dto";
 import { UpdateTrendingSettingsDto } from "./dto/update-trending-settings.dto";
+import { CreateUserDto } from "./dto/create-user.dto";
+import bcrypt from "bcrypt";
+
 
 const SONG_INCLUDE = {
   artist: { select: { id: true, name: true, slug: true } },
@@ -676,6 +679,35 @@ export class AdminService {
         createdAt: true,
         _count: { select: { songs: true, playlists: true } }
       }
+    });
+  }
+
+  async createUser(dto: CreateUserDto) {
+    const existing = await this.prisma.user.findUnique({
+      where: { email: dto.email.trim().toLowerCase() },
+    });
+    if (existing) throw new BadRequestException("User with this email already exists.");
+
+    const password = dto.password || "MusicHub2026!"; // Default password if none provided
+    const passwordHash = await bcrypt.hash(password, 12);
+
+    return this.prisma.user.create({
+      data: {
+        email: dto.email.trim().toLowerCase(),
+        passwordHash,
+        displayName: dto.displayName.trim(),
+        username: dto.username?.trim().toLowerCase() || null,
+        role: dto.role,
+      },
+      select: {
+        id: true,
+        email: true,
+        displayName: true,
+        username: true,
+        role: true,
+        avatarUrl: true,
+        createdAt: true,
+      },
     });
   }
 

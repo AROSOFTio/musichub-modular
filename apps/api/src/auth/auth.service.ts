@@ -55,8 +55,8 @@ export class AuthService {
       throw new UnauthorizedException("Invalid email or password.");
     }
 
-    if (user.role !== Role.ADMIN) {
-      throw new UnauthorizedException("Admin access only.");
+    if (![Role.ADMIN, Role.EDITOR, Role.ARTIST].includes(user.role)) {
+      throw new UnauthorizedException("Insufficient permissions.");
     }
 
     return this.issueSession(user);
@@ -94,8 +94,8 @@ export class AuthService {
       throw new UnauthorizedException("Refresh token does not match.");
     }
 
-    if (user.role !== Role.ADMIN) {
-      throw new UnauthorizedException("Admin access only.");
+    if (![Role.ADMIN, Role.EDITOR, Role.ARTIST].includes(user.role)) {
+      throw new UnauthorizedException("Insufficient permissions.");
     }
 
     return this.issueSession(user);

@@ -1,4 +1,5 @@
-export type UserRole = "USER" | "ARTIST" | "ADMIN";
+export type UserRole = "USER" | "ARTIST" | "EDITOR" | "ADMIN";
+
 
 export type SessionUser = {
   id: string;
@@ -729,6 +730,14 @@ export function listAdminUsers(accessToken: string | undefined) {
   return apiRequest<AdminUser[]>("/admin/users", {
     cache: "no-store",
     headers: authHeader(accessToken),
+  });
+}
+
+export function createAdminUser(accessToken: string | undefined, payload: Record<string, unknown>) {
+  return apiRequest<AdminUser>("/admin/users", {
+    method: "POST",
+    headers: authHeader(accessToken),
+    body: payload,
   });
 }
 

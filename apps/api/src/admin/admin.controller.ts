@@ -27,6 +27,8 @@ import { UpsertMusicTypeDto } from "./dto/upsert-music-type.dto";
 import { UpsertEditorPickDto } from "./dto/upsert-editor-pick.dto";
 import { UpsertHeroBannerDto } from "./dto/upsert-hero-banner.dto";
 import { UpdateTrendingSettingsDto } from "./dto/update-trending-settings.dto";
+import { CreateUserDto } from "./dto/create-user.dto";
+
 
 @Controller("admin")
 @UseGuards(AccessTokenGuard, RolesGuard)
@@ -319,6 +321,11 @@ export class AdminController {
   @Get("users")
   listUsers() {
     return this.adminService.listUsers();
+  }
+
+  @Post("users")
+  createUser(@Body() dto: CreateUserDto) {
+    return this.adminService.createUser(dto);
   }
 
   @Patch("users/:id/role")
