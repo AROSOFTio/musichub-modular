@@ -1,23 +1,22 @@
-import Link from "next/link";
-import { Download, Music2, ShieldCheck } from "lucide-react";
+import { Music2, ShieldCheck, UploadCloud } from "lucide-react";
 
 import { Logo } from "@/components/ui/logo";
 
 const authHighlights = [
   {
     icon: ShieldCheck,
-    title: "Secure JWT sessions",
-    copy: "Access tokens, refresh rotation, and role-aware backend guards are ready.",
+    title: "Admin only",
+    copy: "Public registration is disabled while the catalog is being prepared.",
   },
   {
-    icon: Download,
-    title: "Free normal downloads",
-    copy: "Musichub keeps standard song downloads free while remix monetization stays deferred.",
+    icon: UploadCloud,
+    title: "Upload music",
+    copy: "Add tracks, cover images, genres, release dates, and publishing status.",
   },
   {
     icon: Music2,
-    title: "Deploy-ready foundation",
-    copy: "The web app is structured for Docker Compose, reverse proxying, and future mobile clients.",
+    title: "Manage catalog",
+    copy: "Edit songs, publish or unpublish tracks, and choose editor picks.",
   },
 ];
 
@@ -34,11 +33,11 @@ export default function AuthLayout({
           <div className="mt-10 space-y-4">
             <span className="pill">Musichub Access</span>
             <h1 className="max-w-lg text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
-              Create and manage the production account layer for Musichub.
+              Manage Musichub from one admin dashboard.
             </h1>
             <p className="max-w-xl text-base leading-7 text-slate-600">
-              This foundation connects the clean Musichub UI to real authentication
-              endpoints instead of placeholder flows.
+              Log in to upload songs, edit catalog details, and control what appears
+              on the live music site.
             </p>
           </div>
 
@@ -56,14 +55,6 @@ export default function AuthLayout({
               </div>
             ))}
           </div>
-
-          <p className="mt-10 text-sm text-slate-500">
-            Need the main application shell instead?
-            {" "}
-            <Link className="font-semibold text-violet-700" href="/">
-              Return to Musichub
-            </Link>
-          </p>
         </section>
 
         <section className="px-6 py-8 sm:px-8 lg:px-10 lg:py-12">{children}</section>

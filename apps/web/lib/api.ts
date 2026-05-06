@@ -124,16 +124,6 @@ export function loginRequest(payload: { email: string; password: string }) {
   return apiRequest<AuthResponse>("/auth/login", { method: "POST", body: payload });
 }
 
-export function registerRequest(payload: {
-  email: string;
-  password: string;
-  displayName: string;
-  username?: string;
-  role?: UserRole;
-}) {
-  return apiRequest<AuthResponse>("/auth/register", { method: "POST", body: payload });
-}
-
 export function refreshRequest(refreshToken?: string) {
   return apiRequest<AuthResponse>("/auth/refresh", {
     method: "POST",

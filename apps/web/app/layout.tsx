@@ -12,8 +12,7 @@ export const metadata: Metadata = {
     default: "Musichub",
     template: "%s | Musichub",
   },
-  description:
-    "Musichub is a production-ready music streaming and free-download platform foundation built with Next.js and NestJS.",
+  description: "Musichub admin dashboard for uploading and managing music.",
 };
 
 export default function RootLayout({

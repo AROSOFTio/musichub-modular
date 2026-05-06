@@ -116,7 +116,7 @@ export class CatalogController {
 
   @Get("songs/manage")
   @UseGuards(AccessTokenGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.ARTIST)
+  @Roles(Role.ADMIN)
   listManageableSongs(@CurrentUser() user: AuthenticatedUser) {
     return this.catalogService.listManageable(user);
   }
@@ -128,7 +128,7 @@ export class CatalogController {
 
   @Post("songs")
   @UseGuards(AccessTokenGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.ARTIST)
+  @Roles(Role.ADMIN)
   @UseInterceptors(songFileInterceptor)
   uploadSong(
     @CurrentUser() user: AuthenticatedUser,
@@ -140,7 +140,7 @@ export class CatalogController {
 
   @Patch("songs/:id")
   @UseGuards(AccessTokenGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.ARTIST)
+  @Roles(Role.ADMIN)
   @UseInterceptors(songFileInterceptor)
   updateSong(
     @CurrentUser() user: AuthenticatedUser,
@@ -153,7 +153,7 @@ export class CatalogController {
 
   @Delete("songs/:id")
   @UseGuards(AccessTokenGuard, RolesGuard)
-  @Roles(Role.ADMIN, Role.ARTIST)
+  @Roles(Role.ADMIN)
   deleteSong(@CurrentUser() user: AuthenticatedUser, @Param("id") id: string) {
     return this.catalogService.deleteSong(user, id);
   }

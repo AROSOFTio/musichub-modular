@@ -20,7 +20,7 @@ export function SongManager() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  const canManage = user?.role === "ADMIN" || user?.role === "ARTIST";
+  const canManage = user?.role === "ADMIN";
 
   async function refreshSongs(token: string | undefined) {
     const payload = await listManageableSongs(token);
@@ -134,7 +134,7 @@ export function SongManager() {
   if (!canManage) {
     return (
       <div className="rounded-3xl border border-borderSoft bg-white p-6 text-sm text-slate-500">
-        Sign in as an admin or artist to upload and manage songs.
+        Sign in as an admin to upload and manage songs.
       </div>
     );
   }
@@ -247,7 +247,7 @@ export function SongManager() {
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold text-slate-950">{song.title}</p>
                       <p className="text-xs text-slate-500">
-                        {song.artist.name} · {song.genre.name} · {song.isPublished ? "Published" : "Draft"}
+                        {song.artist.name} | {song.genre.name} | {song.isPublished ? "Published" : "Draft"}
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2">

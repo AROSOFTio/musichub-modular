@@ -4,7 +4,6 @@ import Link from "next/link";
 
 import { useAuth } from "@/lib/auth-context";
 
-import { SearchBox } from "../ui/search-box";
 import { NotificationsDropdown } from "./notifications";
 
 export function TopNav() {
@@ -14,7 +13,9 @@ export function TopNav() {
     <header className="sticky top-0 z-30 hidden border-b border-borderSoft bg-[rgba(252,251,255,0.95)] backdrop-blur lg:block">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-8 py-5">
         <div className="min-w-0 flex-1">
-          <SearchBox />
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
+            Musichub admin
+          </p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -34,14 +35,9 @@ export function TopNav() {
               </button>
             </>
           ) : (
-            <>
-              <Link className="button-secondary" href="/login">
-                Login
-              </Link>
-              <Link className="button-primary" href="/register">
-                Register
-              </Link>
-            </>
+            <Link className="button-primary" href="/login">
+              Admin login
+            </Link>
           )}
         </div>
       </div>

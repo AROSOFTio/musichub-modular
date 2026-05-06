@@ -13,7 +13,6 @@ import {
   loginRequest,
   logoutRequest,
   refreshRequest,
-  registerRequest,
 } from "@/lib/api";
 
 type AuthContextValue = {
@@ -22,14 +21,7 @@ type AuthContextValue = {
   refreshToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (payload: { email: string; password: string }) => Promise<void>;
-  register: (payload: {
-    email: string;
-    password: string;
-    displayName: string;
-    username?: string;
-    role?: "USER" | "ARTIST";
-  }) => Promise<void>;
+  login: (payload: { email: string; password: string }) => Promise<AuthResponse>;
   logout: () => Promise<void>;
 };
 
@@ -117,18 +109,7 @@ export function AuthProvider({
     const nextSession = await loginRequest(payload);
     setSession(nextSession);
     persistSession(nextSession);
-  }
-
-  async function register(payload: {
-    email: string;
-    password: string;
-    displayName: string;
-    username?: string;
-    role?: "USER" | "ARTIST";
-  }) {
-    const nextSession = await registerRequest(payload);
-    setSession(nextSession);
-    persistSession(nextSession);
+    return nextSession;
   }
 
   async function logout() {
@@ -149,7 +130,6 @@ export function AuthProvider({
     isAuthenticated: Boolean(session?.accessToken),
     isLoading,
     login,
-    register,
     logout,
   };
 

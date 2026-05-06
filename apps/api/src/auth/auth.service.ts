@@ -1,8 +1,4 @@
-import {
-  ConflictException,
-  Injectable,
-  UnauthorizedException,
-} from "@nestjs/common";
+import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { Role, User } from "@prisma/client";
@@ -11,7 +7,6 @@ import bcrypt from "bcrypt";
 import { PrismaService } from "../prisma/prisma.service";
 import { LoginDto } from "./dto/login.dto";
 import { RefreshTokenDto } from "./dto/refresh-token.dto";
-import { RegisterDto } from "./dto/register.dto";
 
 type PublicUser = {
   id: string;
@@ -45,43 +40,6 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  async register(dto: RegisterDto): Promise<AuthPayload> {
-    const email = dto.email.trim().toLowerCase();
-    const username = dto.username?.trim().toLowerCase() || null;
-
-    if (dto.role === Role.ADMIN) {
-      throw new UnauthorizedException("Admin accounts cannot self-register.");
-    }
-
-    const existingUser = await this.prisma.user.findFirst({
-      where: {
-        OR: [
-          { email },
-          ...(username ? [{ username }] : []),
-        ],
-      },
-    });
-
-    if (existingUser) {
-      throw new ConflictException(
-        "An account with those credentials already exists.",
-      );
-    }
-
-    const passwordHash = await bcrypt.hash(dto.password, 12);
-    const user = await this.prisma.user.create({
-      data: {
-        email,
-        passwordHash,
-        role: dto.role ?? Role.USER,
-        displayName: dto.displayName.trim(),
-        username,
-      },
-    });
-
-    return this.issueSession(user);
-  }
-
   async login(dto: LoginDto): Promise<AuthPayload> {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email.trim().toLowerCase() },
@@ -95,6 +53,10 @@ export class AuthService {
 
     if (!isPasswordValid) {
       throw new UnauthorizedException("Invalid email or password.");
+    }
+
+    if (user.role !== Role.ADMIN) {
+      throw new UnauthorizedException("Admin access only.");
     }
 
     return this.issueSession(user);
@@ -130,6 +92,10 @@ export class AuthService {
 
     if (!isValidRefresh) {
       throw new UnauthorizedException("Refresh token does not match.");
+    }
+
+    if (user.role !== Role.ADMIN) {
+      throw new UnauthorizedException("Admin access only.");
     }
 
     return this.issueSession(user);

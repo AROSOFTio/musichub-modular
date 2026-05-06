@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
   HttpCode,
   Post,
@@ -16,7 +17,6 @@ import { AuthenticatedUser } from "./decorators/current-user.decorator";
 import { LoginDto } from "./dto/login.dto";
 import { LogoutDto } from "./dto/logout.dto";
 import { RefreshTokenDto } from "./dto/refresh-token.dto";
-import { RegisterDto } from "./dto/register.dto";
 import { AuthService } from "./auth.service";
 import { REFRESH_COOKIE_NAME } from "./auth.constants";
 import { AccessTokenGuard } from "./guards/access-token.guard";
@@ -29,13 +29,8 @@ export class AuthController {
   ) {}
 
   @Post("register")
-  async register(
-    @Body() dto: RegisterDto,
-    @Res({ passthrough: true }) response: Response,
-  ) {
-    const session = await this.authService.register(dto);
-    this.setRefreshCookie(response, session.refreshToken);
-    return session;
+  register() {
+    throw new ForbiddenException("Public registration is disabled.");
   }
 
   @Post("login")

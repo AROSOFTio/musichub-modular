@@ -1,18 +1,23 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 import { useAuth } from "@/lib/auth-context";
 
 export function LoginForm() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, logout, isAuthenticated, isLoading, user } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated && user?.role === "ADMIN") {
+      router.replace("/admin/dashboard");
+    }
+  }, [isAuthenticated, isLoading, router, user]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -20,8 +25,13 @@ export function LoginForm() {
     setIsSubmitting(true);
 
     try {
-      await login({ email, password });
-      router.push("/");
+      const session = await login({ email, password });
+      if (session.user.role !== "ADMIN") {
+        await logout();
+        setError("Admin access only.");
+        return;
+      }
+      router.push("/admin/dashboard");
       router.refresh();
     } catch (submissionError) {
       const message =
@@ -74,16 +84,8 @@ export function LoginForm() {
       ) : null}
 
       <button className="button-primary w-full" disabled={isSubmitting} type="submit">
-        {isSubmitting ? "Signing in..." : "Sign in"}
+        {isSubmitting ? "Signing in..." : "Sign in as admin"}
       </button>
-
-      <p className="text-sm text-slate-500">
-        No account yet?
-        {" "}
-        <Link className="font-semibold text-violet-700" href="/register">
-          Create one
-        </Link>
-      </p>
     </form>
   );
 }
