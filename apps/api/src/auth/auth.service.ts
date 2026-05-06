@@ -55,7 +55,7 @@ export class AuthService {
       throw new UnauthorizedException("Invalid email or password.");
     }
 
-    if (![Role.ADMIN, Role.EDITOR, Role.ARTIST].includes(user.role)) {
+    if (!([Role.ADMIN, Role.EDITOR, Role.ARTIST] as Role[]).includes(user.role)) {
       throw new UnauthorizedException("Insufficient permissions.");
     }
 
@@ -94,7 +94,7 @@ export class AuthService {
       throw new UnauthorizedException("Refresh token does not match.");
     }
 
-    if (![Role.ADMIN, Role.EDITOR, Role.ARTIST].includes(user.role)) {
+    if (!([Role.ADMIN, Role.EDITOR, Role.ARTIST] as Role[]).includes(user.role)) {
       throw new UnauthorizedException("Insufficient permissions.");
     }
 
