@@ -1,61 +1,91 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { Trash2, Upload } from "lucide-react";
+import { Info, Trash2, Upload } from "lucide-react";
 
 import {
+  AdminArtist,
+  AdminGenre,
   CatalogSong,
   deleteSong,
+  listAdminArtists,
+  listAdminGenres,
   listManageableSongs,
   updateSong,
   uploadSong,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 
-export function SongManager() {
+type SongManagerProps = {
+  catalogRefreshKey?: number;
+  onSongSaved?: () => void;
+};
+
+export function SongManager({ catalogRefreshKey = 0, onSongSaved }: SongManagerProps) {
   const { accessToken, user, isLoading } = useAuth();
   const [songs, setSongs] = useState<CatalogSong[]>([]);
+  const [artists, setArtists] = useState<AdminArtist[]>([]);
+  const [genres, setGenres] = useState<AdminGenre[]>([]);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const canManage = user?.role === "ADMIN";
+  const catalogReady = artists.length > 0 && genres.length > 0;
 
   async function refreshSongs(token: string | undefined) {
     const payload = await listManageableSongs(token);
     setSongs(payload);
   }
 
+  async function refreshCatalog(token: string | undefined) {
+    const [artistPayload, genrePayload] = await Promise.all([
+      listAdminArtists(token),
+      listAdminGenres(token),
+    ]);
+    setArtists(artistPayload);
+    setGenres(genrePayload);
+  }
+
   useEffect(() => {
     if (!accessToken || !canManage) {
       setSongs([]);
+      setArtists([]);
+      setGenres([]);
       return;
     }
 
     let cancelled = false;
     const token = accessToken;
 
-    async function loadSongs() {
+    async function loadData() {
       try {
-        const payload = await listManageableSongs(token ?? undefined);
+        const [songPayload, artistPayload, genrePayload] = await Promise.all([
+          listManageableSongs(token ?? undefined),
+          listAdminArtists(token ?? undefined),
+          listAdminGenres(token ?? undefined),
+        ]);
+
         if (!cancelled) {
-          setSongs(payload);
+          setSongs(songPayload);
+          setArtists(artistPayload);
+          setGenres(genrePayload);
           setError(null);
         }
       } catch (songError) {
         if (!cancelled) {
-          setError(songError instanceof Error ? songError.message : "Unable to load songs.");
+          setError(songError instanceof Error ? songError.message : "Unable to load admin catalog.");
         }
       }
     }
 
-    void loadSongs();
+    void loadData();
 
     return () => {
       cancelled = true;
     };
-  }, [accessToken, canManage]);
+  }, [accessToken, canManage, catalogRefreshKey]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -74,7 +104,9 @@ export function SongManager() {
       await uploadSong(accessToken ?? undefined, formData);
       form.reset();
       await refreshSongs(accessToken ?? undefined);
+      await refreshCatalog(accessToken ?? undefined);
       setMessage("Song uploaded and saved.");
+      onSongSaved?.();
     } catch (songError) {
       setError(songError instanceof Error ? songError.message : "Upload failed.");
     } finally {
@@ -89,9 +121,11 @@ export function SongManager() {
 
     const formData = new FormData();
     formData.set("isPublished", String(!song.isPublished));
+
     try {
       await updateSong(accessToken ?? undefined, song.id, formData);
       await refreshSongs(accessToken ?? undefined);
+      onSongSaved?.();
     } catch (songError) {
       setError(songError instanceof Error ? songError.message : "Unable to update song.");
     }
@@ -104,11 +138,13 @@ export function SongManager() {
     }
 
     const formData = new FormData(event.currentTarget);
+
     try {
       await updateSong(accessToken ?? undefined, song.id, formData);
       await refreshSongs(accessToken ?? undefined);
       setEditingId(null);
       setMessage("Song updated.");
+      onSongSaved?.();
     } catch (songError) {
       setError(songError instanceof Error ? songError.message : "Unable to update song.");
     }
@@ -122,6 +158,7 @@ export function SongManager() {
     try {
       await deleteSong(accessToken ?? undefined, song.id);
       await refreshSongs(accessToken ?? undefined);
+      onSongSaved?.();
     } catch (songError) {
       setError(songError instanceof Error ? songError.message : "Unable to delete song.");
     }
@@ -148,34 +185,72 @@ export function SongManager() {
   }
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[0.95fr,1.05fr]">
+    <div className="grid gap-6 xl:grid-cols-[0.92fr,1.08fr]">
       <form className="surface-card p-6 sm:p-7" onSubmit={handleSubmit}>
-        <p className="pill">Upload</p>
+        <p className="pill">Songs</p>
         <h2 className="mt-4 text-xl font-semibold tracking-tight text-slate-950">
-          Add a real song
+          Upload a track
         </h2>
+        <p className="mt-2 text-sm leading-6 text-slate-500">
+          Select an artist and genre first so songs stay cleanly organized in the public catalog.
+        </p>
+
+        {!catalogReady ? (
+          <div className="mt-5 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+            <Info className="mt-0.5 h-4 w-4 shrink-0" />
+            <p>Create at least one artist and one genre before uploading songs.</p>
+          </div>
+        ) : null}
+
         <div className="mt-5 grid gap-4">
           <input className="input-shell" maxLength={140} name="title" placeholder="Song title" required />
-          <input className="input-shell" maxLength={140} name="artistName" placeholder="Artist name" />
-          <input className="input-shell" maxLength={80} name="genreName" placeholder="Genre" />
+          <div className="grid gap-4 md:grid-cols-2">
+            <select className="input-shell" name="artistId" required disabled={!artists.length} defaultValue="">
+              <option value="" disabled>Select artist</option>
+              {artists.map((artist) => (
+                <option key={artist.id} value={artist.id}>
+                  {artist.name}
+                </option>
+              ))}
+            </select>
+            <select className="input-shell" name="genreId" required disabled={!genres.length} defaultValue="">
+              <option value="" disabled>Select genre</option>
+              {genres.map((genre) => (
+                <option key={genre.id} value={genre.id}>
+                  {genre.name}
+                </option>
+              ))}
+            </select>
+          </div>
           <textarea
-            className="min-h-28 rounded-2xl border border-borderSoft bg-white px-4 py-3 text-sm outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
+            className="min-h-28 rounded-2xl border border-borderSoft bg-white px-4 py-3 text-sm outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
             maxLength={2000}
             name="description"
-            placeholder="Description"
+            placeholder="Song description"
           />
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="text-sm font-medium text-slate-600">
               Audio file
-              <input accept="audio/mpeg,audio/mp3,audio/wav" className="mt-2 block w-full text-sm" name="audio" required type="file" />
+              <input
+                accept="audio/mpeg,audio/mp3,audio/wav"
+                className="mt-2 block w-full text-sm"
+                name="audio"
+                required
+                type="file"
+              />
             </label>
             <label className="text-sm font-medium text-slate-600">
               Cover image
-              <input accept="image/jpeg,image/png,image/webp" className="mt-2 block w-full text-sm" name="cover" type="file" />
+              <input
+                accept="image/jpeg,image/png,image/webp"
+                className="mt-2 block w-full text-sm"
+                name="cover"
+                type="file"
+              />
             </label>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <input className="input-shell" min={0} name="duration" placeholder="Duration seconds" type="number" />
+            <input className="input-shell" min={0} name="duration" placeholder="Duration in seconds" type="number" />
             <input className="input-shell" name="releaseDate" type="date" />
           </div>
           <div className="grid gap-3 text-sm text-slate-600 sm:grid-cols-3">
@@ -192,7 +267,7 @@ export function SongManager() {
               Remix later
             </label>
           </div>
-          <button className="button-primary" disabled={isSubmitting} type="submit">
+          <button className="button-primary" disabled={isSubmitting || !catalogReady} type="submit">
             <Upload className="h-4 w-4" />
             {isSubmitting ? "Uploading..." : "Upload song"}
           </button>
@@ -202,10 +277,14 @@ export function SongManager() {
       </form>
 
       <section className="surface-card p-6 sm:p-7">
-        <p className="pill">Manage</p>
+        <p className="pill">Catalog</p>
         <h2 className="mt-4 text-xl font-semibold tracking-tight text-slate-950">
           Uploaded songs
         </h2>
+        <p className="mt-2 text-sm leading-6 text-slate-500">
+          Review titles, switch published status, and keep metadata clean.
+        </p>
+
         <div className="mt-5 space-y-3">
           {songs.length ? (
             songs.map((song) => (
@@ -217,15 +296,27 @@ export function SongManager() {
                   <form className="grid gap-3" onSubmit={(event) => handleEdit(event, song)}>
                     <input className="input-shell" defaultValue={song.title} name="title" required />
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <input className="input-shell" defaultValue={song.artist.name} name="artistName" />
-                      <input className="input-shell" defaultValue={song.genre.name} name="genreName" />
+                      <select className="input-shell" defaultValue={song.artist.id} name="artistId" required>
+                        {artists.map((artist) => (
+                          <option key={artist.id} value={artist.id}>
+                            {artist.name}
+                          </option>
+                        ))}
+                      </select>
+                      <select className="input-shell" defaultValue={song.genre.id} name="genreId" required>
+                        {genres.map((genre) => (
+                          <option key={genre.id} value={genre.id}>
+                            {genre.name}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <textarea
-                      className="min-h-24 rounded-2xl border border-borderSoft bg-white px-4 py-3 text-sm outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
+                      className="min-h-24 rounded-2xl border border-borderSoft bg-white px-4 py-3 text-sm outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
                       defaultValue={song.description ?? ""}
                       name="description"
                     />
-                    <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="grid gap-3 sm:grid-cols-3">
                       <select className="input-shell" defaultValue={String(song.isPublished)} name="isPublished">
                         <option value="true">Published</option>
                         <option value="false">Draft</option>
@@ -234,6 +325,7 @@ export function SongManager() {
                         <option value="true">Free download enabled</option>
                         <option value="false">Download disabled</option>
                       </select>
+                      <input className="input-shell" defaultValue={song.duration ?? ""} min={0} name="duration" type="number" />
                     </div>
                     <div className="flex gap-2">
                       <button className="button-primary" type="submit">Save</button>
@@ -266,7 +358,9 @@ export function SongManager() {
               </div>
             ))
           ) : (
-            <p className="text-sm text-slate-500">No uploaded songs yet.</p>
+            <p className="rounded-2xl border border-dashed border-borderSoft bg-surface p-4 text-sm text-slate-500">
+              No uploaded songs yet.
+            </p>
           )}
         </div>
       </section>

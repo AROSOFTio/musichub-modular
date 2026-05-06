@@ -29,6 +29,10 @@ export type CatalogArtist = {
   _count?: { songs: number; followers: number };
 };
 
+export type AdminArtist = CatalogArtist & {
+  _count: { songs: number; followers: number };
+};
+
 export type CatalogGenre = {
   id: string;
   name: string;
@@ -36,6 +40,10 @@ export type CatalogGenre = {
   icon?: string | null;
   color?: string | null;
   _count?: { songs: number };
+};
+
+export type AdminGenre = CatalogGenre & {
+  _count: { songs: number };
 };
 
 export type CatalogSong = {
@@ -74,6 +82,19 @@ export type SearchResult = {
   songs: CatalogSong[];
   artists: CatalogArtist[];
   genres: CatalogGenre[];
+};
+
+export type AdminOverview = {
+  totalUsers: number;
+  totalArtistAccounts: number;
+  totalAdmins: number;
+  totalArtistProfiles: number;
+  totalGenres: number;
+  totalSongs: number;
+  publishedSongs: number;
+  draftSongs: number;
+  freeDownloadsEnabled: boolean;
+  remixPaymentsEnabled: boolean;
 };
 
 type JsonBody = BodyInit | Record<string, unknown> | null | undefined;
@@ -245,15 +266,105 @@ export function setEditorPick(accessToken: string | undefined, songId: string, p
 
 // Admin
 export function getAdminOverview(accessToken: string | undefined) {
-  return apiRequest<{
-    totalUsers: number;
-    totalArtists: number;
-    totalAdmins: number;
-    totalSongs: number;
-    publishedSongs: number;
-    freeDownloadsEnabled: boolean;
-    remixPaymentsEnabled: boolean;
-  }>("/admin/overview", {
+  return apiRequest<AdminOverview>("/admin/overview", {
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+  });
+}
+
+export function listAdminArtists(accessToken: string | undefined) {
+  return apiRequest<AdminArtist[]>("/admin/artists", {
+    cache: "no-store",
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+  });
+}
+
+export function createAdminArtist(
+  accessToken: string | undefined,
+  payload: {
+    name: string;
+    slug?: string;
+    bio?: string;
+    avatar?: string;
+    coverImage?: string;
+    verified?: boolean;
+  },
+) {
+  return apiRequest<AdminArtist>("/admin/artists", {
+    method: "POST",
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+    body: payload,
+  });
+}
+
+export function updateAdminArtist(
+  accessToken: string | undefined,
+  id: string,
+  payload: {
+    name: string;
+    slug?: string;
+    bio?: string;
+    avatar?: string;
+    coverImage?: string;
+    verified?: boolean;
+  },
+) {
+  return apiRequest<AdminArtist>(`/admin/artists/${id}`, {
+    method: "PATCH",
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+    body: payload,
+  });
+}
+
+export function deleteAdminArtist(accessToken: string | undefined, id: string) {
+  return apiRequest<{ success: boolean }>(`/admin/artists/${id}`, {
+    method: "DELETE",
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+  });
+}
+
+export function listAdminGenres(accessToken: string | undefined) {
+  return apiRequest<AdminGenre[]>("/admin/genres", {
+    cache: "no-store",
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+  });
+}
+
+export function createAdminGenre(
+  accessToken: string | undefined,
+  payload: {
+    name: string;
+    slug?: string;
+    color?: string;
+    icon?: string;
+  },
+) {
+  return apiRequest<AdminGenre>("/admin/genres", {
+    method: "POST",
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+    body: payload,
+  });
+}
+
+export function updateAdminGenre(
+  accessToken: string | undefined,
+  id: string,
+  payload: {
+    name: string;
+    slug?: string;
+    color?: string;
+    icon?: string;
+  },
+) {
+  return apiRequest<AdminGenre>(`/admin/genres/${id}`, {
+    method: "PATCH",
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+    body: payload,
+  });
+}
+
+export function deleteAdminGenre(accessToken: string | undefined, id: string) {
+  return apiRequest<{ success: boolean }>(`/admin/genres/${id}`, {
+    method: "DELETE",
     headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
   });
 }

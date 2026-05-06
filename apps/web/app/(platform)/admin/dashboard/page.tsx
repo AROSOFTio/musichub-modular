@@ -4,17 +4,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CheckCircle2, Lock, Music2, Star, UploadCloud } from "lucide-react";
 
+import { ArtistManager } from "@/components/dashboard/artist-manager";
+import { GenreManager } from "@/components/dashboard/genre-manager";
 import { SongManager } from "@/components/dashboard/song-manager";
-import { CatalogSong, getAdminOverview, listManageableSongs, setEditorPick } from "@/lib/api";
+import { PageHeader } from "@/components/ui/page-header";
+import { AdminOverview, CatalogSong, getAdminOverview, listManageableSongs, setEditorPick } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-
-type Overview = {
-  totalAdmins: number;
-  totalSongs: number;
-  publishedSongs: number;
-  freeDownloadsEnabled: boolean;
-  remixPaymentsEnabled: boolean;
-};
 
 function StatCard({
   label,
@@ -36,8 +31,14 @@ function StatCard({
   );
 }
 
-function AdminStats({ accessToken }: { accessToken: string }) {
-  const [overview, setOverview] = useState<Overview | null>(null);
+function AdminStats({
+  accessToken,
+  refreshKey,
+}: {
+  accessToken: string;
+  refreshKey: number;
+}) {
+  const [overview, setOverview] = useState<AdminOverview | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -66,7 +67,7 @@ function AdminStats({ accessToken }: { accessToken: string }) {
     return () => {
       cancelled = true;
     };
-  }, [accessToken]);
+  }, [accessToken, refreshKey]);
 
   if (error) {
     return (
@@ -78,8 +79,8 @@ function AdminStats({ accessToken }: { accessToken: string }) {
 
   if (!overview) {
     return (
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {[1, 2, 3, 4].map((item) => (
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
+        {[1, 2, 3, 4, 5, 6].map((item) => (
           <div key={item} className="h-32 animate-pulse rounded-2xl bg-violet-100" />
         ))}
       </div>
@@ -87,20 +88,24 @@ function AdminStats({ accessToken }: { accessToken: string }) {
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <StatCard label="Songs" value={overview.totalSongs} helper="Total uploaded" />
-      <StatCard label="Published" value={overview.publishedSongs} helper="Visible on site" />
-      <StatCard label="Admins" value={overview.totalAdmins} helper="Allowed accounts" />
-      <StatCard
-        label="Downloads"
-        value={overview.freeDownloadsEnabled ? "Free" : "Off"}
-        helper={overview.remixPaymentsEnabled ? "Remix paid" : "Standard only"}
-      />
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
+      <StatCard label="Artist profiles" value={overview.totalArtistProfiles} helper="Public catalog" />
+      <StatCard label="Genres" value={overview.totalGenres} helper="Music categories" />
+      <StatCard label="Songs" value={overview.totalSongs} helper="Full catalog" />
+      <StatCard label="Published" value={overview.publishedSongs} helper="Visible to listeners" />
+      <StatCard label="Drafts" value={overview.draftSongs} helper="Pending release" />
+      <StatCard label="Admins" value={overview.totalAdmins} helper="Control access" />
     </div>
   );
 }
 
-function EditorPicksManager({ accessToken }: { accessToken: string }) {
+function EditorPicksManager({
+  accessToken,
+  refreshKey,
+}: {
+  accessToken: string;
+  refreshKey: number;
+}) {
   const [songs, setSongs] = useState<CatalogSong[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -132,7 +137,7 @@ function EditorPicksManager({ accessToken }: { accessToken: string }) {
     return () => {
       cancelled = true;
     };
-  }, [accessToken]);
+  }, [accessToken, refreshKey]);
 
   async function togglePick(song: CatalogSong) {
     setUpdating(song.id);
@@ -161,7 +166,7 @@ function EditorPicksManager({ accessToken }: { accessToken: string }) {
             Editor picks
           </h2>
           <p className="mt-1 text-sm text-slate-500">
-            Choose uploaded songs to feature on Musichub.
+            Mark published songs for the public home page and featured sections.
           </p>
         </div>
         <span className="inline-flex w-fit items-center gap-2 rounded-2xl border border-violet-200 bg-violet-50 px-4 py-2 text-sm font-semibold text-violet-700">
@@ -198,7 +203,7 @@ function EditorPicksManager({ accessToken }: { accessToken: string }) {
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-slate-950">{song.title}</p>
                 <p className="truncate text-xs text-slate-500">
-                  {song.artist.name} - {song.isPublished ? "Published" : "Draft"}
+                  {song.artist.name} | {song.isPublished ? "Published" : "Draft"}
                 </p>
               </div>
               <button
@@ -207,7 +212,7 @@ function EditorPicksManager({ accessToken }: { accessToken: string }) {
                     ? "inline-flex items-center gap-2 rounded-2xl bg-violet-700 px-3 py-2 text-xs font-semibold text-white"
                     : "inline-flex items-center gap-2 rounded-2xl border border-borderSoft bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:border-violet-300 hover:bg-violet-50"
                 }
-                disabled={updating === song.id}
+                disabled={updating === song.id || !song.isPublished}
                 onClick={() => togglePick(song)}
                 type="button"
               >
@@ -228,7 +233,12 @@ function EditorPicksManager({ accessToken }: { accessToken: string }) {
 
 export default function AdminDashboardPage() {
   const { accessToken, user, isAuthenticated, isLoading } = useAuth();
+  const [refreshKey, setRefreshKey] = useState(0);
   const canManage = Boolean(isAuthenticated && user?.role === "ADMIN" && accessToken);
+
+  function refreshAdminData() {
+    setRefreshKey((current) => current + 1);
+  }
 
   if (isLoading) {
     return <div className="h-96 animate-pulse rounded-2xl bg-violet-100" />;
@@ -244,7 +254,7 @@ export default function AdminDashboardPage() {
           Admin access required
         </h1>
         <p className="mt-3 text-sm leading-6 text-slate-500">
-          Sign in with the admin account to upload, publish, and manage songs.
+          Sign in with the admin account to manage artists, genres, songs, and featured content.
         </p>
         <Link className="button-primary mt-6" href="/login">
           Admin login
@@ -257,33 +267,50 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-8">
+      <PageHeader
+        title="Music administration"
+        description="Set up artists and genres first, then upload songs into the right catalog structure and choose what the public storefront should feature."
+        action={
+          <Link className="button-secondary" href="/" rel="noreferrer" target="_blank">
+            View public site
+          </Link>
+        }
+      />
+
       <section className="rounded-2xl border border-borderSoft bg-white p-6 shadow-card sm:p-8">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="pill">Admin dashboard</p>
+            <p className="pill">Admin workflow</p>
             <h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-              Upload and manage music
+              Build the catalog the professional way
             </h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-500">
-              Add songs, edit metadata, publish tracks, and choose editor picks.
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-500">
+              Start with artist profiles and genres such as Gospel, Worship, Afrobeat, or Dancehall.
+              After that, upload songs using dropdown selections so the public catalog stays consistent.
             </p>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:w-80 lg:grid-cols-1">
+          <div className="grid gap-3 sm:grid-cols-2 lg:w-96">
             <div className="flex items-center gap-3 rounded-2xl border border-violet-200 bg-violet-50 p-4 text-sm font-semibold text-violet-800">
               <UploadCloud className="h-5 w-5" />
-              MP3 and WAV upload
+              Structured upload flow
             </div>
             <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">
               <CheckCircle2 className="h-5 w-5" />
-              Publish controls ready
+              Public storefront stays live
             </div>
           </div>
         </div>
       </section>
 
-      <AdminStats accessToken={adminAccessToken} />
-      <SongManager />
-      <EditorPicksManager accessToken={adminAccessToken} />
+      <AdminStats accessToken={adminAccessToken} refreshKey={refreshKey} />
+
+      <div className="grid gap-6 xl:grid-cols-2">
+        <ArtistManager accessToken={adminAccessToken} onChange={refreshAdminData} />
+        <GenreManager accessToken={adminAccessToken} onChange={refreshAdminData} />
+      </div>
+
+      <SongManager catalogRefreshKey={refreshKey} onSongSaved={refreshAdminData} />
+      <EditorPicksManager accessToken={adminAccessToken} refreshKey={refreshKey} />
     </div>
   );
 }
