@@ -4,14 +4,26 @@ import Link from "next/link";
 import { Twitter, Instagram, Facebook, ExternalLink } from "lucide-react";
 import { Logo } from "../ui/logo";
 import { MODULE_KEYS } from "@/lib/modules/module-keys";
+import type { ModuleKey } from "@/lib/modules/module-keys";
 import { filterModuleItems } from "@/lib/modules/module-registry";
 import { useModules } from "@/lib/modules/use-modules";
+
+type FooterLink = {
+  label: string;
+  href: string;
+  moduleKey?: ModuleKey;
+};
+
+type FooterSection = {
+  title: string;
+  links: FooterLink[];
+};
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
   const modules = useModules();
 
-  const footerSections = [
+  const footerSections: FooterSection[] = [
     {
       title: "Platform",
       links: [
