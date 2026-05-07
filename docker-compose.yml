@@ -95,17 +95,6 @@ services:
     command: ["redis-server", "--save", "", "--appendonly", "no"]
     restart: unless-stopped
 
-  phpmyadmin:
-    image: adminer:4.8.1
-    environment:
-      ADMINER_DEFAULT_SERVER: postgres
-    depends_on:
-      postgres:
-        condition: service_healthy
-    ports:
-      - "4009:8080"
-    restart: unless-stopped
-
 volumes:
   postgres_data:
   api_uploads:
