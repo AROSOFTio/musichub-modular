@@ -5,6 +5,8 @@ import { FormEvent, useEffect, useState } from "react";
 
 import { useAuth } from "@/lib/auth-context";
 
+const adminRoles = new Set(["ADMIN", "DEV_ADMIN", "EDITOR", "ARTIST"]);
+
 export function LoginForm() {
   const router = useRouter();
   const { login, logout, isAuthenticated, isLoading, user } = useAuth();
@@ -14,8 +16,8 @@ export function LoginForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && isAuthenticated && user?.role === "ADMIN") {
-      router.replace("/admin/dashboard");
+    if (!isLoading && isAuthenticated && user && adminRoles.has(user.role)) {
+      router.replace(user.role === "DEV_ADMIN" ? "/admin/modules" : "/admin/dashboard");
     }
   }, [isAuthenticated, isLoading, router, user]);
 
@@ -26,12 +28,7 @@ export function LoginForm() {
 
     try {
       const session = await login({ email, password });
-      if (session.user.role !== "ADMIN") {
-        await logout();
-        setError("Admin access only.");
-        return;
-      }
-      router.push("/admin/dashboard");
+      router.push(session.user.role === "DEV_ADMIN" ? "/admin/modules" : adminRoles.has(session.user.role) ? "/admin/dashboard" : "/");
       router.refresh();
     } catch (submissionError) {
       const message =
@@ -54,7 +51,7 @@ export function LoginForm() {
           className="input-shell"
           id="email"
           onChange={(event) => setEmail(event.target.value)}
-          placeholder="admin@musichub.arosoft.io"
+          placeholder="admin@hub.arosoft.io"
           required
           type="email"
           value={email}

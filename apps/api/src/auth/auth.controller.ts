@@ -20,17 +20,27 @@ import { RefreshTokenDto } from "./dto/refresh-token.dto";
 import { AuthService } from "./auth.service";
 import { REFRESH_COOKIE_NAME } from "./auth.constants";
 import { AccessTokenGuard } from "./guards/access-token.guard";
+import { FeatureModulesService } from "../feature-modules/feature-modules.service";
+import { ArtistRegisterDto, RegisterDto } from "./dto/register.dto";
 
 @Controller("auth")
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
+    private readonly featureModules: FeatureModulesService,
   ) {}
 
   @Post("register")
-  register() {
-    throw new ForbiddenException("Public registration is disabled.");
+  async register(@Body() dto: RegisterDto) {
+    await this.featureModules.assertEnabled("user_registration", "api");
+    return this.authService.registerUser(dto);
+  }
+
+  @Post("register/artist")
+  async registerArtist(@Body() dto: ArtistRegisterDto) {
+    await this.featureModules.assertEnabled("artist_registration", "api");
+    return this.authService.registerArtist(dto);
   }
 
   @Post("login")

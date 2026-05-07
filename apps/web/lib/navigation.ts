@@ -46,7 +46,7 @@ export const primaryNavigation: NavItem[] = [
 export const secondaryNavigation: NavItem[] = [
   { href: "/artists", label: "Artists", icon: Mic2, moduleKey: MODULE_KEYS.artists },
   { href: "/about", label: "About", icon: Info },
-  { href: "/contact", label: "Contact", icon: Mail },
+  { href: "/contact", label: "Contact", icon: Mail, moduleKey: MODULE_KEYS.contactSupport },
   { href: "/privacy", label: "Privacy", icon: Shield },
   { href: "/admin", label: "Admin", icon: HelpCircle },
 ];

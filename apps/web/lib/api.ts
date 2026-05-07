@@ -271,6 +271,49 @@ export type RemixProject = {
   updatedAt: string;
 };
 
+export type SupportTicket = {
+  id: string;
+  ticketNumber: number;
+  category: "ADVERTISE" | "SONG_REQUEST" | "SONG_REMOVAL" | "OTHER";
+  status: "NEW" | "OPEN" | "AWAITING_USER" | "RESOLVED" | "CLOSED";
+  subject: string;
+  requesterName: string;
+  requesterEmail: string;
+  requesterPhone: string | null;
+  assignedToId: string | null;
+  assignedTo?: { id: string; displayName: string; email: string } | null;
+  metadata: Record<string, unknown> | null;
+  emailDeliveryStatus: "NOT_CONFIGURED" | "PENDING" | "SENT" | "FAILED";
+  emailError: string | null;
+  messages?: SupportMessage[];
+  attachments?: SupportAttachment[];
+  _count?: { messages: number; attachments: number };
+  createdAt: string;
+  updatedAt: string;
+  closedAt: string | null;
+};
+
+export type SupportMessage = {
+  id: string;
+  ticketId: string;
+  authorType: "REQUESTER" | "ADMIN" | "SYSTEM";
+  authorName: string;
+  authorEmail: string | null;
+  body: string;
+  emailDeliveryStatus: "NOT_CONFIGURED" | "PENDING" | "SENT" | "FAILED";
+  createdAt: string;
+  attachments?: SupportAttachment[];
+};
+
+export type SupportAttachment = {
+  id: string;
+  filename: string;
+  mimeType: string;
+  size: number;
+  filePath: string;
+  createdAt: string;
+};
+
 export type SearchResult = {
   songs: CatalogSong[];
   artists: CatalogArtist[];
@@ -348,6 +391,14 @@ export function logoutRequest(accessToken: string, refreshToken?: string) {
   });
 }
 
+export function registerUserRequest(payload: { email: string; password: string; displayName: string; username?: string }) {
+  return apiRequest<AuthResponse>("/auth/register", { method: "POST", body: payload });
+}
+
+export function registerArtistRequest(payload: { email: string; password: string; displayName: string; username?: string; artistName: string; bio?: string }) {
+  return apiRequest<AuthResponse>("/auth/register/artist", { method: "POST", body: payload });
+}
+
 // ─── Home Feed ─────────────────────────────────────────────────────────────
 export function getHomeFeed() {
   return apiRequest<HomeFeed>("/home", { cache: "no-store" });
@@ -405,6 +456,62 @@ export function updateRemixProject(accessToken: string | undefined, id: string, 
 export function processRemixProject(accessToken: string | undefined, id: string) {
   return apiRequest<RemixProject>(`/remix/projects/${id}/process`, {
     method: "POST",
+    headers: authHeader(accessToken),
+  });
+}
+
+export function submitSupportTicket(payload: FormData) {
+  return apiRequest<SupportTicket>("/support/contact", {
+    method: "POST",
+    body: payload,
+  });
+}
+
+export function listSupportTickets(accessToken: string | undefined, filters: { status?: string; category?: string } = {}) {
+  const params = new URLSearchParams();
+  if (filters.status) params.set("status", filters.status);
+  if (filters.category) params.set("category", filters.category);
+  const suffix = params.toString() ? `?${params.toString()}` : "";
+  return apiRequest<SupportTicket[]>(`/support/admin/tickets${suffix}`, {
+    cache: "no-store",
+    headers: authHeader(accessToken),
+  });
+}
+
+export function getSupportTicket(accessToken: string | undefined, id: string) {
+  return apiRequest<SupportTicket>(`/support/admin/tickets/${id}`, {
+    cache: "no-store",
+    headers: authHeader(accessToken),
+  });
+}
+
+export function replySupportTicket(accessToken: string | undefined, id: string, message: string) {
+  return apiRequest<SupportTicket>(`/support/admin/tickets/${id}/reply`, {
+    method: "POST",
+    headers: authHeader(accessToken),
+    body: { message },
+  });
+}
+
+export function updateSupportTicketStatus(accessToken: string | undefined, id: string, status: string) {
+  return apiRequest<SupportTicket>(`/support/admin/tickets/${id}/status`, {
+    method: "PATCH",
+    headers: authHeader(accessToken),
+    body: { status },
+  });
+}
+
+export function assignSupportTicket(accessToken: string | undefined, id: string, assignedToId: string | null) {
+  return apiRequest<SupportTicket>(`/support/admin/tickets/${id}/assign`, {
+    method: "PATCH",
+    headers: authHeader(accessToken),
+    body: { assignedToId },
+  });
+}
+
+export function listSupportAssignees(accessToken: string | undefined) {
+  return apiRequest<Array<{ id: string; displayName: string; email: string; role: string }>>("/support/admin/tickets/assignees", {
+    cache: "no-store",
     headers: authHeader(accessToken),
   });
 }

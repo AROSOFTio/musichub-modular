@@ -3,16 +3,16 @@ services:
     build:
       context: ./apps/web
       args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://music.arosoft.io/api}
-        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-https://music.arosoft.io}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://hub.arosoft.io/api}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-https://hub.arosoft.io}
         API_INTERNAL_URL: ${API_INTERNAL_URL:-http://api:4000/api}
     env_file:
       - .env
     environment:
       NODE_ENV: production
       PORT: 3000
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://music.arosoft.io/api}
-      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-https://music.arosoft.io}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://hub.arosoft.io/api}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-https://hub.arosoft.io}
       API_INTERNAL_URL: ${API_INTERNAL_URL:-http://api:4000/api}
     depends_on:
       api:
@@ -42,7 +42,7 @@ services:
       NODE_ENV: production
       PORT: 4000
       DATABASE_URL: ${DATABASE_URL}
-      FRONTEND_URL: ${FRONTEND_URL:-https://music.arosoft.io}
+      FRONTEND_URL: ${FRONTEND_URL:-https://hub.arosoft.io}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
       JWT_SECRET: ${JWT_SECRET}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
@@ -51,7 +51,17 @@ services:
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       ADMIN_DISPLAY_NAME: ${ADMIN_DISPLAY_NAME:-Musichub Admin}
+      DEV_ADMIN_EMAIL: ${DEV_ADMIN_EMAIL}
+      DEV_ADMIN_PASSWORD: ${DEV_ADMIN_PASSWORD}
+      DEV_ADMIN_DISPLAY_NAME: ${DEV_ADMIN_DISPLAY_NAME:-MusicHub Developer}
       UPLOAD_DIR: ${UPLOAD_DIR:-/app/uploads}
+      SUPPORT_EMAIL_FROM: ${SUPPORT_EMAIL_FROM:-support@hub.arosoft.io}
+      SUPPORT_INBOUND_EMAIL: ${SUPPORT_INBOUND_EMAIL:-}
+      SUPPORT_UPLOAD_MAX_BYTES: ${SUPPORT_UPLOAD_MAX_BYTES:-10485760}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
     depends_on:
       postgres:
         condition: service_healthy

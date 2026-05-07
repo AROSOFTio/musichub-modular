@@ -153,7 +153,7 @@ const NAV: { section: string; items: NavItem[] }[] = [
   {
     section: "Support",
     items: [
-      { label: "Messages", href: "/admin/messages", icon: Mail, moduleKey: MODULE_KEYS.adminMessages },
+      { label: "Support Inbox", href: "/admin/messages", icon: Mail, moduleKey: MODULE_KEYS.adminMessages },
     ],
   },
 ];

@@ -6,7 +6,9 @@ import bcrypt from "bcrypt";
 
 import { PrismaService } from "../prisma/prisma.service";
 import { LoginDto } from "./dto/login.dto";
+import { ArtistRegisterDto, RegisterDto } from "./dto/register.dto";
 import { RefreshTokenDto } from "./dto/refresh-token.dto";
+import { slugify } from "../catalog/slug";
 
 type PublicUser = {
   id: string;
@@ -55,11 +57,31 @@ export class AuthService {
       throw new UnauthorizedException("Invalid email or password.");
     }
 
-    if (!([Role.DEV_ADMIN, Role.ADMIN, Role.EDITOR, Role.ARTIST] as Role[]).includes(user.role)) {
+    if (!([Role.DEV_ADMIN, Role.ADMIN, Role.EDITOR, Role.ARTIST, Role.USER] as Role[]).includes(user.role)) {
       throw new UnauthorizedException("Insufficient permissions.");
     }
 
     return this.issueSession(user);
+  }
+
+  async registerUser(dto: RegisterDto): Promise<AuthPayload> {
+    return this.createAccount(dto, Role.USER);
+  }
+
+  async registerArtist(dto: ArtistRegisterDto): Promise<AuthPayload> {
+    const session = await this.createAccount(dto, Role.ARTIST);
+    const artistName = dto.artistName.trim() || dto.displayName.trim();
+    const slug = await this.uniqueArtistSlug(artistName);
+    await this.prisma.artist.create({
+      data: {
+        name: artistName,
+        slug,
+        bio: dto.bio?.trim() || null,
+        verificationStatus: "PENDING",
+        verified: false,
+      },
+    });
+    return session;
   }
 
   async refresh(dto: RefreshTokenDto): Promise<AuthPayload> {
@@ -94,7 +116,7 @@ export class AuthService {
       throw new UnauthorizedException("Refresh token does not match.");
     }
 
-    if (!([Role.DEV_ADMIN, Role.ADMIN, Role.EDITOR, Role.ARTIST] as Role[]).includes(user.role)) {
+    if (!([Role.DEV_ADMIN, Role.ADMIN, Role.EDITOR, Role.ARTIST, Role.USER] as Role[]).includes(user.role)) {
       throw new UnauthorizedException("Insufficient permissions.");
     }
 
@@ -153,6 +175,36 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
+  }
+
+  private async createAccount(dto: RegisterDto, role: Role) {
+    const email = dto.email.trim().toLowerCase();
+    const existing = await this.prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      throw new UnauthorizedException("An account with this email already exists.");
+    }
+
+    const passwordHash = await bcrypt.hash(dto.password, 12);
+    const user = await this.prisma.user.create({
+      data: {
+        email,
+        passwordHash,
+        displayName: dto.displayName.trim(),
+        username: dto.username?.trim().toLowerCase() || null,
+        role,
+      },
+    });
+    return this.issueSession(user);
+  }
+
+  private async uniqueArtistSlug(value: string) {
+    const base = slugify(value) || "artist";
+    let candidate = base;
+    let index = 2;
+    while (await this.prisma.artist.findUnique({ where: { slug: candidate } })) {
+      candidate = `${base}-${index++}`;
+    }
+    return candidate;
   }
 
   private toPublicUser(user: User): PublicUser {

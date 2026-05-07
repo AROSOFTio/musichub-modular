@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Mail, Github, Twitter, Instagram, Facebook, ExternalLink } from "lucide-react";
+import { Twitter, Instagram, Facebook, ExternalLink } from "lucide-react";
 import { Logo } from "../ui/logo";
 
 export function Footer() {
@@ -57,9 +57,6 @@ export function Footer() {
               </Link>
               <Link href="#" className="text-[var(--muted)] hover:text-violet-600 transition-colors">
                 <Facebook className="h-5 w-5" />
-              </Link>
-              <Link href="mailto:support@musichub.arosoft.io" className="text-[var(--muted)] hover:text-violet-600 transition-colors">
-                <Mail className="h-5 w-5" />
               </Link>
             </div>
           </div>

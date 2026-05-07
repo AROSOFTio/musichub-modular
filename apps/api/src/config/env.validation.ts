@@ -11,7 +11,17 @@ type EnvShape = {
   ADMIN_EMAIL?: string;
   ADMIN_PASSWORD?: string;
   ADMIN_DISPLAY_NAME?: string;
+  DEV_ADMIN_EMAIL?: string;
+  DEV_ADMIN_PASSWORD?: string;
+  DEV_ADMIN_DISPLAY_NAME?: string;
   UPLOAD_DIR?: string;
+  SUPPORT_EMAIL_FROM?: string;
+  SUPPORT_INBOUND_EMAIL?: string;
+  SUPPORT_UPLOAD_MAX_BYTES?: string;
+  SMTP_HOST?: string;
+  SMTP_PORT?: string;
+  SMTP_USER?: string;
+  SMTP_PASSWORD?: string;
 };
 
 export function validateEnv(config: EnvShape) {
@@ -36,6 +46,16 @@ export function validateEnv(config: EnvShape) {
     ADMIN_EMAIL: config.ADMIN_EMAIL,
     ADMIN_PASSWORD: config.ADMIN_PASSWORD,
     ADMIN_DISPLAY_NAME: config.ADMIN_DISPLAY_NAME || "Musichub Admin",
+    DEV_ADMIN_EMAIL: config.DEV_ADMIN_EMAIL,
+    DEV_ADMIN_PASSWORD: config.DEV_ADMIN_PASSWORD,
+    DEV_ADMIN_DISPLAY_NAME: config.DEV_ADMIN_DISPLAY_NAME || "MusicHub Developer",
     UPLOAD_DIR: config.UPLOAD_DIR || "/app/uploads",
+    SUPPORT_EMAIL_FROM: config.SUPPORT_EMAIL_FROM,
+    SUPPORT_INBOUND_EMAIL: config.SUPPORT_INBOUND_EMAIL,
+    SUPPORT_UPLOAD_MAX_BYTES: config.SUPPORT_UPLOAD_MAX_BYTES || "10485760",
+    SMTP_HOST: config.SMTP_HOST,
+    SMTP_PORT: config.SMTP_PORT || "587",
+    SMTP_USER: config.SMTP_USER,
+    SMTP_PASSWORD: config.SMTP_PASSWORD,
   };
 }

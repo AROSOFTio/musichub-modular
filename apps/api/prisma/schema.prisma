@@ -53,6 +53,34 @@ enum RemixJobStatus {
   FAILED
 }
 
+enum SupportTicketStatus {
+  NEW
+  OPEN
+  AWAITING_USER
+  RESOLVED
+  CLOSED
+}
+
+enum SupportTicketCategory {
+  ADVERTISE
+  SONG_REQUEST
+  SONG_REMOVAL
+  OTHER
+}
+
+enum SupportMessageAuthorType {
+  REQUESTER
+  ADMIN
+  SYSTEM
+}
+
+enum EmailDeliveryStatus {
+  NOT_CONFIGURED
+  PENDING
+  SENT
+  FAILED
+}
+
 // ─── Core Models ────────────────────────────────────────────────────────────
 
 model User {
@@ -77,6 +105,8 @@ model User {
   comments      Comment[]
   notifications Notification[]
   remixProjects RemixProject[] @relation("UserRemixProjects")
+  assignedSupportTickets SupportTicket[] @relation("AssignedSupportTickets")
+  supportMessages SupportMessage[] @relation("AdminSupportMessages")
 
   @@map("users")
 }
@@ -396,6 +426,86 @@ model ContactMessage {
   updatedAt DateTime @updatedAt
 
   @@map("contact_messages")
+}
+
+model SupportTicket {
+  id                  String                @id @default(uuid())
+  ticketNumber        Int                   @unique @default(autoincrement())
+  category            SupportTicketCategory
+  status              SupportTicketStatus   @default(NEW)
+  subject             String
+  requesterName       String
+  requesterEmail      String
+  requesterPhone      String?
+  assignedToId        String?
+  metadata            Json?
+  emailDeliveryStatus EmailDeliveryStatus   @default(NOT_CONFIGURED)
+  emailError          String?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  closedAt            DateTime?
+
+  assignedTo User? @relation("AssignedSupportTickets", fields: [assignedToId], references: [id], onDelete: SetNull)
+  messages   SupportMessage[]
+  attachments SupportAttachment[]
+  inboundMappings InboundEmailMapping[]
+
+  @@index([category, status, createdAt])
+  @@index([requesterEmail])
+  @@index([assignedToId])
+  @@map("support_tickets")
+}
+
+model SupportMessage {
+  id                  String                   @id @default(uuid())
+  ticketId            String
+  authorType          SupportMessageAuthorType
+  authorName          String
+  authorEmail         String?
+  adminUserId         String?
+  body                String
+  emailDeliveryStatus EmailDeliveryStatus      @default(NOT_CONFIGURED)
+  emailError          String?
+  createdAt           DateTime                 @default(now())
+
+  ticket      SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  adminUser   User?         @relation("AdminSupportMessages", fields: [adminUserId], references: [id], onDelete: SetNull)
+  attachments SupportAttachment[]
+
+  @@index([ticketId, createdAt])
+  @@index([adminUserId])
+  @@map("support_messages")
+}
+
+model SupportAttachment {
+  id        String   @id @default(uuid())
+  ticketId  String
+  messageId String?
+  filename  String
+  mimeType  String
+  size      Int
+  filePath  String
+  createdAt DateTime @default(now())
+
+  ticket  SupportTicket  @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  message SupportMessage? @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@index([messageId])
+  @@map("support_attachments")
+}
+
+model InboundEmailMapping {
+  id          String   @id @default(uuid())
+  ticketId    String
+  replyToken  String   @unique
+  inboundEmail String?
+  createdAt   DateTime @default(now())
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@map("inbound_email_mappings")
 }
 
 model FeatureModule {

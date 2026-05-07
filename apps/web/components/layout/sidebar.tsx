@@ -19,9 +19,10 @@ export function Sidebar() {
 
   const infoLinks = [
     { label: "About Us", href: "/about", icon: Info },
-    { label: "Contact", href: "/contact", icon: Mail },
+    { label: "Contact", href: "/contact", icon: Mail, moduleKey: "contact_support" },
     { label: "Privacy", href: "/privacy", icon: Shield },
   ];
+  const filteredInfoLinks = filterModuleItems(infoLinks, modules);
 
   return (
     <aside className="fixed inset-y-0 left-0 hidden w-72 border-r border-borderSoft bg-[var(--card-bg)] px-5 py-6 lg:flex lg:flex-col">
@@ -72,7 +73,7 @@ export function Sidebar() {
             Information
           </p>
           <div className="mt-3 space-y-2">
-            {infoLinks.map((item) => {
+            {filteredInfoLinks.map((item) => {
               const isActive = pathname === item.href;
 
               return (
