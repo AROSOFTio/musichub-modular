@@ -278,7 +278,7 @@ export function AdminSidebar({
 }) {
   const pathname = usePathname();
   const modules = useModules();
-  const { accessToken } = useAuth();
+  const { accessToken, user } = useAuth();
   const [adminModules, setAdminModules] = useState<Record<string, boolean> | null>(null);
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   useEffect(() => {
@@ -291,7 +291,10 @@ export function AdminSidebar({
       })
       .catch(() => setAdminModules(null));
   }, [accessToken]);
-  const effectiveModules = adminModules ?? modules;
+  const effectiveModules =
+    user?.role === "DEV_ADMIN"
+      ? { admin_modules: true, admin_settings: true }
+      : adminModules ?? { ...modules, admin_modules: false };
   const navGroups = useMemo(() => NAV.map((group) => ({
     ...group,
     items: group.items.filter((item) => hasModule(effectiveModules, item.moduleKey)),

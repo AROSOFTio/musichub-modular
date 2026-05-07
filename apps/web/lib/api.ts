@@ -197,6 +197,7 @@ export type AdminOverview = {
   totalUsers: number;
   totalArtistAccounts: number;
   totalAdmins: number;
+  totalDevAdmins: number;
   totalArtistProfiles: number;
   totalGenres: number;
   totalSongs: number;

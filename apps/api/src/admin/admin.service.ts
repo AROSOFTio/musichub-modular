@@ -34,10 +34,19 @@ export class AdminService {
   // ─── Overview ────────────────────────────────────────────────────────────
 
   async getOverview() {
+    const safe = async <T>(query: Promise<T>, fallback: T): Promise<T> => {
+      try {
+        return await query;
+      } catch {
+        return fallback;
+      }
+    };
+
     const [
       totalUsers,
       totalArtistAccounts,
       totalAdmins,
+      totalDevAdmins,
       totalArtistProfiles,
       totalGenres,
       totalSongs,
@@ -51,36 +60,38 @@ export class AdminService {
       topSongs,
       latestSongs,
     ] = await Promise.all([
-      this.prisma.user.count(),
-      this.prisma.user.count({ where: { role: Role.ARTIST } }),
-      this.prisma.user.count({ where: { role: Role.ADMIN } }),
-      this.prisma.artist.count(),
-      this.prisma.genre.count(),
-      this.prisma.song.count(),
-      this.prisma.song.count({ where: { status: SongStatus.PUBLISHED } }),
-      this.prisma.song.count({ where: { status: SongStatus.DRAFT } }),
-      this.prisma.song.count({ where: { status: SongStatus.DISABLED } }),
-      this.prisma.album.count(),
-      this.prisma.musicType.count(),
-      this.prisma.song.aggregate({ _sum: { playCount: true } }),
-      this.prisma.song.aggregate({ _sum: { downloadCount: true } }),
-      this.prisma.song.findMany({
+      safe(this.prisma.user.count(), 0),
+      safe(this.prisma.user.count({ where: { role: Role.ARTIST } }), 0),
+      safe(this.prisma.user.count({ where: { role: Role.ADMIN } }), 0),
+      safe(this.prisma.user.count({ where: { role: Role.DEV_ADMIN } }), 0),
+      safe(this.prisma.artist.count(), 0),
+      safe(this.prisma.genre.count(), 0),
+      safe(this.prisma.song.count(), 0),
+      safe(this.prisma.song.count({ where: { status: SongStatus.PUBLISHED } }), 0),
+      safe(this.prisma.song.count({ where: { status: SongStatus.DRAFT } }), 0),
+      safe(this.prisma.song.count({ where: { status: SongStatus.DISABLED } }), 0),
+      safe(this.prisma.album.count(), 0),
+      safe(this.prisma.musicType.count(), 0),
+      safe(this.prisma.song.aggregate({ _sum: { playCount: true } }), { _sum: { playCount: 0 } }),
+      safe(this.prisma.song.aggregate({ _sum: { downloadCount: true } }), { _sum: { downloadCount: 0 } }),
+      safe(this.prisma.song.findMany({
         where: { status: SongStatus.PUBLISHED },
         orderBy: { playCount: "desc" },
         take: 5,
         include: SONG_INCLUDE,
-      }),
-      this.prisma.song.findMany({
+      }), []),
+      safe(this.prisma.song.findMany({
         orderBy: { createdAt: "desc" },
         take: 5,
         include: SONG_INCLUDE,
-      }),
+      }), []),
     ]);
 
     return {
       totalUsers,
       totalArtistAccounts,
       totalAdmins,
+      totalDevAdmins,
       totalArtistProfiles,
       totalGenres,
       totalSongs,

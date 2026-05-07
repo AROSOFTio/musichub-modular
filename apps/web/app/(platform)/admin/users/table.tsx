@@ -141,6 +141,7 @@ export function AdminUsersTable() {
                         <option value="ARTIST">Artist</option>
                         <option value="EDITOR">Editor</option>
                         <option value="ADMIN">Admin</option>
+                        <option value="DEV_ADMIN">Dev Admin</option>
                       </select>
                       <ConfirmDeleteDialog
                         title="Delete user"

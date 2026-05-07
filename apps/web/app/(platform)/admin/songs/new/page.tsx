@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Info, Upload, X } from "lucide-react";
+import { Plus, Upload, X } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import {
   listAdminArtists,
@@ -159,26 +159,30 @@ export default function AddSongPage() {
       <form onSubmit={handleSubmit} className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-4 rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950 shadow-sm">
           <h2 className="font-semibold text-slate-800 dark:text-slate-200">Track Details</h2>
-          {artists.length === 0 && (
-            <div className="flex items-start gap-2 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-300">
-              <Info className="mt-0.5 h-4 w-4 shrink-0" />
-              Create at least one artist and genre before uploading.
-            </div>
-          )}
           <input name="title" required maxLength={140} placeholder="Song title" className="h-11 w-full rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 dark:border-slate-800 dark:bg-slate-900 dark:text-white transition" />
           
           <div className="grid gap-3 sm:grid-cols-2">
-            <select name="artistId" value={selectedArtist} onChange={e => { if (e.target.value === 'NEW') setModalConfig({ type: 'artist' }); else setSelectedArtist(e.target.value); }} required disabled={!artists.length} className="h-11 w-full rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:border-violet-400 dark:border-slate-800 dark:bg-slate-900 dark:text-white transition appearance-none bg-no-repeat" style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundPosition: "right 0.5rem center", backgroundSize: "1.5em 1.5em", paddingRight: "2.5rem" }}>
-              <option value="" disabled>Select artist</option>
-              {artists.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
-              <option value="NEW" className="font-semibold text-violet-700 bg-violet-50">+ Add New Artist</option>
-            </select>
+            <div className="flex gap-2">
+              <select name="artistId" value={selectedArtist} onChange={e => { if (e.target.value === 'NEW') setModalConfig({ type: 'artist' }); else setSelectedArtist(e.target.value); }} required className="h-11 min-w-0 flex-1 rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:border-violet-400 dark:border-slate-800 dark:bg-slate-900 dark:text-white transition appearance-none bg-no-repeat" style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundPosition: "right 0.5rem center", backgroundSize: "1.5em 1.5em", paddingRight: "2.5rem" }}>
+                <option value="" disabled>Select artist</option>
+                {artists.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
+                <option value="NEW" className="font-semibold text-violet-700 bg-violet-50">+ Add New Artist</option>
+              </select>
+              <button type="button" onClick={() => setModalConfig({ type: "artist" })} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-violet-200 bg-violet-50 text-violet-700 hover:bg-violet-100" aria-label="Create artist">
+                <Plus className="h-4 w-4" />
+              </button>
+            </div>
             
-            <select name="genreId" value={selectedGenre} onChange={e => { if (e.target.value === 'NEW') setModalConfig({ type: 'genre' }); else setSelectedGenre(e.target.value); }} required disabled={!genres.length} className="h-11 w-full rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:border-violet-400 dark:border-slate-800 dark:bg-slate-900 dark:text-white transition appearance-none bg-no-repeat" style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundPosition: "right 0.5rem center", backgroundSize: "1.5em 1.5em", paddingRight: "2.5rem" }}>
-              <option value="" disabled>Select genre</option>
-              {genres.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
-              <option value="NEW" className="font-semibold text-violet-700 bg-violet-50">+ Add New Genre</option>
-            </select>
+            <div className="flex gap-2">
+              <select name="genreId" value={selectedGenre} onChange={e => { if (e.target.value === 'NEW') setModalConfig({ type: 'genre' }); else setSelectedGenre(e.target.value); }} required className="h-11 min-w-0 flex-1 rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:border-violet-400 dark:border-slate-800 dark:bg-slate-900 dark:text-white transition appearance-none bg-no-repeat" style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundPosition: "right 0.5rem center", backgroundSize: "1.5em 1.5em", paddingRight: "2.5rem" }}>
+                <option value="" disabled>Select genre</option>
+                {genres.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
+                <option value="NEW" className="font-semibold text-violet-700 bg-violet-50">+ Add New Genre</option>
+              </select>
+              <button type="button" onClick={() => setModalConfig({ type: "genre" })} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-violet-200 bg-violet-50 text-violet-700 hover:bg-violet-100" aria-label="Create genre">
+                <Plus className="h-4 w-4" />
+              </button>
+            </div>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
@@ -240,7 +244,7 @@ export default function AddSongPage() {
           
           {error && <div className="rounded-xl bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">{error}</div>}
           
-          <button disabled={submitting || !artists.length} type="submit" className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-violet-700 px-4 py-3.5 text-sm font-semibold text-white hover:bg-violet-800 disabled:opacity-60 dark:bg-violet-600 dark:hover:bg-violet-500 transition shadow-sm hover:shadow">
+          <button disabled={submitting} type="submit" className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-violet-700 px-4 py-3.5 text-sm font-semibold text-white hover:bg-violet-800 disabled:opacity-60 dark:bg-violet-600 dark:hover:bg-violet-500 transition shadow-sm hover:shadow">
             <Upload className="h-4 w-4" /> {submitting ? "Uploading…" : "Upload Song"}
           </button>
         </div>

@@ -14,6 +14,7 @@ enum Role {
   ARTIST
   EDITOR
   ADMIN
+  DEV_ADMIN
 }
 
 enum SongStatus {

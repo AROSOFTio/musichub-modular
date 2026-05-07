@@ -72,32 +72,55 @@ async function main() {
   const adminPassword = process.env.ADMIN_PASSWORD?.trim();
   const adminDisplayName =
     process.env.ADMIN_DISPLAY_NAME?.trim() || "Musichub Admin";
+  const devAdminEmail = process.env.DEV_ADMIN_EMAIL?.trim().toLowerCase();
+  const devAdminPassword = process.env.DEV_ADMIN_PASSWORD?.trim();
+  const devAdminDisplayName =
+    process.env.DEV_ADMIN_DISPLAY_NAME?.trim() || "MusicHub Developer";
 
   if (!adminEmail || !adminPassword) {
     console.warn(
       "Admin seed skipped because ADMIN_EMAIL or ADMIN_PASSWORD is missing.",
     );
-    return;
+  } else {
+    const passwordHash = await bcrypt.hash(adminPassword, 12);
+
+    await prisma.user.upsert({
+      where: { email: adminEmail },
+      update: {
+        displayName: adminDisplayName,
+        passwordHash,
+        role: Role.ADMIN,
+      },
+      create: {
+        email: adminEmail,
+        displayName: adminDisplayName,
+        passwordHash,
+        role: Role.ADMIN,
+      },
+    });
+
+    console.info(`Admin seed complete for ${adminEmail}.`);
   }
 
-  const passwordHash = await bcrypt.hash(adminPassword, 12);
+  if (devAdminEmail && devAdminPassword) {
+    const devPasswordHash = await bcrypt.hash(devAdminPassword, 12);
+    await prisma.user.upsert({
+      where: { email: devAdminEmail },
+      update: {
+        displayName: devAdminDisplayName,
+        passwordHash: devPasswordHash,
+        role: Role.DEV_ADMIN,
+      },
+      create: {
+        email: devAdminEmail,
+        displayName: devAdminDisplayName,
+        passwordHash: devPasswordHash,
+        role: Role.DEV_ADMIN,
+      },
+    });
 
-  await prisma.user.upsert({
-    where: { email: adminEmail },
-    update: {
-      displayName: adminDisplayName,
-      passwordHash,
-      role: Role.ADMIN,
-    },
-    create: {
-      email: adminEmail,
-      displayName: adminDisplayName,
-      passwordHash,
-      role: Role.ADMIN,
-    },
-  });
-
-  console.info(`Admin seed complete for ${adminEmail}.`);
+    console.info(`Developer admin seed complete for ${devAdminEmail}.`);
+  }
 }
 
 main()

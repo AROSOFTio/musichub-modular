@@ -18,14 +18,14 @@ export class FeatureModulesController {
 
   @Get("admin/modules")
   @UseGuards(AccessTokenGuard, RolesGuard)
-  @Roles(Role.ADMIN)
+  @Roles(Role.DEV_ADMIN)
   getAllModules() {
     return this.featureModulesService.getAll();
   }
 
   @Get("admin/modules/flags")
   @UseGuards(AccessTokenGuard, RolesGuard)
-  @Roles(Role.ADMIN)
+  @Roles(Role.DEV_ADMIN)
   async getAdminFlags() {
     return {
       public: await this.featureModulesService.getFlags("public"),
@@ -36,7 +36,7 @@ export class FeatureModulesController {
 
   @Patch("admin/modules/:key")
   @UseGuards(AccessTokenGuard, RolesGuard)
-  @Roles(Role.ADMIN)
+  @Roles(Role.DEV_ADMIN)
   updateModule(@Param("key") key: string, @Body() dto: UpdateFeatureModuleDto) {
     return this.featureModulesService.update(key, dto);
   }

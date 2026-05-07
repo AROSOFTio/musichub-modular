@@ -141,8 +141,8 @@ export default function NewUserPage() {
 
         <div className="space-y-2">
           <label className="text-xs font-black uppercase tracking-widest text-[var(--muted)]">System Role</label>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            {(["USER", "ARTIST", "EDITOR", "ADMIN"] as UserRole[]).map((role) => (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
+            {(["USER", "ARTIST", "EDITOR", "ADMIN", "DEV_ADMIN"] as UserRole[]).map((role) => (
               <button
                 key={role}
                 type="button"
