@@ -14,7 +14,6 @@ import {
   Mic2,
   Info,
   Mail,
-  HelpCircle,
   SlidersHorizontal,
 } from "lucide-react";
 import { MODULE_KEYS } from "@/lib/modules/module-keys";
@@ -25,6 +24,7 @@ export type NavItem = {
   icon: LucideIcon;
   moduleKey?: string;
   adminModuleKey?: string;
+  requiredModuleKeys?: string[];
 };
 
 export const primaryNavigation: NavItem[] = [
@@ -36,8 +36,8 @@ export const primaryNavigation: NavItem[] = [
   { href: "/genres", label: "Genres", icon: Tags, moduleKey: MODULE_KEYS.genres },
   { href: "/search", label: "Search", icon: Search, moduleKey: MODULE_KEYS.search },
   { href: "/library", label: "Library", icon: Library, moduleKey: MODULE_KEYS.library },
-  { href: "/favorites", label: "Favorites", icon: Heart, moduleKey: MODULE_KEYS.favorites },
-  { href: "/playlists", label: "Playlists", icon: ListMusic, moduleKey: MODULE_KEYS.playlists },
+  { href: "/favorites", label: "Favorites", icon: Heart, moduleKey: MODULE_KEYS.favorites, requiredModuleKeys: [MODULE_KEYS.userRegistration] },
+  { href: "/playlists", label: "Playlists", icon: ListMusic, moduleKey: MODULE_KEYS.playlists, requiredModuleKeys: [MODULE_KEYS.userRegistration] },
   { href: "/remix-studio", label: "Remix Studio", icon: SlidersHorizontal, moduleKey: MODULE_KEYS.remix },
 ];
 
@@ -46,7 +46,6 @@ export const secondaryNavigation: NavItem[] = [
   { href: "/about", label: "About", icon: Info },
   { href: "/contact", label: "Contact", icon: Mail, moduleKey: MODULE_KEYS.contactSupport },
   { href: "/privacy", label: "Privacy", icon: Shield },
-  { href: "/admin", label: "Admin", icon: HelpCircle },
 ];
 
 export const mobileNavigation: NavItem[] = [

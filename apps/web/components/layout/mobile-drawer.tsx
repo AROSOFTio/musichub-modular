@@ -17,6 +17,7 @@ export function MobileDrawer() {
   const router = useRouter();
   const { isAuthenticated, user, logout } = useAuth();
   const modules = useModules();
+  const canAccessAdmin = user?.role === "ADMIN" || user?.role === "DEV_ADMIN";
 
   useEffect(() => {
     setIsOpen(false);
@@ -80,7 +81,7 @@ export function MobileDrawer() {
 
         {/* ── Nav links — grows & scrolls ───────────────────────── */}
         <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
-          {isAuthenticated && (
+          {isAuthenticated && canAccessAdmin && (
             <Link
               href="/admin/dashboard"
               className="mb-3 flex items-center gap-4 rounded-2xl bg-violet-50 px-4 py-3.5 text-base font-bold text-violet-700 transition-colors dark:bg-violet-900/20 dark:text-violet-300"

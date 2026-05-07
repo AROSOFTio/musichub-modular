@@ -4,10 +4,10 @@ import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { MODULE_KEYS } from "@/lib/modules/module-keys";
-import { hasModule } from "@/lib/modules/module-registry";
+import { hasModule, hasModules } from "@/lib/modules/module-registry";
 import { useModules } from "@/lib/modules/use-modules";
 
-const PUBLIC_ROUTE_MODULES: Array<{ path: string; moduleKey: string; exact?: boolean }> = [
+const PUBLIC_ROUTE_MODULES: Array<{ path: string; moduleKey: string; exact?: boolean; requiredModuleKeys?: string[] }> = [
   { path: "/trending", moduleKey: MODULE_KEYS.trending },
   { path: "/latest", moduleKey: MODULE_KEYS.latest },
   { path: "/top-50", moduleKey: MODULE_KEYS.top50 },
@@ -15,8 +15,8 @@ const PUBLIC_ROUTE_MODULES: Array<{ path: string; moduleKey: string; exact?: boo
   { path: "/genres", moduleKey: MODULE_KEYS.genres },
   { path: "/artists", moduleKey: MODULE_KEYS.artists },
   { path: "/downloads", moduleKey: MODULE_KEYS.downloads },
-  { path: "/favorites", moduleKey: MODULE_KEYS.favorites },
-  { path: "/playlists", moduleKey: MODULE_KEYS.playlists },
+  { path: "/favorites", moduleKey: MODULE_KEYS.favorites, requiredModuleKeys: [MODULE_KEYS.userRegistration] },
+  { path: "/playlists", moduleKey: MODULE_KEYS.playlists, requiredModuleKeys: [MODULE_KEYS.userRegistration] },
   { path: "/library", moduleKey: MODULE_KEYS.library },
   { path: "/search", moduleKey: MODULE_KEYS.search },
   { path: "/contact", moduleKey: MODULE_KEYS.contactSupport },
@@ -33,7 +33,7 @@ export function ModuleRouteGuard({ children }: { children: React.ReactNode }) {
       route.exact ? pathname === route.path : pathname === route.path || pathname.startsWith(`${route.path}/`)
     ));
 
-    if (match && !hasModule(modules, match.moduleKey)) {
+    if (match && (!hasModule(modules, match.moduleKey) || !hasModules(modules, match.requiredModuleKeys ?? []))) {
       router.replace("/");
     }
   }, [modules, pathname, router]);

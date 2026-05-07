@@ -4,9 +4,13 @@ import { useState } from "react";
 import { UserPlus, UserCheck } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { followArtist, unfollowArtist } from "@/lib/api-engagement";
+import { MODULE_KEYS } from "@/lib/modules/module-keys";
+import { hasModules } from "@/lib/modules/module-registry";
+import { useModules } from "@/lib/modules/use-modules";
 
 export function FollowArtistButton({ artistId }: { artistId: string }) {
   const { accessToken } = useAuth();
+  const modules = useModules();
   const [isFollowing, setIsFollowing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -27,6 +31,8 @@ export function FollowArtistButton({ artistId }: { artistId: string }) {
       setIsLoading(false);
     }
   };
+
+  if (!hasModules(modules, [MODULE_KEYS.artistRegistration, MODULE_KEYS.follows])) return null;
 
   return (
     <button

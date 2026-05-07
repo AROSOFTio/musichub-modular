@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Info, Mail, Shield } from "lucide-react";
 
 import { primaryNavigation, secondaryNavigation } from "@/lib/navigation";
 import { filterModuleItems } from "@/lib/modules/module-registry";
@@ -16,13 +15,6 @@ export function Sidebar() {
   const modules = useModules();
   const primaryItems = filterModuleItems(primaryNavigation, modules);
   const secondaryItems = filterModuleItems(secondaryNavigation, modules);
-
-  const infoLinks = [
-    { label: "About Us", href: "/about", icon: Info },
-    { label: "Contact", href: "/contact", icon: Mail, moduleKey: "contact_support" },
-    { label: "Privacy", href: "/privacy", icon: Shield },
-  ];
-  const filteredInfoLinks = filterModuleItems(infoLinks, modules);
 
   return (
     <aside className="fixed inset-y-0 left-0 hidden w-72 border-r border-borderSoft bg-[var(--card-bg)] px-5 py-6 lg:flex lg:flex-col">
@@ -68,27 +60,6 @@ export function Sidebar() {
           </div>
         </div>
 
-        <div className="mt-8 border-t border-borderSoft pt-6">
-          <p className="px-4 text-[10px] font-bold uppercase tracking-widest text-[var(--muted)]">
-            Information
-          </p>
-          <div className="mt-3 space-y-2">
-            {filteredInfoLinks.map((item) => {
-              const isActive = pathname === item.href;
-
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn("sidebar-link", isActive && "sidebar-link-active")}
-                >
-                  <item.icon className="h-5 w-5" />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
       </div>
 
     </aside>

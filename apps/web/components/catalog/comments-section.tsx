@@ -4,17 +4,25 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { getSongComments, addComment, deleteComment, Comment } from "@/lib/api-engagement";
 import { Trash } from "lucide-react";
+import { MODULE_KEYS } from "@/lib/modules/module-keys";
+import { hasModules } from "@/lib/modules/module-registry";
+import { useModules } from "@/lib/modules/use-modules";
 
 export function CommentsSection({ songId }: { songId: string }) {
   const { accessToken, user } = useAuth();
+  const modules = useModules();
   const [comments, setComments] = useState<Comment[]>([]);
   const [content, setContent] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    if (!hasModules(modules, [MODULE_KEYS.userRegistration, MODULE_KEYS.comments])) {
+      setIsLoading(false);
+      return;
+    }
     loadComments();
-  }, [songId]);
+  }, [songId, modules]);
 
   const loadComments = async () => {
     try {
@@ -56,6 +64,7 @@ export function CommentsSection({ songId }: { songId: string }) {
     }
   };
 
+  if (!hasModules(modules, [MODULE_KEYS.userRegistration, MODULE_KEYS.comments])) return null;
   if (isLoading) return <div className="mt-8 animate-pulse h-32 bg-slate-100 rounded-3xl" />;
 
   return (

@@ -55,7 +55,7 @@ export function Footer() {
   ];
 
   return (
-    <footer className="mt-20 border-t border-borderSoft bg-slate-50 dark:bg-slate-900/50 px-4 py-12 sm:px-6 lg:px-8">
+    <footer className="mt-20 border-t border-slate-200 bg-slate-100/80 px-4 py-12 text-slate-700 dark:border-slate-800 dark:bg-slate-950 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-12 lg:grid-cols-4">
           {/* Logo & About Section */}

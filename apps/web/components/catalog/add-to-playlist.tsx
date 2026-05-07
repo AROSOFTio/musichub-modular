@@ -1,12 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Check, Loader2 } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { getUserPlaylists, addSongToPlaylist, Playlist } from "@/lib/api-engagement";
+import { MODULE_KEYS } from "@/lib/modules/module-keys";
+import { hasModules } from "@/lib/modules/module-registry";
+import { useModules } from "@/lib/modules/use-modules";
 
 export function AddToPlaylist({ songId }: { songId: string }) {
   const { accessToken } = useAuth();
+  const modules = useModules();
   const [isOpen, setIsOpen] = useState(false);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -44,7 +48,7 @@ export function AddToPlaylist({ songId }: { songId: string }) {
     }
   };
 
-  if (!accessToken) return null;
+  if (!accessToken || !hasModules(modules, [MODULE_KEYS.userRegistration, MODULE_KEYS.playlists])) return null;
 
   return (
     <div className="relative">
