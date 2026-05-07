@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
 import { createRemixProject, listRemixProjects, type RemixProject } from "@/lib/api";
@@ -10,7 +10,7 @@ import { hasModule } from "@/lib/modules/module-registry";
 import { useModules } from "@/lib/modules/use-modules";
 import { RemixProjectList } from "@/components/remix/remix-project-list";
 
-export default function RemixStudioPage() {
+function RemixStudioContent() {
   const { accessToken, isAuthenticated } = useAuth();
   const modules = useModules();
   const router = useRouter();
@@ -40,5 +40,13 @@ export default function RemixStudioPage() {
       <h1 className="text-2xl font-black text-[var(--foreground)]">Remix Studio</h1>
       <RemixProjectList projects={projects} />
     </div>
+  );
+}
+
+export default function RemixStudioPage() {
+  return (
+    <Suspense fallback={null}>
+      <RemixStudioContent />
+    </Suspense>
   );
 }
