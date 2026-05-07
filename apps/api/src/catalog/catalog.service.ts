@@ -391,7 +391,7 @@ export class CatalogService {
     });
 
     if (song.isPublished) {
-      await this.notifyFollowers(song.artist.id, song.id, song.title, song.artist.name, song.slug);
+      await this.notifyFollowers(song.artist.id, song.id, song.title, song.artist.name, song.slug).catch(() => undefined);
     }
 
     return this.toSongResponse(song);
@@ -591,11 +591,23 @@ export class CatalogService {
     if (!dto.languageName) return null;
 
     const name = dto.languageName.trim();
-    return this.prisma.language.upsert({
-      where: { name },
-      update: { name },
-      create: { name },
+    if (!name) return null;
+
+    const existing = await this.prisma.language.findFirst({
+      where: { name: { equals: name, mode: "insensitive" } },
     });
+    if (existing) return existing;
+
+    try {
+      return await this.prisma.language.create({ data: { name } });
+    } catch (error: any) {
+      if (error?.code === "P2002") {
+        return this.prisma.language.findFirstOrThrow({
+          where: { name: { equals: name, mode: "insensitive" } },
+        });
+      }
+      throw error;
+    }
   }
 
   private async uniqueSongSlug(value: string, existingId?: string) {

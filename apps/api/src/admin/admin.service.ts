@@ -670,10 +670,21 @@ export class AdminService {
     });
     if (existing) return existing;
 
-    return this.prisma.language.create({
-      data: { name: cleanName },
-      include: { _count: { select: { songs: true } } },
-    });
+    try {
+      return await this.prisma.language.create({
+        data: { name: cleanName },
+        include: { _count: { select: { songs: true } } },
+      });
+    } catch (error: any) {
+      if (error?.code === "P2002") {
+        const duplicate = await this.prisma.language.findFirst({
+          where: { name: { equals: cleanName, mode: "insensitive" } },
+          include: { _count: { select: { songs: true } } },
+        });
+        if (duplicate) return duplicate;
+      }
+      throw error;
+    }
   }
 
   async updateLanguage(id: string, name: string) {
