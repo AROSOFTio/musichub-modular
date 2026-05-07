@@ -7,13 +7,14 @@ import type { CatalogSong } from "@/lib/api";
 import { MODULE_KEYS } from "@/lib/modules/module-keys";
 import { hasModule } from "@/lib/modules/module-registry";
 import { useModules } from "@/lib/modules/use-modules";
+import { formatSongArtists } from "@/lib/song-artists";
 import { usePlayerStore } from "@/lib/stores/player-store";
 
 export function toTrack(song: CatalogSong) {
   return {
     id: song.id,
     title: song.title,
-    artist: song.artist.name,
+    artist: formatSongArtists(song),
     artworkUrl: song.coverImage,
     streamUrl: song.streamUrl ?? "",
     downloadUrl: song.downloadUrl,
@@ -54,7 +55,7 @@ export function SongCard({ song, compact = false }: { song: CatalogSong; compact
           {song.title}
         </Link>
         <Link href={`/artists/${song.artist.slug}`} className="block truncate text-xs font-medium text-[var(--muted)] hover:text-violet-500">
-          {song.artist.name}
+          {formatSongArtists(song)}
         </Link>
       </div>
       <div className="flex items-center gap-1">

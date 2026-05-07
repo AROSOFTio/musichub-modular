@@ -1,5 +1,7 @@
 import {
+  ArrayMaxSize,
   IsBooleanString,
+  IsArray,
   IsDateString,
   IsInt,
   IsOptional,
@@ -7,7 +9,21 @@ import {
   MaxLength,
   Min,
 } from "class-validator";
-import { Type } from "class-transformer";
+import { Transform, Type } from "class-transformer";
+
+function toStringArray(value: unknown) {
+  if (value === undefined || value === null || value === "") return undefined;
+  if (typeof value === "string" && value.trim().startsWith("[")) {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) return parsed.map((item) => String(item).trim()).filter(Boolean);
+    } catch {
+      return value.split(",").map((item) => item.trim()).filter(Boolean);
+    }
+  }
+  const raw = Array.isArray(value) ? value : typeof value === "string" ? value.split(",") : [value];
+  return raw.map((item) => String(item).trim()).filter(Boolean);
+}
 
 export class SongUploadDto {
   @IsString()
@@ -22,6 +38,13 @@ export class SongUploadDto {
   @IsOptional()
   @IsString()
   artistId?: string;
+
+  @IsOptional()
+  @Transform(({ value }) => toStringArray(value))
+  @IsArray()
+  @ArrayMaxSize(12)
+  @IsString({ each: true })
+  featuredArtistIds?: string[];
 
   @IsOptional()
   @IsString()

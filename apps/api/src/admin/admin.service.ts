@@ -21,6 +21,10 @@ import bcrypt from "bcrypt";
 
 const SONG_INCLUDE = {
   artist: { select: { id: true, name: true, slug: true } },
+  featuredArtists: {
+    orderBy: { sortOrder: "asc" },
+    include: { artist: { select: { id: true, name: true, slug: true } } },
+  },
   genre: { select: { id: true, name: true, slug: true } },
   album: { select: { id: true, title: true } },
   musicType: { select: { id: true, name: true } },
@@ -153,7 +157,30 @@ export class AdminService {
     if (dto.seoTitle !== undefined) data["seoTitle"] = dto.seoTitle || null;
     if (dto.seoDescription !== undefined) data["seoDescription"] = dto.seoDescription || null;
 
-    return this.prisma.song.update({ where: { id }, data, include: SONG_INCLUDE });
+    const primaryArtistId = (data["artistId"] as string | undefined) ?? existing.artistId;
+    const featuredArtistIds = dto.featuredArtistIds === undefined
+      ? undefined
+      : await this.resolveFeaturedArtistIds(dto.featuredArtistIds, primaryArtistId);
+
+    return this.prisma.$transaction(async (tx) => {
+      await tx.song.update({ where: { id }, data });
+
+      if (featuredArtistIds !== undefined) {
+        await tx.songFeaturedArtist.deleteMany({ where: { songId: id } });
+        if (featuredArtistIds.length) {
+          await tx.songFeaturedArtist.createMany({
+            data: featuredArtistIds.map((artistId, sortOrder) => ({
+              songId: id,
+              artistId,
+              sortOrder,
+            })),
+            skipDuplicates: true,
+          });
+        }
+      }
+
+      return tx.song.findUniqueOrThrow({ where: { id }, include: SONG_INCLUDE });
+    });
   }
 
   async deleteAdminSong(id: string) {
@@ -195,6 +222,28 @@ export class AdminService {
       },
       include: { _count: { select: { songs: true, followers: true } } },
     });
+  }
+
+  private normalizeArtistIds(value?: string[] | string) {
+    const raw = Array.isArray(value) ? value : typeof value === "string" ? value.split(",") : [];
+    return Array.from(new Set(raw.map((item) => String(item).trim()).filter(Boolean)));
+  }
+
+  private async resolveFeaturedArtistIds(value: string[] | string | undefined, primaryArtistId: string) {
+    const ids = this.normalizeArtistIds(value).filter((artistId) => artistId !== primaryArtistId);
+    if (!ids.length) return [];
+
+    const artists = await this.prisma.artist.findMany({
+      where: { id: { in: ids } },
+      select: { id: true },
+    });
+    const found = new Set(artists.map((artist) => artist.id));
+    const missing = ids.filter((artistId) => !found.has(artistId));
+    if (missing.length) {
+      throw new BadRequestException("One or more featured artists were not found.");
+    }
+
+    return ids;
   }
 
   async updateArtist(id: string, dto: UpsertArtistDto) {

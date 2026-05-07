@@ -21,6 +21,11 @@ const STATUS_FILTERS = [
 
 type SongsListProps = { status?: string; title: string; description: string };
 
+function formatAdminSongArtists(song: AdminSong) {
+  const featuredNames = song.featuredArtists?.map((item) => item.artist.name).filter(Boolean) ?? [];
+  return featuredNames.length ? `${song.artist.name} feat. ${featuredNames.join(", ")}` : song.artist.name;
+}
+
 export function AdminSongsTable({ status, title, description }: SongsListProps) {
   const { accessToken } = useAuth();
   const [songs, setSongs] = useState<AdminSong[]>([]);
@@ -68,7 +73,7 @@ export function AdminSongsTable({ status, title, description }: SongsListProps) 
     setSongs((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
   }
 
-  const artistOptions = Array.from(new Map(songs.map((song) => [song.artist.id, song.artist])).values())
+  const artistOptions = Array.from(new Map(songs.flatMap((song) => [song.artist, ...(song.featuredArtists?.map((item) => item.artist) ?? [])]).map((artist) => [artist.id, artist])).values())
     .sort((a, b) => a.name.localeCompare(b.name));
   const genreOptions = Array.from(new Map(songs.map((song) => [song.genre.id, song.genre])).values())
     .sort((a, b) => a.name.localeCompare(b.name));
@@ -82,11 +87,12 @@ export function AdminSongsTable({ status, title, description }: SongsListProps) 
       !term ||
       s.title.toLowerCase().includes(term) ||
       s.artist.name.toLowerCase().includes(term) ||
+      Boolean(s.featuredArtists?.some((item) => item.artist.name.toLowerCase().includes(term))) ||
       s.genre.name.toLowerCase().includes(term) ||
       s.language?.name.toLowerCase().includes(term);
     return (
       matchesSearch &&
-      (!artistFilter || s.artist.id === artistFilter) &&
+      (!artistFilter || s.artist.id === artistFilter || Boolean(s.featuredArtists?.some((item) => item.artist.id === artistFilter))) &&
       (!genreFilter || s.genre.id === genreFilter) &&
       (!languageFilter || s.language?.id === languageFilter)
     );
@@ -205,7 +211,7 @@ export function AdminSongsTable({ status, title, description }: SongsListProps) 
                       <span className="max-w-[160px] truncate font-medium text-slate-900">{song.title}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-slate-600">{song.artist.name}</td>
+                  <td className="max-w-[220px] truncate px-4 py-3 text-slate-600">{formatAdminSongArtists(song)}</td>
                   <td className="px-4 py-3 text-slate-500">{song.genre.name}</td>
                   <td className="px-4 py-3 text-slate-500">{song.language?.name ?? "None"}</td>
                   <td className="px-4 py-3"><StatusBadge status={song.status} /></td>

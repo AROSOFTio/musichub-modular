@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Search as SearchIcon, Music, Users, Layers } from "lucide-react";
 import Link from "next/link";
 import { searchAll, CatalogSong, CatalogArtist, CatalogGenre, SearchResult } from "@/lib/api";
+import { formatSongArtists } from "@/lib/song-artists";
 import { usePlayerStore } from "@/lib/stores/player-store";
 
 function useDebounce<T>(value: T, delay: number): T {
@@ -34,11 +35,11 @@ function SongResult({ song }: { song: CatalogSong }) {
           {song.title}
         </Link>
         <Link href={`/artists/${song.artist.slug}`} className="block truncate text-sm text-slate-500 hover:text-violet-600">
-          {song.artist.name} · {song.genre.name}
+          {formatSongArtists(song)} · {song.genre.name}
         </Link>
       </div>
       <button
-        onClick={() => playTrack({ id: song.id, title: song.title, artist: song.artist.name, artworkUrl: song.coverImage, streamUrl: song.streamUrl, downloadUrl: song.downloadUrl, duration: song.duration ?? undefined })}
+        onClick={() => playTrack({ id: song.id, title: song.title, artist: formatSongArtists(song), artworkUrl: song.coverImage, streamUrl: song.streamUrl, downloadUrl: song.downloadUrl, duration: song.duration ?? undefined })}
         className="shrink-0 rounded-full bg-violet-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-violet-700"
       >
         Play

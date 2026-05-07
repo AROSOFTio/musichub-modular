@@ -21,6 +21,10 @@ type SongFiles = {
 
 const songInclude = {
   artist: true,
+  featuredArtists: {
+    orderBy: { sortOrder: "asc" },
+    include: { artist: true },
+  },
   genre: true,
   language: true,
   musicType: true,
@@ -32,7 +36,7 @@ const songInclude = {
       role: true,
     },
   },
-};
+} as const;
 
 @Injectable()
 export class CatalogService {
@@ -53,6 +57,7 @@ export class CatalogService {
               OR: [
                 { title: { contains: search, mode: "insensitive" } },
                 { artist: { name: { contains: search, mode: "insensitive" } } },
+                { featuredArtists: { some: { artist: { name: { contains: search, mode: "insensitive" } } } } },
                 { genre: { name: { contains: search, mode: "insensitive" } } },
               ],
             }
@@ -180,6 +185,7 @@ export class CatalogService {
             { title: { contains: q, mode: "insensitive" } },
             { description: { contains: q, mode: "insensitive" } },
             { artist: { name: { contains: q, mode: "insensitive" } } },
+            { featuredArtists: { some: { artist: { name: { contains: q, mode: "insensitive" } } } } },
           ],
         },
         include: songInclude,
@@ -365,6 +371,7 @@ export class CatalogService {
     const artist = await this.resolveArtist(dto, user);
     const genre = await this.resolveGenre(dto);
     const language = await this.resolveLanguage(dto);
+    const featuredArtistIds = await this.resolveFeaturedArtistIds(dto.featuredArtistIds, artist.id);
     const slug = await this.uniqueSongSlug(dto.slug || dto.title);
 
     const song = await this.prisma.song.create({
@@ -388,6 +395,14 @@ export class CatalogService {
         status: this.booleanFromString(dto.isPublished, true) ? SongStatus.PUBLISHED : SongStatus.DRAFT,
         allowDownload: this.booleanFromString(dto.allowDownload, true),
         allowRemix: this.booleanFromString(dto.allowRemix, false),
+        featuredArtists: featuredArtistIds.length
+          ? {
+              create: featuredArtistIds.map((artistId, sortOrder) => ({
+                artistId,
+                sortOrder,
+              })),
+            }
+          : undefined,
       },
       include: songInclude,
     });
@@ -432,41 +447,62 @@ export class CatalogService {
     const artist = dto.artistId || dto.artistName ? await this.resolveArtist(dto, user) : null;
     const genre = dto.genreId || dto.genreName ? await this.resolveGenre(dto) : null;
     const language = dto.languageId || dto.languageName ? await this.resolveLanguage(dto) : null;
+    const nextArtistId = artist?.id ?? existing.artistId;
+    const featuredArtistIds = dto.featuredArtistIds === undefined
+      ? undefined
+      : await this.resolveFeaturedArtistIds(dto.featuredArtistIds, nextArtistId);
     const nextSlug =
       dto.slug || (dto.title && dto.title.trim() !== existing.title)
         ? await this.uniqueSongSlug(dto.slug || dto.title || existing.title, existing.id)
         : existing.slug;
 
-    const song = await this.prisma.song.update({
-      where: { id: existing.id },
-      data: {
-        title: dto.title?.trim() || existing.title,
-        slug: nextSlug,
-        artistId: artist?.id ?? existing.artistId,
-        genreId: genre?.id ?? existing.genreId,
-        albumId: dto.albumId === undefined ? existing.albumId : dto.albumId || null,
-        musicTypeId: dto.musicTypeId === undefined ? existing.musicTypeId : dto.musicTypeId || null,
-        languageId: language?.id ?? existing.languageId,
-        coverImage: coverFile?.publicUrl ?? existing.coverImage,
-        audioFile: audioFile?.relativePath ?? existing.audioFile,
-        duration:
-          dto.duration === undefined ? existing.duration : this.optionalNumber(dto.duration),
-        description:
-          dto.description === undefined ? existing.description : dto.description?.trim() || null,
-        seoTitle: dto.seoTitle === undefined ? existing.seoTitle : dto.seoTitle?.trim() || null,
-        seoDescription: dto.seoDescription === undefined ? existing.seoDescription : dto.seoDescription?.trim() || null,
-        releaseDate:
-          dto.releaseDate === undefined
-            ? existing.releaseDate
-            : dto.releaseDate
-              ? new Date(dto.releaseDate)
-              : null,
-        isPublished: nextIsPublished,
-        status: nextIsPublished && existing.status === SongStatus.DRAFT ? SongStatus.PUBLISHED : existing.status,
-        allowDownload: this.booleanFromString(dto.allowDownload, existing.allowDownload),
-        allowRemix: this.booleanFromString(dto.allowRemix, existing.allowRemix),
-      },
-      include: songInclude,
+    const song = await this.prisma.$transaction(async (tx) => {
+      await tx.song.update({
+        where: { id: existing.id },
+        data: {
+          title: dto.title?.trim() || existing.title,
+          slug: nextSlug,
+          artistId: nextArtistId,
+          genreId: genre?.id ?? existing.genreId,
+          albumId: dto.albumId === undefined ? existing.albumId : dto.albumId || null,
+          musicTypeId: dto.musicTypeId === undefined ? existing.musicTypeId : dto.musicTypeId || null,
+          languageId: language?.id ?? existing.languageId,
+          coverImage: coverFile?.publicUrl ?? existing.coverImage,
+          audioFile: audioFile?.relativePath ?? existing.audioFile,
+          duration:
+            dto.duration === undefined ? existing.duration : this.optionalNumber(dto.duration),
+          description:
+            dto.description === undefined ? existing.description : dto.description?.trim() || null,
+          seoTitle: dto.seoTitle === undefined ? existing.seoTitle : dto.seoTitle?.trim() || null,
+          seoDescription: dto.seoDescription === undefined ? existing.seoDescription : dto.seoDescription?.trim() || null,
+          releaseDate:
+            dto.releaseDate === undefined
+              ? existing.releaseDate
+              : dto.releaseDate
+                ? new Date(dto.releaseDate)
+                : null,
+          isPublished: nextIsPublished,
+          status: nextIsPublished && existing.status === SongStatus.DRAFT ? SongStatus.PUBLISHED : existing.status,
+          allowDownload: this.booleanFromString(dto.allowDownload, existing.allowDownload),
+          allowRemix: this.booleanFromString(dto.allowRemix, existing.allowRemix),
+        },
+      });
+
+      if (featuredArtistIds !== undefined) {
+        await tx.songFeaturedArtist.deleteMany({ where: { songId: existing.id } });
+        if (featuredArtistIds.length) {
+          await tx.songFeaturedArtist.createMany({
+            data: featuredArtistIds.map((artistId, sortOrder) => ({
+              songId: existing.id,
+              artistId,
+              sortOrder,
+            })),
+            skipDuplicates: true,
+          });
+        }
+      }
+
+      return tx.song.findUniqueOrThrow({ where: { id: existing.id }, include: songInclude });
     });
 
     return this.toSongResponse(song);
@@ -612,6 +648,28 @@ export class CatalogService {
     }
   }
 
+  private normalizeArtistIds(value?: string[] | string) {
+    const raw = Array.isArray(value) ? value : typeof value === "string" ? value.split(",") : [];
+    return Array.from(new Set(raw.map((item) => String(item).trim()).filter(Boolean)));
+  }
+
+  private async resolveFeaturedArtistIds(value: string[] | string | undefined, primaryArtistId: string) {
+    const ids = this.normalizeArtistIds(value).filter((artistId) => artistId !== primaryArtistId);
+    if (!ids.length) return [];
+
+    const artists = await this.prisma.artist.findMany({
+      where: { id: { in: ids } },
+      select: { id: true },
+    });
+    const found = new Set(artists.map((artist) => artist.id));
+    const missing = ids.filter((artistId) => !found.has(artistId));
+    if (missing.length) {
+      throw new BadRequestException("One or more featured artists were not found.");
+    }
+
+    return ids;
+  }
+
   private async uniqueSongSlug(value: string, existingId?: string) {
     return this.uniqueSlug(value, async (slug) => {
       const song = await this.prisma.song.findUnique({ where: { slug } });
@@ -657,7 +715,7 @@ export class CatalogService {
     return value === "true" || value === "1" || value === "on";
   }
 
-  private toSongResponse(song: Song & { artist: any; genre: any; language?: any; musicType?: any }, modules?: Record<string, boolean>) {
+  private toSongResponse(song: Song & { artist: any; featuredArtists?: Array<{ artist: any }>; genre: any; language?: any; musicType?: any }, modules?: Record<string, boolean>) {
     const canStream = modules?.streaming ?? true;
     const canDownload = modules?.downloads ?? true;
     const canRemix = modules?.remix ?? true;
@@ -666,6 +724,7 @@ export class CatalogService {
       title: song.title,
       slug: song.slug,
       artist: song.artist,
+      featuredArtists: song.featuredArtists?.map((item) => item.artist) ?? [],
       genre: song.genre,
       language: song.language ?? null,
       musicType: song.musicType ?? null,

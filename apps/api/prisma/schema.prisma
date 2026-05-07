@@ -125,9 +125,10 @@ model Artist {
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
 
-  songs     Song[]
-  followers Follow[]
-  albums    Album[]
+  songs         Song[]
+  featuredSongs SongFeaturedArtist[]
+  followers     Follow[]
+  albums        Album[]
 
   @@map("artists")
 }
@@ -234,12 +235,13 @@ model Song {
   musicType MusicType? @relation(fields: [musicTypeId], references: [id], onDelete: SetNull)
   language  Language?  @relation(fields: [languageId], references: [id], onDelete: SetNull)
 
-  likes        Like[]
-  favorites    Favorite[]
-  playlists    PlaylistSong[]
-  playHistory  PlayHistory[]
-  comments     Comment[]
-  editorPicks  EditorPick[]
+  likes           Like[]
+  favorites       Favorite[]
+  playlists       PlaylistSong[]
+  playHistory     PlayHistory[]
+  comments        Comment[]
+  editorPicks     EditorPick[]
+  featuredArtists SongFeaturedArtist[]
   remixProjects RemixProject[] @relation("SourceSongRemixProjects")
 
   @@index([artistId])
@@ -251,6 +253,21 @@ model Song {
   @@index([isPublished, releaseDate])
   @@index([status])
   @@map("songs")
+}
+
+model SongFeaturedArtist {
+  id        String   @id @default(uuid())
+  songId    String
+  artistId  String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  song   Song   @relation(fields: [songId], references: [id], onDelete: Cascade)
+  artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+
+  @@unique([songId, artistId])
+  @@index([artistId])
+  @@map("song_featured_artists")
 }
 
 // ─── Discovery / Editorial Models ───────────────────────────────────────────

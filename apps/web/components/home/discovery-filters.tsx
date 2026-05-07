@@ -90,7 +90,7 @@ export function filterDiscoverySongs(songs: CatalogSong[], filters: DiscoveryFil
     })();
 
     return (
-      (!filters.artist || song.artist.id === filters.artist) &&
+      (!filters.artist || song.artist.id === filters.artist || song.featuredArtists?.some((artist) => artist.id === filters.artist)) &&
       (!filters.genre || song.genre.id === filters.genre) &&
       (!filters.language || song.language?.id === filters.language) &&
       (!filters.musicType || song.musicType?.id === filters.musicType) &&
@@ -117,7 +117,7 @@ export function DiscoveryFilters({
   onChange: (filters: DiscoveryFilterState) => void;
   compact?: boolean;
 }) {
-  const artistOptions = uniqueOptions(songs.map((song) => song.artist));
+  const artistOptions = uniqueOptions(songs.flatMap((song) => [song.artist, ...(song.featuredArtists ?? [])]));
   const genreOptions = uniqueOptions(songs.map((song) => song.genre));
   const languageOptions = uniqueOptions(songs.map((song) => song.language));
   const typeOptions = uniqueOptions(songs.map((song) => song.musicType));

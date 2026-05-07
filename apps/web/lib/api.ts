@@ -136,6 +136,7 @@ export type CatalogSong = {
   title: string;
   slug: string;
   artist: CatalogArtist;
+  featuredArtists?: CatalogArtist[];
   genre: CatalogGenre;
   language?: { id: string; name: string } | null;
   musicType?: { id: string; name: string; slug?: string } | null;
@@ -161,6 +162,7 @@ export type AdminSong = {
   slug: string;
   status: string;
   artist: { id: string; name: string; slug: string };
+  featuredArtists?: Array<{ artist: { id: string; name: string; slug: string } }>;
   genre: { id: string; name: string; slug: string };
   album: { id: string; title: string } | null;
   musicType: { id: string; name: string } | null;

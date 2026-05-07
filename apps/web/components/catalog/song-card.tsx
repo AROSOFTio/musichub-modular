@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Download, Play } from "lucide-react";
 
 import { CatalogSong } from "@/lib/api";
+import { formatSongArtists } from "@/lib/song-artists";
 import { usePlayerStore } from "@/lib/stores/player-store";
 
 type SongCardProps = {
@@ -15,7 +16,7 @@ function toPlayerTrack(song: CatalogSong) {
   return {
     id: song.id,
     title: song.title,
-    artist: song.artist.name,
+    artist: formatSongArtists(song),
     artworkUrl: song.coverImage,
     streamUrl: song.streamUrl,
     downloadUrl: song.downloadUrl,
@@ -50,7 +51,7 @@ export function SongCard({ song, queue }: SongCardProps) {
             {song.title}
           </Link>
           <p className="mt-1 line-clamp-1 text-sm text-slate-500">
-            {song.artist.name} · {song.genre.name}
+            {formatSongArtists(song)} · {song.genre.name}
           </p>
           <p className="mt-2 text-xs font-medium text-slate-400">
             {song.downloadCount} downloads

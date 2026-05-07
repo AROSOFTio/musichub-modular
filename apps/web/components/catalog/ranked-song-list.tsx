@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Play, Download, Music } from "lucide-react";
 import { CatalogSong } from "@/lib/api";
+import { formatSongArtists } from "@/lib/song-artists";
 import { usePlayerStore } from "@/lib/stores/player-store";
 
 type Props = {
@@ -23,7 +24,7 @@ export function RankedSongList({ songs, showRank = false, showDownloads = false 
   const toTrack = (song: CatalogSong) => ({
     id: song.id,
     title: song.title,
-    artist: song.artist.name,
+    artist: formatSongArtists(song),
     artworkUrl: song.coverImage,
     streamUrl: song.streamUrl,
     downloadUrl: song.downloadUrl,
@@ -69,7 +70,7 @@ export function RankedSongList({ songs, showRank = false, showDownloads = false 
               href={`/artists/${song.artist.slug}`}
               className="block truncate text-xs text-slate-500 hover:text-violet-600"
             >
-              {song.artist.name}
+              {formatSongArtists(song)}
               <span className="text-slate-300"> · </span>
               {song.genre.name}
             </Link>

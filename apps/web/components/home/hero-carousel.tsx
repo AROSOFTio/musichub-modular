@@ -4,6 +4,7 @@ import Link from "next/link";
 import { BadgeCheck, ChevronLeft, ChevronRight, Download, Play, SlidersHorizontal } from "lucide-react";
 
 import type { CatalogSong } from "@/lib/api";
+import { formatSongArtists } from "@/lib/song-artists";
 import { MODULE_KEYS } from "@/lib/modules/module-keys";
 import { hasModule } from "@/lib/modules/module-registry";
 import { useModules } from "@/lib/modules/use-modules";
@@ -29,7 +30,7 @@ export function HeroCarousel({ song }: { song: CatalogSong | null }) {
       <div className="relative z-10 min-h-[280px] px-6 py-8 sm:min-h-[340px] sm:px-10 lg:px-12">
         <div className="flex items-center gap-2 text-xs font-bold text-violet-100">
           <BadgeCheck className="h-4 w-4 fill-violet-500 text-white" />
-          {song.artist.name}
+          {formatSongArtists(song)}
         </div>
         <h1 className="mt-5 max-w-xl text-4xl font-black tracking-tight sm:text-6xl">{song.title}</h1>
         <div className="mt-8 flex flex-wrap gap-3">

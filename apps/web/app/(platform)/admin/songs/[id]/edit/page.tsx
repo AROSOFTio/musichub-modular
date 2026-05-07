@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Save, X } from "lucide-react";
+import { Plus, Save, X } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import {
   listAdminArtists,
@@ -38,11 +38,12 @@ export default function EditSongPage({ params }: { params: { id: string } }) {
   const [languages, setLanguages] = useState<AdminLanguage[]>([]);
   
   const [selectedArtist, setSelectedArtist] = useState("");
+  const [featuredArtistIds, setFeaturedArtistIds] = useState<string[]>([]);
   const [selectedGenre, setSelectedGenre] = useState("");
   const [selectedAlbum, setSelectedAlbum] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("");
 
-  const [modalConfig, setModalConfig] = useState<{ type: "artist" | "genre" | "album" | "language" } | null>(null);
+  const [modalConfig, setModalConfig] = useState<{ type: "artist" | "genre" | "album" | "language"; target?: "primary" | "featured" } | null>(null);
   const [modalInput, setModalInput] = useState("");
   const [modalLoading, setModalLoading] = useState(false);
   
@@ -63,12 +64,18 @@ export default function EditSongPage({ params }: { params: { id: string } }) {
       setSong(s);
       setArtists(a); setGenres(g); setAlbums(al); setMusicTypes(mt); setLanguages(l);
       setSelectedArtist(s.artist.id);
+      setFeaturedArtistIds(s.featuredArtists?.map((item) => item.artist.id) ?? []);
       setSelectedGenre(s.genre.id);
       setSelectedAlbum(s.album?.id ?? "");
       setSelectedLanguage(s.language?.id ?? "");
     }).catch(() => setError("Failed to load song data."))
       .finally(() => setLoading(false));
   }, [accessToken, id]);
+
+  useEffect(() => {
+    if (!selectedArtist) return;
+    setFeaturedArtistIds((current) => current.filter((artistId) => artistId !== selectedArtist));
+  }, [selectedArtist]);
 
   async function handleModalSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -84,7 +91,12 @@ export default function EditSongPage({ params }: { params: { id: string } }) {
           fd.append("avatar", fileInput.files[0]);
         }
         const a = await createAdminArtist(accessToken, fd);
-        setArtists(p => [...p, a]); setSelectedArtist(a.id);
+        setArtists(p => [...p, a]);
+        if (modalConfig.target === "featured") {
+          setFeaturedArtistIds((current) => Array.from(new Set([...current, a.id])));
+        } else {
+          setSelectedArtist(a.id);
+        }
       } else if (modalConfig.type === "genre") {
         const g = await createAdminGenre(accessToken, { name: modalInput });
         setGenres(p => [...p, g]); setSelectedGenre(g.id);
@@ -113,6 +125,7 @@ export default function EditSongPage({ params }: { params: { id: string } }) {
       const fd = new FormData(e.currentTarget);
       const payload: Record<string, any> = {};
       fd.forEach((value, key) => { payload[key] = value; });
+      payload.featuredArtistIds = featuredArtistIds;
       
       // Handle checkboxes
       payload.isPublished = fd.get("isPublished") === "true";
@@ -189,7 +202,7 @@ export default function EditSongPage({ params }: { params: { id: string } }) {
           <input name="title" defaultValue={song.title} required maxLength={140} placeholder="Song title" className="h-11 w-full rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100 dark:border-slate-800 dark:bg-slate-900 dark:text-white transition" />
           
           <div className="grid gap-3 sm:grid-cols-2">
-            <select name="artistId" value={selectedArtist} onChange={e => { if (e.target.value === 'NEW') setModalConfig({ type: 'artist' }); else setSelectedArtist(e.target.value); }} required className="h-11 w-full rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:border-violet-400 dark:border-slate-800 dark:bg-slate-900 dark:text-white transition appearance-none bg-no-repeat" style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundPosition: "right 0.5rem center", backgroundSize: "1.5em 1.5em", paddingRight: "2.5rem" }}>
+            <select name="artistId" value={selectedArtist} onChange={e => { if (e.target.value === 'NEW') setModalConfig({ type: 'artist', target: "primary" }); else setSelectedArtist(e.target.value); }} required className="h-11 w-full rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:border-violet-400 dark:border-slate-800 dark:bg-slate-900 dark:text-white transition appearance-none bg-no-repeat" style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e\")", backgroundPosition: "right 0.5rem center", backgroundSize: "1.5em 1.5em", paddingRight: "2.5rem" }}>
               {artists.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
               <option value="NEW" className="font-semibold text-violet-700 bg-violet-50">+ Add New Artist</option>
             </select>
@@ -198,6 +211,42 @@ export default function EditSongPage({ params }: { params: { id: string } }) {
               {genres.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
               <option value="NEW" className="font-semibold text-violet-700 bg-violet-50">+ Add New Genre</option>
             </select>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 p-4 dark:border-slate-800">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200">Featuring artists</h3>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Select every artist featured on this track.</p>
+              </div>
+              <button type="button" onClick={() => setModalConfig({ type: "artist", target: "featured" })} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-violet-200 bg-violet-50 text-violet-700 hover:bg-violet-100" aria-label="Create featured artist">
+                <Plus className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="mt-3 grid max-h-44 gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
+              {artists.filter((artist) => artist.id !== selectedArtist).map((artist) => (
+                <label key={artist.id} className="flex items-center gap-2 rounded-xl border border-slate-100 px-3 py-2 text-sm text-slate-700 dark:border-slate-800 dark:text-slate-300">
+                  <input
+                    type="checkbox"
+                    name="featuredArtistIds"
+                    value={artist.id}
+                    checked={featuredArtistIds.includes(artist.id)}
+                    onChange={(event) => {
+                      setFeaturedArtistIds((current) =>
+                        event.target.checked
+                          ? Array.from(new Set([...current, artist.id]))
+                          : current.filter((id) => id !== artist.id),
+                      );
+                    }}
+                    className="h-4 w-4 rounded border-slate-300 text-violet-600 focus:ring-violet-600"
+                  />
+                  <span className="truncate">{artist.name}</span>
+                </label>
+              ))}
+              {artists.filter((artist) => artist.id !== selectedArtist).length === 0 ? (
+                <p className="text-sm text-slate-500">No other artists available yet.</p>
+              ) : null}
+            </div>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">

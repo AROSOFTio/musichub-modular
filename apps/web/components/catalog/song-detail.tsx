@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Download, Play } from "lucide-react";
 
 import { CatalogSong, getSong } from "@/lib/api";
+import { formatSongArtists } from "@/lib/song-artists";
 import { usePlayerStore } from "@/lib/stores/player-store";
 import { EngagementButtons } from "./engagement-buttons";
 import { CommentsSection } from "./comments-section";
@@ -78,7 +79,7 @@ export function SongDetail({ slug }: SongDetailProps) {
         <h1 className="mt-4 text-3xl font-semibold tracking-tight text-slate-950">
           {song.title}
         </h1>
-        <p className="mt-2 text-lg font-medium text-slate-600">{song.artist.name}</p>
+        <p className="mt-2 text-lg font-medium text-slate-600">{formatSongArtists(song)}</p>
         {song.description ? (
           <p className="mt-4 text-sm leading-7 text-slate-500">{song.description}</p>
         ) : null}
@@ -90,7 +91,7 @@ export function SongDetail({ slug }: SongDetailProps) {
               playTrack({
                 id: song.id,
                 title: song.title,
-                artist: song.artist.name,
+                artist: formatSongArtists(song),
                 artworkUrl: song.coverImage,
                 streamUrl: song.streamUrl,
                 downloadUrl: song.downloadUrl,
