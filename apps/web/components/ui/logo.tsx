@@ -13,7 +13,7 @@ export function Logo({ className, href = "/" }: { className?: string; href?: str
       {!imgError ? (
         <Image
           src="/brand/musichub-logo.png"
-          alt="Musichub"
+          alt="MusicHub"
           width={120}
           height={36}
           priority
@@ -21,8 +21,8 @@ export function Logo({ className, href = "/" }: { className?: string; href?: str
           className="h-9 w-auto object-contain"
         />
       ) : (
-        <span className="text-xl font-bold tracking-tight text-slate-900">
-          Music<span className="text-violet-700">hub</span>
+        <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+          Music<span className="text-violet-700">Hub</span>
         </span>
       )}
     </Link>
