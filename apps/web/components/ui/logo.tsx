@@ -14,14 +14,14 @@ export function Logo({ className, href = "/" }: { className?: string; href?: str
         <Image
           src="/brand/musichub-logo.png"
           alt="MusicHub"
-          width={120}
-          height={36}
+          width={168}
+          height={50}
           priority
           onError={() => setImgError(true)}
-          className="h-9 w-auto object-contain"
+          className="h-11 w-auto object-contain sm:h-12"
         />
       ) : (
-        <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+        <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
           Music<span className="text-violet-700">Hub</span>
         </span>
       )}
