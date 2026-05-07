@@ -5,9 +5,13 @@ import { Logo } from "../ui/logo";
 import { MobileDrawer } from "./mobile-drawer";
 import Link from "next/link";
 import { Search } from "lucide-react";
+import { MODULE_KEYS } from "@/lib/modules/module-keys";
+import { hasModule } from "@/lib/modules/module-registry";
+import { useModules } from "@/lib/modules/use-modules";
 
 export function MobileHeader() {
   const { isAuthenticated } = useAuth();
+  const modules = useModules();
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white px-4 py-3 lg:hidden shadow-sm">
@@ -19,12 +23,14 @@ export function MobileHeader() {
 
         {/* Right: search only — login/logout lives inside the drawer */}
         <div className="flex items-center gap-2">
-          <Link
-            href="/search"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-600 transition-colors hover:bg-slate-100"
-          >
-            <Search className="h-4 w-4" />
-          </Link>
+          {hasModule(modules, MODULE_KEYS.search) ? (
+            <Link
+              href="/search"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-600 transition-colors hover:bg-slate-100"
+            >
+              <Search className="h-4 w-4" />
+            </Link>
+          ) : null}
           {isAuthenticated && (
             <Link
               href="/admin/dashboard"

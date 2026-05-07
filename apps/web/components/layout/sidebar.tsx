@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Info, Mail, Shield, HelpCircle } from "lucide-react";
+import { Info, Mail, Shield } from "lucide-react";
 
 import { primaryNavigation, secondaryNavigation } from "@/lib/navigation";
 import { filterModuleItems } from "@/lib/modules/module-registry";
@@ -91,17 +91,6 @@ export function Sidebar() {
         </div>
       </div>
 
-      <div className="mt-auto pt-6">
-        <div className="rounded-3xl border border-borderSoft bg-[var(--surface)] p-5">
-          <div className="flex items-center gap-2 text-violet-600">
-            <HelpCircle className="h-4 w-4" />
-            <p className="text-xs font-bold uppercase tracking-wider">Platform Rule</p>
-          </div>
-          <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
-            Normal song downloads stay free. Remix monetization comes later.
-          </p>
-        </div>
-      </div>
     </aside>
   );
 }

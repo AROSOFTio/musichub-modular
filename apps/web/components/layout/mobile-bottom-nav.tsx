@@ -12,10 +12,13 @@ export function MobileBottomNav() {
   const pathname = usePathname();
   const modules = useModules();
   const items = filterModuleItems(mobileNavigation, modules).slice(0, 5);
+  const gridCols = ["", "grid-cols-1", "grid-cols-2", "grid-cols-3", "grid-cols-4", "grid-cols-5"][
+    Math.max(1, Math.min(5, items.length))
+  ];
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-borderSoft bg-white/95 px-4 py-3 backdrop-blur lg:hidden">
-      <div className="mx-auto grid max-w-md grid-cols-5 gap-2">
+      <div className={`mx-auto grid max-w-md ${gridCols} gap-2`}>
         {items.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 

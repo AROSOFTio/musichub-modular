@@ -12,7 +12,7 @@ const supportFiles = FileFieldsInterceptor([
   { name: "advertImage", maxCount: 1 },
   { name: "proofAttachment", maxCount: 1 },
   { name: "attachment", maxCount: 1 },
-], { limits: { fileSize: 10 * 1024 * 1024 } });
+], { limits: { fileSize: Number(process.env.SUPPORT_UPLOAD_MAX_BYTES || 10 * 1024 * 1024) } });
 
 @Controller("support")
 export class SupportController {

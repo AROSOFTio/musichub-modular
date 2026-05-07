@@ -3,25 +3,29 @@
 import Link from "next/link";
 import { Twitter, Instagram, Facebook, ExternalLink } from "lucide-react";
 import { Logo } from "../ui/logo";
+import { MODULE_KEYS } from "@/lib/modules/module-keys";
+import { filterModuleItems } from "@/lib/modules/module-registry";
+import { useModules } from "@/lib/modules/use-modules";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
+  const modules = useModules();
 
   const footerSections = [
     {
       title: "Platform",
       links: [
-        { label: "Home", href: "/" },
-        { label: "Trending", href: "/trending" },
-        { label: "Latest Uploads", href: "/latest" },
-        { label: "Genres", href: "/genres" },
-        { label: "Popular Artists", href: "/artists" },
+        { label: "Home", href: "/", moduleKey: MODULE_KEYS.home },
+        { label: "Trending", href: "/trending", moduleKey: MODULE_KEYS.trending },
+        { label: "Latest Uploads", href: "/latest", moduleKey: MODULE_KEYS.latest },
+        { label: "Genres", href: "/genres", moduleKey: MODULE_KEYS.genres },
+        { label: "Popular Artists", href: "/artists", moduleKey: MODULE_KEYS.artists },
       ],
     },
     {
       title: "Support",
       links: [
-        { label: "Contact Us", href: "/contact" },
+        { label: "Contact Us", href: "/contact", moduleKey: MODULE_KEYS.contactSupport },
         { label: "About MusicHub", href: "/about" },
         { label: "Privacy Policy", href: "/privacy" },
         { label: "Terms of Service", href: "/terms" },
@@ -31,8 +35,8 @@ export function Footer() {
       title: "For Artists",
       links: [
         { label: "Artist Login", href: "/login" },
-        { label: "Upload Music", href: "/admin/songs/new" },
-        { label: "Verification", href: "/about" },
+        { label: "Artist Registration", href: "/register?type=artist", moduleKey: MODULE_KEYS.artistRegistration },
+        { label: "Upload Music", href: "/admin/songs/new", moduleKey: MODULE_KEYS.upload },
       ],
     },
   ];
@@ -46,7 +50,7 @@ export function Footer() {
             <Logo />
             <p className="text-sm leading-6 text-[var(--muted)]">
               MusicHub is a premier music streaming platform dedicated to independent artists. 
-              Discover, stream, and download high-quality music for free.
+              Discover and stream high-quality music from independent artists.
             </p>
             <div className="flex gap-4">
               <Link href="#" className="text-[var(--muted)] hover:text-violet-600 transition-colors">
@@ -68,7 +72,7 @@ export function Footer() {
                 {section.title}
               </h3>
               <ul className="mt-4 space-y-3">
-                {section.links.map((link) => (
+                {filterModuleItems(section.links, modules).map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}

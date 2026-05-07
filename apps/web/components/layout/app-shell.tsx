@@ -4,6 +4,7 @@ import { MobileHeader } from "./mobile-header";
 import { Sidebar } from "./sidebar";
 import { TopNav } from "./top-nav";
 import { Footer } from "./footer";
+import { ModuleRouteGuard } from "./module-route-guard";
 
 export function AppShell({
   children,
@@ -18,7 +19,7 @@ export function AppShell({
         <TopNav />
         <main className="px-4 pb-20 pt-4 sm:px-6 lg:px-8 lg:pt-6">
           <div className="mx-auto max-w-7xl">
-            {children}
+            <ModuleRouteGuard>{children}</ModuleRouteGuard>
           </div>
         </main>
         <Footer />

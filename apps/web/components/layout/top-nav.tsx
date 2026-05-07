@@ -6,16 +6,20 @@ import { SearchBox } from "../ui/search-box";
 import { NotificationsDropdown } from "./notifications";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "@/lib/theme-context";
+import { MODULE_KEYS } from "@/lib/modules/module-keys";
+import { hasModule } from "@/lib/modules/module-registry";
+import { useModules } from "@/lib/modules/use-modules";
 
 export function TopNav() {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const modules = useModules();
 
   return (
     <header className="sticky top-0 z-30 hidden border-b border-borderSoft bg-[var(--background)] backdrop-blur lg:block">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-8 py-5">
         <div className="min-w-0 flex-1">
-          <SearchBox />
+          {hasModule(modules, MODULE_KEYS.search) ? <SearchBox /> : null}
         </div>
 
         <div className="flex items-center gap-3">

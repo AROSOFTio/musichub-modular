@@ -39,13 +39,14 @@ export default function ContactPage() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
     setStatus("submitting");
     setError("");
     try {
-      const formData = new FormData(event.currentTarget);
+      const formData = new FormData(form);
       formData.set("category", category);
       await submitSupportTicket(formData);
-      event.currentTarget.reset();
+      form.reset();
       setStatus("success");
     } catch (err) {
       setStatus("error");
