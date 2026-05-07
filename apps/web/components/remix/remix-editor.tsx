@@ -4,12 +4,17 @@ import { useState } from "react";
 import { Download, Play, Wand2 } from "lucide-react";
 
 import { getApiUrl, processRemixProject, updateRemixProject, type RemixProject } from "@/lib/api";
+import { MODULE_KEYS } from "@/lib/modules/module-keys";
+import { hasModule } from "@/lib/modules/module-registry";
+import { useModules } from "@/lib/modules/use-modules";
 import { RemixControls } from "./remix-controls";
 
 export function RemixEditor({ initialProject, accessToken }: { initialProject: RemixProject; accessToken: string | undefined }) {
+  const modules = useModules();
   const [project, setProject] = useState(initialProject);
   const [status, setStatus] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const canDownloadRemix = hasModule(modules, MODULE_KEYS.downloads) && hasModule(modules, MODULE_KEYS.proPlan);
 
   async function change(key: string, value: number) {
     const next = { ...project, [key]: value };
@@ -61,7 +66,7 @@ export function RemixEditor({ initialProject, accessToken }: { initialProject: R
           <button onClick={process} className="inline-flex items-center gap-2 rounded-full bg-violet-600 px-5 py-3 text-sm font-black text-white"><Wand2 className="h-4 w-4" /> Process</button>
           {project.previewFile ? <button onClick={loadPreview} className="inline-flex items-center gap-2 rounded-full border border-borderSoft px-5 py-3 text-sm font-bold"><Play className="h-4 w-4" /> Preview</button> : null}
           {previewUrl ? <audio controls src={previewUrl} className="h-11" /> : null}
-          {project.outputFile ? <button onClick={downloadOutput} className="inline-flex items-center gap-2 rounded-full border border-borderSoft px-5 py-3 text-sm font-bold"><Download className="h-4 w-4" /> Download</button> : null}
+          {project.outputFile && canDownloadRemix ? <button onClick={downloadOutput} className="inline-flex items-center gap-2 rounded-full border border-borderSoft px-5 py-3 text-sm font-bold"><Download className="h-4 w-4" /> Pro Download</button> : null}
         </div>
       </section>
       <RemixControls project={project} onChange={change} />

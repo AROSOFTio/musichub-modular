@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Users } from "lucide-react";
+import { Mic2 } from "lucide-react";
 import { listArtists, CatalogArtist } from "@/lib/api";
 
 export default function ArtistsPage() {
@@ -41,13 +41,14 @@ export default function ArtistsPage() {
               href={`/artists/${artist.slug}`}
               className="group flex flex-col items-center gap-4 rounded-3xl border border-borderSoft bg-white p-6 text-center transition-shadow hover:shadow-card"
             >
-              <div className="h-24 w-24 overflow-hidden rounded-full bg-violet-100 ring-2 ring-violet-100 transition-all group-hover:ring-violet-300">
+              <div className="h-24 w-24 overflow-hidden rounded-full bg-slate-100 ring-2 ring-violet-100 transition-all group-hover:ring-violet-300">
                 {artist.avatar ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={artist.avatar} alt="" className="h-full w-full object-cover" />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-3xl font-extrabold text-violet-600">
-                    {artist.name.charAt(0).toUpperCase()}
+                  <div className="flex h-full w-full flex-col items-center justify-center bg-slate-950 text-white">
+                    <Mic2 className="h-6 w-6" />
+                    <span className="mt-1 text-xs font-black">{artist.name.charAt(0).toUpperCase()}</span>
                   </div>
                 )}
               </div>

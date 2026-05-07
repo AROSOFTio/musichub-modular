@@ -41,6 +41,7 @@ export class AdminController {
 
   // ─── Overview ────────────────────────────────────────────────────────────
   @Get("overview")
+  @Roles(Role.ADMIN, Role.DEV_ADMIN)
   getOverview() {
     return this.adminService.getOverview();
   }

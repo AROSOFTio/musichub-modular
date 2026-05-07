@@ -1,4 +1,4 @@
-import { Heart, ListMusic, History, Download } from "lucide-react";
+import { Heart, ListMusic, History } from "lucide-react";
 import Link from "next/link";
 import { PageHeader } from "@/components/ui/page-header";
 
@@ -7,7 +7,6 @@ export default function LibraryPage() {
     { name: "Favorites", href: "/favorites", icon: Heart, description: "Songs you've favorited" },
     { name: "Playlists", href: "/playlists", icon: ListMusic, description: "Your custom playlists" },
     { name: "Recently Played", href: "/library/history", icon: History, description: "Your listening history" },
-    { name: "Downloads", href: "/downloads", icon: Download, description: "Your downloaded tracks" },
   ];
 
   return (
@@ -16,7 +15,7 @@ export default function LibraryPage() {
         title="Your Library"
         description="Manage your favorites, playlists, and listening history."
       />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {libraryLinks.map((link) => (
           <Link
             key={link.name}

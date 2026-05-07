@@ -53,6 +53,7 @@ const featureModules = [
 ] as const;
 
 const coreModules = new Set(["core_catalog", "home", "admin_modules", "admin_settings"]);
+const defaultDisabledModules = new Set(["pro_plan"]);
 
 const prisma = new PrismaClient();
 
@@ -69,6 +70,8 @@ async function main() {
           description: `${name} feature module.`,
           sortOrder,
           isCore: coreModules.has(key),
+          enabledPublic: !defaultDisabledModules.has(key),
+          enabledAdmin: !defaultDisabledModules.has(key),
         },
       }),
     ),

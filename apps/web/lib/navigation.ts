@@ -2,7 +2,6 @@ import type { LucideIcon } from "lucide-react";
 import {
   Activity,
   Clock3,
-  Download,
   Flame,
   Heart,
   Home,
@@ -39,7 +38,6 @@ export const primaryNavigation: NavItem[] = [
   { href: "/library", label: "Library", icon: Library, moduleKey: MODULE_KEYS.library },
   { href: "/favorites", label: "Favorites", icon: Heart, moduleKey: MODULE_KEYS.favorites },
   { href: "/playlists", label: "Playlists", icon: ListMusic, moduleKey: MODULE_KEYS.playlists },
-  { href: "/downloads", label: "Downloads", icon: Download, moduleKey: MODULE_KEYS.downloads },
   { href: "/remix-studio", label: "Remix Studio", icon: SlidersHorizontal, moduleKey: MODULE_KEYS.remix },
 ];
 
@@ -55,6 +53,5 @@ export const mobileNavigation: NavItem[] = [
   { href: "/", label: "Home", icon: Home, moduleKey: MODULE_KEYS.home },
   { href: "/trending", label: "Trending", icon: Flame, moduleKey: MODULE_KEYS.trending },
   { href: "/library", label: "Library", icon: Library, moduleKey: MODULE_KEYS.library },
-  { href: "/downloads", label: "Downloads", icon: Download, moduleKey: MODULE_KEYS.downloads },
   { href: "/search", label: "Search", icon: Search, moduleKey: MODULE_KEYS.search },
 ];

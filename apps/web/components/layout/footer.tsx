@@ -16,6 +16,7 @@ type FooterLink = {
 
 type FooterSection = {
   title: string;
+  moduleKey?: ModuleKey;
   links: FooterLink[];
 };
 
@@ -45,8 +46,8 @@ export function Footer() {
     },
     {
       title: "For Artists",
+      moduleKey: MODULE_KEYS.artistRegistration,
       links: [
-        { label: "Artist Login", href: "/login" },
         { label: "Artist Registration", href: "/register?type=artist", moduleKey: MODULE_KEYS.artistRegistration },
         { label: "Upload Music", href: "/admin/songs/new", moduleKey: MODULE_KEYS.upload },
       ],
@@ -78,7 +79,7 @@ export function Footer() {
           </div>
 
           {/* Links Sections */}
-          {footerSections.map((section) => (
+          {footerSections.filter((section) => !section.moduleKey || modules[section.moduleKey] !== false).map((section) => (
             <div key={section.title}>
               <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--foreground)]">
                 {section.title}
@@ -94,16 +95,6 @@ export function Footer() {
                     </Link>
                   </li>
                 ))}
-                {section.title === "For Artists" && (
-                  <li>
-                    <Link
-                      href="/login"
-                      className="text-xs text-slate-400 hover:text-violet-600 transition-colors opacity-50 hover:opacity-100"
-                    >
-                      Admin Login
-                    </Link>
-                  </li>
-                )}
               </ul>
             </div>
           ))}

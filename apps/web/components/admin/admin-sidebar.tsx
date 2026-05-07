@@ -295,7 +295,7 @@ export function AdminSidebar({
   }, [accessToken]);
   const effectiveModules =
     user?.role === "DEV_ADMIN"
-      ? { admin_modules: true, admin_settings: true }
+      ? { admin_dashboard: true, admin_users: true, admin_modules: true, admin_settings: true }
       : adminModules ?? { ...modules, admin_modules: false };
   const navGroups = useMemo(() => NAV.map((group) => ({
     ...group,

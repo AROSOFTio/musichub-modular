@@ -28,6 +28,9 @@ export function AdminSongsTable({ status, title, description }: SongsListProps) 
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState(status ?? "");
+  const [artistFilter, setArtistFilter] = useState("");
+  const [genreFilter, setGenreFilter] = useState("");
+  const [languageFilter, setLanguageFilter] = useState("");
 
   async function load(token: string, s: string) {
     setLoading(true);
@@ -65,11 +68,29 @@ export function AdminSongsTable({ status, title, description }: SongsListProps) 
     setSongs((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
   }
 
-  const filtered = songs.filter(
-    (s) =>
-      s.title.toLowerCase().includes(search.toLowerCase()) ||
-      s.artist.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const artistOptions = Array.from(new Map(songs.map((song) => [song.artist.id, song.artist])).values())
+    .sort((a, b) => a.name.localeCompare(b.name));
+  const genreOptions = Array.from(new Map(songs.map((song) => [song.genre.id, song.genre])).values())
+    .sort((a, b) => a.name.localeCompare(b.name));
+  const languageOptions = Array.from(
+    new Map(songs.filter((song) => song.language).map((song) => [song.language!.id, song.language!])).values(),
+  ).sort((a, b) => a.name.localeCompare(b.name));
+
+  const filtered = songs.filter((s) => {
+    const term = search.trim().toLowerCase();
+    const matchesSearch =
+      !term ||
+      s.title.toLowerCase().includes(term) ||
+      s.artist.name.toLowerCase().includes(term) ||
+      s.genre.name.toLowerCase().includes(term) ||
+      s.language?.name.toLowerCase().includes(term);
+    return (
+      matchesSearch &&
+      (!artistFilter || s.artist.id === artistFilter) &&
+      (!genreFilter || s.genre.id === genreFilter) &&
+      (!languageFilter || s.language?.id === languageFilter)
+    );
+  });
 
   return (
     <div className="space-y-6">
@@ -103,15 +124,41 @@ export function AdminSongsTable({ status, title, description }: SongsListProps) 
         </div>
       )}
 
-      {/* Search */}
-      <div className="relative max-w-sm">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-        <input
-          className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-4 text-sm outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
-          placeholder="Search songs or artists…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+      {/* Search and filters */}
+      <div className="grid gap-3 lg:grid-cols-[minmax(220px,1fr)_180px_180px_180px]">
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <input
+            className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-4 text-sm outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
+            placeholder="Search songs, artists, genres, languages..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <select
+          className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-600 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
+          value={artistFilter}
+          onChange={(e) => setArtistFilter(e.target.value)}
+        >
+          <option value="">All artists</option>
+          {artistOptions.map((artist) => <option key={artist.id} value={artist.id}>{artist.name}</option>)}
+        </select>
+        <select
+          className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-600 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
+          value={genreFilter}
+          onChange={(e) => setGenreFilter(e.target.value)}
+        >
+          <option value="">All genres</option>
+          {genreOptions.map((genre) => <option key={genre.id} value={genre.id}>{genre.name}</option>)}
+        </select>
+        <select
+          className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-600 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
+          value={languageFilter}
+          onChange={(e) => setLanguageFilter(e.target.value)}
+        >
+          <option value="">All languages</option>
+          {languageOptions.map((language) => <option key={language.id} value={language.id}>{language.name}</option>)}
+        </select>
       </div>
 
       {error && <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div>}
@@ -135,6 +182,7 @@ export function AdminSongsTable({ status, title, description }: SongsListProps) 
                 <th className="px-4 py-3">Song</th>
                 <th className="px-4 py-3">Artist</th>
                 <th className="px-4 py-3">Genre</th>
+                <th className="px-4 py-3">Language</th>
                 <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3 text-right"><Play className="ml-auto h-3 w-3" /></th>
                 <th className="px-4 py-3 text-right"><Download className="ml-auto h-3 w-3" /></th>
@@ -159,6 +207,7 @@ export function AdminSongsTable({ status, title, description }: SongsListProps) 
                   </td>
                   <td className="px-4 py-3 text-slate-600">{song.artist.name}</td>
                   <td className="px-4 py-3 text-slate-500">{song.genre.name}</td>
+                  <td className="px-4 py-3 text-slate-500">{song.language?.name ?? "None"}</td>
                   <td className="px-4 py-3"><StatusBadge status={song.status} /></td>
                   <td className="px-4 py-3 text-right text-slate-500">{song.playCount.toLocaleString()}</td>
                   <td className="px-4 py-3 text-right text-slate-500">{song.downloadCount.toLocaleString()}</td>

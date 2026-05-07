@@ -23,6 +23,10 @@ type EnvShape = {
   SMTP_PORT?: string;
   SMTP_USER?: string;
   SMTP_PASSWORD?: string;
+  PESAPAL_CONSUMER_KEY?: string;
+  PESAPAL_CONSUMER_SECRET?: string;
+  PESAPAL_ENVIRONMENT?: string;
+  PESAPAL_CALLBACK_URL?: string;
 };
 
 export function validateEnv(config: EnvShape) {
@@ -59,5 +63,9 @@ export function validateEnv(config: EnvShape) {
     SMTP_PORT: config.SMTP_PORT || "587",
     SMTP_USER: config.SMTP_USER,
     SMTP_PASSWORD: config.SMTP_PASSWORD,
+    PESAPAL_CONSUMER_KEY: config.PESAPAL_CONSUMER_KEY,
+    PESAPAL_CONSUMER_SECRET: config.PESAPAL_CONSUMER_SECRET,
+    PESAPAL_ENVIRONMENT: config.PESAPAL_ENVIRONMENT || "production",
+    PESAPAL_CALLBACK_URL: config.PESAPAL_CALLBACK_URL,
   };
 }

@@ -127,7 +127,9 @@ export class RemixService {
   }
 
   async resolveDownload(user: AuthenticatedUser, id: string) {
+    await this.featureModules.assertEnabled("remix", "api");
     await this.featureModules.assertEnabled("downloads", "api");
+    await this.featureModules.assertEnabled("pro_plan", "api");
     const project = await this.getOwnedProject(user, id);
     if (!project.outputFile) throw new NotFoundException("Remix output has not been generated.");
     const filePath = await this.storage.resolve(project.outputFile);

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Music, Download, Radio, Users } from "lucide-react";
+import { ArrowLeft, Mic2 } from "lucide-react";
 import { getArtist, CatalogArtist, CatalogSong } from "@/lib/api";
 import { RankedSongList } from "@/components/catalog/ranked-song-list";
 import { FollowArtistButton } from "@/components/catalog/follow-artist";
@@ -67,22 +67,30 @@ export default function ArtistProfilePage({ params }: { params: { slug: string }
 
       {/* Profile Header */}
       <div className="rounded-3xl border border-borderSoft bg-white p-6 shadow-card sm:p-8">
-        {artist.coverImage && (
+        {artist.coverImage ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={artist.coverImage}
             alt=""
             className="mb-6 h-48 w-full rounded-2xl object-cover"
           />
+        ) : (
+          <div className="mb-6 flex h-48 w-full items-center justify-center rounded-2xl bg-slate-950 text-white">
+            <div className="text-center">
+              <Mic2 className="mx-auto h-10 w-10" />
+              <p className="mt-3 text-sm font-bold uppercase tracking-[0.3em] text-slate-300">Artist Profile</p>
+            </div>
+          </div>
         )}
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-          <div className="h-24 w-24 shrink-0 overflow-hidden rounded-full bg-violet-100 ring-4 ring-violet-100">
+          <div className="h-24 w-24 shrink-0 overflow-hidden rounded-full bg-slate-100 ring-4 ring-violet-100">
             {artist.avatar ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={artist.avatar} alt="" className="h-full w-full object-cover" />
             ) : (
-              <div className="flex h-full w-full items-center justify-center text-3xl font-extrabold text-violet-600">
-                {artist.name.charAt(0).toUpperCase()}
+              <div className="flex h-full w-full flex-col items-center justify-center bg-slate-950 text-white">
+                <Mic2 className="h-7 w-7" />
+                <span className="mt-1 text-sm font-black">{artist.name.charAt(0).toUpperCase()}</span>
               </div>
             )}
           </div>
