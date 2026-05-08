@@ -136,7 +136,7 @@ export function DiscoveryFilters({
   if (!songs.length) return null;
 
   const content = (
-    <div className={compact ? "grid gap-4 sm:grid-cols-2" : "space-y-4"}>
+    <div className={compact ? "grid gap-3 sm:grid-cols-2 xl:grid-cols-6" : "space-y-4"}>
       {showArtist ? <SelectFilter label="Artist" value={filters.artist} options={artistOptions} placeholder="All artists" onChange={(value) => setFilter("artist", value)} /> : null}
       {showGenre ? <SelectFilter label="Genre" value={filters.genre} options={genreOptions} placeholder="All genres" onChange={(value) => setFilter("genre", value)} /> : null}
       <SelectFilter label="Language" value={filters.language} options={languageOptions} placeholder="All languages" onChange={(value) => setFilter("language", value)} />
@@ -164,8 +164,8 @@ export function DiscoveryFilters({
   );
 
   return (
-    <section className="rounded-3xl border border-borderSoft bg-[var(--card-bg)] p-5">
-      <div className="mb-4 flex items-center justify-between gap-3">
+    <section className={compact ? "rounded-3xl border border-borderSoft bg-[var(--card-bg)] p-4 shadow-sm" : "rounded-3xl border border-borderSoft bg-[var(--card-bg)] p-5"}>
+      <div className={compact ? "mb-3 flex items-center justify-between gap-3" : "mb-4 flex items-center justify-between gap-3"}>
         <div className="flex items-center gap-2">
           <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-violet-50 text-violet-600">
             <SlidersHorizontal className="h-4 w-4" />

@@ -69,7 +69,7 @@ export function AudioPlayerBar() {
   if (!hasTrack) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-20 z-30 px-4 lg:bottom-0 lg:left-72 lg:px-8">
+    <div className="fixed inset-x-0 bottom-20 z-30 px-4 lg:bottom-0 lg:px-8">
       <audio
         ref={audioRef}
         src={currentTrack?.streamUrl ?? undefined}

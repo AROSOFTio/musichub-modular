@@ -2,15 +2,22 @@
 
 import { useMemo, useState } from "react";
 import type { HomeFeed } from "@/lib/api";
-import { emptyDiscoveryFilters, filterDiscoverySongs, isDiscoveryFilterActive } from "./discovery-filters";
+import { DiscoveryFilters, emptyDiscoveryFilters, filterDiscoverySongs, isDiscoveryFilterActive } from "./discovery-filters";
 import { FilteredSongsSection } from "./filtered-songs-section";
 import { HeroAdCarousel } from "./hero-ad-carousel";
 import { HomeQuickLinks } from "./home-quick-links";
 import { HotThisPeriodSection } from "./hot-this-period-section";
 import { PopularArtistsSection } from "./popular-artists-section";
-import { RightRail } from "./right-rail";
 import { TestimonialsSection } from "./testimonials-section";
 import { UpcomingEventsSection } from "./upcoming-events-section";
+
+function AdSlot({ label }: { label: string }) {
+  return (
+    <aside className="sticky top-28 hidden h-[calc(100vh-8rem)] rounded-3xl border border-dashed border-borderSoft bg-[var(--card-bg)] p-4 text-center text-xs font-bold uppercase tracking-[0.18em] text-[var(--muted)] xl:flex xl:items-center xl:justify-center">
+      {label}
+    </aside>
+  );
+}
 
 export function HomeDesktopLayout({ feed }: { feed: HomeFeed }) {
   const modules = feed.modules ?? {};
@@ -29,8 +36,10 @@ export function HomeDesktopLayout({ feed }: { feed: HomeFeed }) {
   const filtersActive = isDiscoveryFilterActive(filters);
 
   return (
-    <div className="hidden gap-8 lg:grid lg:grid-cols-[minmax(0,1fr)_320px]">
-      <div className="space-y-10">
+    <div className="hidden gap-6 lg:grid lg:grid-cols-1 xl:grid-cols-[minmax(120px,15%)_minmax(0,70%)_minmax(120px,15%)]">
+      <AdSlot label="Advert" />
+      <div className="space-y-8">
+        <DiscoveryFilters songs={allSongs} filters={filters} onChange={setFilters} compact modules={modules} />
         <HeroAdCarousel ads={feed.heroBanners} modules={modules} />
         <HomeQuickLinks modules={modules} />
         {filtersActive ? (
@@ -46,7 +55,7 @@ export function HomeDesktopLayout({ feed }: { feed: HomeFeed }) {
           </>
         )}
       </div>
-      <RightRail modules={modules} continueListening={feed.continueListening ?? []} songs={allSongs} filters={filters} onFiltersChange={setFilters} />
+      <AdSlot label="Advert" />
     </div>
   );
 }

@@ -29,9 +29,9 @@ export function UpcomingEventsSection({ events, modules }: { events?: HomeEvent[
           No upcoming events have been published yet.
         </div>
       ) : null}
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+      <div className="flex gap-3 overflow-x-auto pb-2">
         {visibleEvents.map((event) => (
-          <article key={event.id} className="flex gap-3 rounded-2xl border border-borderSoft bg-[var(--card-bg)] p-3 shadow-sm">
+          <article key={event.id} className="flex w-80 shrink-0 gap-3 rounded-2xl border border-borderSoft bg-[var(--card-bg)] p-3 shadow-sm">
             <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-violet-50 text-violet-500">
               {event.image ? <img src={event.image} alt="" className="h-full w-full object-cover" /> : <CalendarDays className="h-7 w-7" />}
             </div>

@@ -16,7 +16,7 @@ export function TestimonialsSection({ testimonials, modules }: { testimonials?: 
     <section className="rounded-3xl border border-borderSoft bg-[var(--card-bg)] p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between gap-4">
         <h2 className="text-lg font-black text-[var(--foreground)]">What People Say</h2>
-        <Link href="/about" className="text-xs font-black text-violet-700">View all</Link>
+        <Link href="/admin" className="text-xs font-black text-violet-700">Admin posts</Link>
       </div>
       {!visible.length ? (
         <div className="rounded-2xl border border-dashed border-borderSoft bg-[var(--surface)] p-5 text-sm text-[var(--muted)]">
