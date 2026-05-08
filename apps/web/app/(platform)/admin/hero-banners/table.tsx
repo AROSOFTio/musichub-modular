@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Image as ImageIcon, Plus, Trash2 } from "lucide-react";
+import { Edit3, Image as ImageIcon, Plus, Trash2 } from "lucide-react";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { AdminEmptyState } from "@/components/admin/admin-empty-state";
 import { ConfirmDeleteDialog } from "@/components/admin/confirm-delete-dialog";
@@ -68,12 +68,17 @@ export function AdminHeroBannersTable({ status, title, description }: HeroBanner
                   <div className="text-xs text-slate-400">
                     Priority: {banner.priority} {banner.linkedSongId ? "· Links to Song" : ""}
                   </div>
-                  <ConfirmDeleteDialog
-                    title="Delete banner"
-                    description={`Delete "${banner.title}"?`}
-                    onConfirm={() => handleDelete(banner.id)}
-                    trigger={(open) => <button onClick={open} className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"><Trash2 className="h-4 w-4" /></button>}
-                  />
+                  <div className="flex items-center gap-1">
+                    <Link href={`/admin/hero-banners/${banner.id}/edit`} className="rounded-lg p-1.5 text-slate-400 hover:bg-violet-50 hover:text-violet-700" aria-label="Edit banner">
+                      <Edit3 className="h-4 w-4" />
+                    </Link>
+                    <ConfirmDeleteDialog
+                      title="Delete banner"
+                      description={`Delete "${banner.title}"?`}
+                      onConfirm={() => handleDelete(banner.id)}
+                      trigger={(open) => <button onClick={open} className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600"><Trash2 className="h-4 w-4" /></button>}
+                    />
+                  </div>
                 </div>
               </div>
             </div>

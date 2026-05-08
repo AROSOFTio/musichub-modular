@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   Activity,
   Clock3,
+  Download,
   Flame,
   Heart,
   Home,
@@ -46,5 +47,6 @@ export const mobileNavigation: NavItem[] = [
   { href: "/", label: "Home", icon: Home, moduleKey: MODULE_KEYS.home },
   { href: "/trending", label: "Trending", icon: Flame, moduleKey: MODULE_KEYS.trending },
   { href: "/library", label: "Library", icon: Library, moduleKey: MODULE_KEYS.library },
+  { href: "/downloads", label: "Downloads", icon: Download, moduleKey: MODULE_KEYS.downloads },
   { href: "/search", label: "Search", icon: Search, moduleKey: MODULE_KEYS.search },
 ];

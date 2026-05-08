@@ -17,8 +17,8 @@ export function MobileBottomNav() {
   ];
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-borderSoft bg-white/95 px-4 py-3 backdrop-blur lg:hidden">
-      <div className={`mx-auto grid max-w-md ${gridCols} gap-2`}>
+    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-[#eee8f8] bg-white px-3 py-2 lg:hidden">
+      <div className={`mx-auto grid max-w-md ${gridCols} gap-1`}>
         {items.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
@@ -27,12 +27,12 @@ export function MobileBottomNav() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-col items-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-semibold text-slate-500 transition",
-                isActive && "bg-violet-50 text-violet-700",
+                "flex flex-col items-center gap-1 rounded-xl px-1.5 py-1.5 text-[10px] font-bold text-slate-500 transition",
+                isActive && "text-violet-700",
               )}
             >
-              <item.icon className="h-4 w-4" />
-              <span>{item.label}</span>
+              <item.icon className={cn("h-5 w-5", isActive && "fill-violet-50")} />
+              <span className="truncate">{item.label}</span>
             </Link>
           );
         })}
@@ -40,4 +40,3 @@ export function MobileBottomNav() {
     </nav>
   );
 }
-

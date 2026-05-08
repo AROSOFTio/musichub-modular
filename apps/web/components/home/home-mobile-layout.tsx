@@ -1,18 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { HomeFeed } from "@/lib/api";
-import { DiscoveryFilters, emptyDiscoveryFilters, filterDiscoverySongs, isDiscoveryFilterActive } from "./discovery-filters";
-import { FilteredSongsSection } from "./filtered-songs-section";
+import { MODULE_KEYS } from "@/lib/modules/module-keys";
+import { hasModule } from "@/lib/modules/module-registry";
+import { FeatureShortcuts } from "./feature-shortcuts";
 import { HeroAdCarousel } from "./hero-ad-carousel";
-import { HomeQuickLinks } from "./home-quick-links";
-import { HotThisPeriodSection } from "./hot-this-period-section";
-import { PopularArtistsSection } from "./popular-artists-section";
-import { TestimonialsSection } from "./testimonials-section";
-import { UpcomingEventsSection } from "./upcoming-events-section";
+import { LatestUploadsSection } from "./latest-uploads-section";
+import { TrendingSection } from "./trending-section";
 
 export function HomeMobileLayout({ feed }: { feed: HomeFeed }) {
-  const [filters, setFilters] = useState(emptyDiscoveryFilters);
+  const modules = feed.modules ?? {};
   const allSongs = useMemo(() => {
     const sources = [
       feed.trendingNow ?? feed.trending ?? [],
@@ -23,33 +21,16 @@ export function HomeMobileLayout({ feed }: { feed: HomeFeed }) {
     ];
     return Array.from(new Map(sources.flat().map((song) => [song.id, song])).values());
   }, [feed]);
-  const filteredSongs = useMemo(() => filterDiscoverySongs(allSongs, filters), [allSongs, filters]);
-  const filtersActive = isDiscoveryFilterActive(filters);
+  const trending = feed.trendingNow ?? feed.trending ?? allSongs;
+  const latest = feed.latestUploads ?? feed.latest ?? allSongs;
+  const featuredSong = feed.featured ?? allSongs[0] ?? null;
 
   return (
-    <div className="space-y-7 lg:hidden">
-      <HeroAdCarousel ads={feed.heroBanners} modules={feed.modules ?? {}} />
-      <HomeQuickLinks modules={feed.modules ?? {}} />
-      <details className="group">
-        <summary className="flex cursor-pointer list-none items-center justify-between rounded-3xl border border-borderSoft bg-[var(--card-bg)] px-5 py-4 text-sm font-black text-[var(--foreground)] shadow-card">
-          Filters
-          <span className="text-xs text-[var(--muted)] group-open:hidden">Open</span>
-          <span className="hidden text-xs text-[var(--muted)] group-open:inline">Close</span>
-        </summary>
-        <div className="mt-3">
-          <DiscoveryFilters songs={allSongs} filters={filters} onChange={setFilters} compact modules={feed.modules ?? {}} />
-        </div>
-      </details>
-      {filtersActive ? (
-        <FilteredSongsSection songs={filteredSongs} />
-      ) : (
-        <>
-          <HotThisPeriodSection songs={allSongs} modules={feed.modules ?? {}} />
-          <UpcomingEventsSection events={feed.events} modules={feed.modules ?? {}} />
-          <TestimonialsSection testimonials={feed.testimonials} modules={feed.modules ?? {}} />
-          <PopularArtistsSection artists={feed.popularArtists ?? []} modules={feed.modules ?? {}} />
-        </>
-      )}
+    <div className="space-y-6 lg:hidden">
+      <HeroAdCarousel ads={feed.heroBanners} modules={modules} featuredSong={featuredSong} />
+      <FeatureShortcuts modules={modules} />
+      {hasModule(modules, MODULE_KEYS.trending) ? <TrendingSection songs={trending} /> : null}
+      {hasModule(modules, MODULE_KEYS.latest) ? <LatestUploadsSection songs={latest} mobile /> : null}
     </div>
   );
 }
