@@ -2,132 +2,115 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Download, Play, SlidersHorizontal } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 
-import type { CatalogSong, HeroBannerAd } from "@/lib/api";
+import type { HeroBannerAd } from "@/lib/api";
 import { MODULE_KEYS } from "@/lib/modules/module-keys";
 import { hasModule } from "@/lib/modules/module-registry";
 import type { ModuleFlags } from "@/lib/modules/module-keys";
-import { formatSongArtists } from "@/lib/song-artists";
-import { usePlayerStore } from "@/lib/stores/player-store";
-import { toTrack } from "./song-card";
 
 const fallbackAd: HeroBannerAd = {
   id: "fallback-musichub-promo",
-  title: "Lost In The Rhythm",
-  subtitle: "A smooth MusicHub featured sound for playlists, downloads, and fresh remix ideas.",
-  ctaLabel: "Play Now",
+  title: "Feel the Beat. Live the Moment.",
+  subtitle: "Discover fresh artists, trending songs, and premium music experiences on MusicHub.",
+  ctaLabel: "Explore",
   ctaUrl: "/trending",
-  sponsorLabel: "FEATURED",
+  sponsorLabel: "MusicHub",
 };
 
+const allowedCtas = new Set(["Learn More", "Explore", "Upgrade Now", "Get Tickets", "Visit Sponsor"]);
+
 function normalizeAd(ad: HeroBannerAd): HeroBannerAd {
+  const label = ad.ctaLabel && allowedCtas.has(ad.ctaLabel) ? ad.ctaLabel : "Learn More";
   return {
     ...ad,
-    ctaUrl: ad.ctaUrl || "/trending",
-    sponsorLabel: ad.sponsorLabel || "FEATURED",
+    ctaLabel: label,
+    ctaUrl: ad.ctaUrl || "/",
+    sponsorLabel: ad.sponsorLabel || "Sponsored",
   };
 }
 
-export function HeroAdCarousel({
-  ads,
-  modules,
-  featuredSong,
-}: {
-  ads?: HeroBannerAd[];
-  modules: ModuleFlags;
-  featuredSong?: CatalogSong | null;
-}) {
+export function HeroAdCarousel({ ads, modules }: { ads?: HeroBannerAd[]; modules: ModuleFlags }) {
   const isHeroEnabled = hasModule(modules, MODULE_KEYS.heroBanners);
-  const playTrack = usePlayerStore((s) => s.playTrack);
   const normalizedAds = useMemo(() => {
     const source = isHeroEnabled && ads?.length ? ads : [fallbackAd];
     return source.map(normalizeAd);
   }, [ads, isHeroEnabled]);
   const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
   const active = normalizedAds[index] ?? normalizedAds[0];
-  const canDownload = hasModule(modules, MODULE_KEYS.downloads) && Boolean(featuredSong?.downloadUrl);
-  const canRemix = hasModule(modules, MODULE_KEYS.remix) && Boolean(featuredSong?.allowRemix);
-  const title = active?.title || featuredSong?.title || fallbackAd.title;
-  const artist = featuredSong ? formatSongArtists(featuredSong) : "Ethan Miles";
-  const image = active?.image || featuredSong?.coverImage || "";
-  const mobileImage = active?.mobileImage || image;
 
   useEffect(() => {
-    if (normalizedAds.length <= 1) return;
-    const timer = window.setInterval(() => setIndex((current) => (current + 1) % normalizedAds.length), 7000);
+    if (paused || normalizedAds.length <= 1) return;
+    const timer = window.setInterval(() => {
+      setIndex((current) => (current + 1) % normalizedAds.length);
+    }, 7000);
     return () => window.clearInterval(timer);
-  }, [normalizedAds.length]);
+  }, [normalizedAds.length, paused]);
+
+  if (!active) return null;
 
   function move(step: number) {
     setIndex((current) => (current + step + normalizedAds.length) % normalizedAds.length);
   }
 
-  if (!active) return null;
-
   return (
-    <section className="relative min-h-[330px] overflow-hidden rounded-[2rem] border border-violet-100 bg-gradient-to-br from-[#f7efff] via-[#f1e8ff] to-[#fff6fb] px-5 py-6 shadow-[0_18px_45px_rgba(109,40,217,0.10)] sm:min-h-[360px] sm:px-8 lg:min-h-[390px]">
-      {image ? (
+    <section
+      className="relative overflow-hidden rounded-[2rem] border border-violet-100 bg-[#100727] text-white shadow-xl"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      {active.image || active.mobileImage ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={image} alt="" className="absolute inset-y-0 right-0 hidden h-full w-[52%] object-cover object-center sm:block" />
-      ) : null}
-      {mobileImage ? (
+        <img src={active.mobileImage || active.image || ""} alt="" className="absolute inset-0 h-full w-full object-cover opacity-80 sm:hidden" />
+      ) : (
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_35%,rgba(236,72,153,0.45),transparent_28%),linear-gradient(120deg,#150735,#351066_45%,#0b061a)]" />
+      )}
+      {active.image ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={mobileImage} alt="" className="absolute inset-y-0 right-0 h-full w-[48%] object-cover object-center opacity-95 sm:hidden" />
+        <img src={active.image} alt="" className="absolute inset-0 hidden h-full w-full object-cover opacity-80 sm:block" />
       ) : null}
-      <div className="absolute inset-y-0 right-[32%] hidden w-40 bg-gradient-to-r from-[#f5edff] to-transparent sm:block" />
-      <div className="relative z-10 flex min-h-[285px] max-w-[58%] flex-col justify-center sm:max-w-[55%]">
-        <span className="mb-4 inline-flex w-fit rounded-full bg-white/80 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-violet-700 ring-1 ring-violet-100">
-          {active.sponsorLabel}
+      {!active.image && active.mobileImage ? (
+        <div className="absolute inset-0 hidden bg-[radial-gradient(circle_at_75%_35%,rgba(236,72,153,0.45),transparent_28%),linear-gradient(120deg,#150735,#351066_45%,#0b061a)] sm:block" />
+      ) : null}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-violet-950/35 to-transparent" />
+      <div className="absolute inset-y-0 right-0 hidden w-1/2 opacity-70 lg:block" style={{ background: "repeating-linear-gradient(90deg, transparent 0 14px, rgba(236,72,153,.35) 15px 18px, transparent 19px 34px)" }} />
+
+      <div className="relative z-10 min-h-[235px] px-6 py-7 sm:min-h-[300px] sm:px-9 lg:min-h-[330px] lg:px-12">
+        <span className="inline-flex rounded-full bg-violet-600 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-white">
+          {active.sponsorLabel || "Sponsored"}
         </span>
-        <h1 className="text-3xl font-black leading-tight text-slate-950 sm:text-5xl lg:text-6xl">{title}</h1>
-        <p className="mt-3 text-sm font-bold text-slate-700 sm:text-base">
-          by {artist} <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs text-violet-700">Verified</span>
-        </p>
-        <p className="mt-4 max-w-md text-sm leading-6 text-slate-600">{active.subtitle || fallbackAd.subtitle}</p>
-        <div className="mt-6 flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            onClick={() => featuredSong && playTrack(toTrack(featuredSong))}
-            className="inline-flex h-11 items-center gap-2 rounded-2xl bg-violet-700 px-5 text-sm font-black text-white shadow-sm hover:bg-violet-800 disabled:opacity-60"
-            disabled={!featuredSong}
-          >
-            <Play className="h-4 w-4 fill-current" />
-            Play Now
-          </button>
-          {canDownload ? (
-            <a href={featuredSong?.downloadUrl ?? undefined} className="inline-flex h-11 items-center gap-2 rounded-2xl border border-violet-200 bg-white px-5 text-sm font-black text-violet-700 hover:bg-violet-50">
-              <Download className="h-4 w-4" />
-              Download
-            </a>
-          ) : null}
-          {canRemix ? (
-            <Link href={`/remix-studio?song=${featuredSong?.id}`} className="inline-flex h-11 items-center gap-2 rounded-2xl border border-violet-200 bg-white px-4 text-sm font-black text-violet-700 hover:bg-violet-50">
-              <SlidersHorizontal className="h-4 w-4" />
-              Remix This <span className="rounded-full bg-violet-700 px-1.5 py-0.5 text-[9px] text-white">PRO</span>
-            </Link>
-          ) : null}
+        <h1 className="mt-5 max-w-xl text-3xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+          {active.title}
+        </h1>
+        {active.subtitle ? (
+          <p className="mt-3 max-w-lg text-sm font-semibold leading-6 text-violet-50 sm:text-base">
+            {active.subtitle}
+          </p>
+        ) : null}
+        <div className="mt-7">
+          <Link href={active.ctaUrl || "/"} className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-black text-violet-700 shadow-lg hover:bg-violet-50">
+            {active.ctaLabel || "Learn More"}
+            <ExternalLink className="h-4 w-4" />
+          </Link>
         </div>
-        <p className="mt-4 text-xs font-semibold text-slate-500">
-          Download is free for all songs {hasModule(modules, MODULE_KEYS.remix) ? " - Remix download is Pro only" : ""}
-        </p>
       </div>
 
       {normalizedAds.length > 1 ? (
         <>
-          <button type="button" onClick={() => move(-1)} className="absolute right-20 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-violet-700 shadow-sm" aria-label="Previous advert">
+          <button type="button" onClick={() => move(-1)} className="absolute left-3 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur hover:bg-white/30 sm:flex" aria-label="Previous advert">
             <ChevronLeft className="h-5 w-5" />
           </button>
-          <button type="button" onClick={() => move(1)} className="absolute right-7 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-violet-700 shadow-sm" aria-label="Next advert">
+          <button type="button" onClick={() => move(1)} className="absolute right-3 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur hover:bg-white/30 sm:flex" aria-label="Next advert">
             <ChevronRight className="h-5 w-5" />
           </button>
+          <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 gap-2">
+            {normalizedAds.map((ad, itemIndex) => (
+              <button key={ad.id ?? itemIndex} type="button" onClick={() => setIndex(itemIndex)} className={`h-2 rounded-full transition-all ${itemIndex === index ? "w-6 bg-white" : "w-2 bg-white/50"}`} aria-label={`Show advert ${itemIndex + 1}`} />
+            ))}
+          </div>
         </>
       ) : null}
-      <div className="absolute bottom-5 left-8 z-20 flex gap-2">
-        {normalizedAds.map((ad, itemIndex) => (
-          <button key={ad.id ?? itemIndex} type="button" onClick={() => setIndex(itemIndex)} className={`h-2 rounded-full transition-all ${itemIndex === index ? "w-7 bg-violet-700" : "w-2 bg-violet-200"}`} aria-label={`Show advert ${itemIndex + 1}`} />
-        ))}
-      </div>
     </section>
   );
 }
