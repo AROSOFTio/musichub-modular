@@ -71,6 +71,17 @@ export type AdminAlbum = {
   _count: { songs: number };
 };
 
+export type CatalogAlbum = {
+  id: string;
+  title: string;
+  slug: string;
+  artistId: string;
+  artist?: { id: string; name: string; slug: string };
+  coverImage?: string | null;
+  releaseDate?: string | null;
+  _count?: { songs: number };
+};
+
 export type AdminMusicType = {
   id: string;
   name: string;
@@ -219,7 +230,7 @@ export type AdminOverview = {
 export type HomeFeed = {
   featured?: CatalogSong | null;
   modules: Record<string, boolean>;
-  heroBanners?: unknown[];
+  heroBanners?: HeroBannerAd[];
   trendingNow?: CatalogSong[];
   latestUploads?: CatalogSong[];
   editorPicks?: CatalogSong[];
@@ -227,9 +238,44 @@ export type HomeFeed = {
   popularArtists?: CatalogArtist[];
   continueListening?: CatalogSong[];
   browseGenres?: CatalogGenre[];
+  events?: HomeEvent[];
+  testimonials?: HomeTestimonial[];
   genres?: CatalogGenre[];
   trending?: CatalogSong[];
   latest?: CatalogSong[];
+};
+
+export type HomeEvent = {
+  id: string;
+  title: string;
+  location: string;
+  date: string;
+  image?: string | null;
+  ctaLabel?: string;
+  ctaUrl?: string;
+};
+
+export type HomeTestimonial = {
+  id: string;
+  name: string;
+  text: string;
+  avatar?: string | null;
+  rating?: number;
+};
+
+export type HeroBannerAd = {
+  id?: string;
+  title: string;
+  subtitle?: string | null;
+  image?: string | null;
+  mobileImage?: string | null;
+  ctaLabel?: string | null;
+  ctaUrl?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  priority?: number;
+  sponsorLabel?: string | null;
+  placement?: string | null;
 };
 
 export type FeatureModule = {
@@ -322,6 +368,7 @@ export type SearchResult = {
   songs: CatalogSong[];
   artists: CatalogArtist[];
   genres: CatalogGenre[];
+  albums?: CatalogAlbum[];
 };
 
 type JsonBody = BodyInit | Record<string, unknown> | null | undefined;

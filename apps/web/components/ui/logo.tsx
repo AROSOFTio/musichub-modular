@@ -1,23 +1,26 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
+const logoSources = [
+  "/brand/musichub-logo.png",
+  "/brand/musichub-logo.svg",
+  "/brand/musichub-logo.webp",
+];
+
 export function Logo({ className, href = "/" }: { className?: string; href?: string }) {
-  const [imgError, setImgError] = useState(false);
+  const [sourceIndex, setSourceIndex] = useState(0);
+  const source = logoSources[sourceIndex];
 
   return (
     <Link className={cn("inline-flex items-center gap-3", className)} href={href}>
-      {!imgError ? (
-        <Image
-          src="/brand/musichub-logo.png"
+      {source ? (
+        <img
+          src={source}
           alt="MusicHub"
-          width={168}
-          height={50}
-          priority
-          onError={() => setImgError(true)}
+          onError={() => setSourceIndex((current) => current + 1)}
           className="h-11 w-auto object-contain sm:h-12"
         />
       ) : (

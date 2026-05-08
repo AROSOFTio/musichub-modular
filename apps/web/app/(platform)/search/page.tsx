@@ -1,9 +1,13 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { Search as SearchIcon, Music, Users, Layers } from "lucide-react";
+import { Suspense, useEffect, useState } from "react";
+import { Search as SearchIcon, Music, Users, Layers, Disc3 } from "lucide-react";
 import Link from "next/link";
-import { searchAll, CatalogSong, CatalogArtist, CatalogGenre, SearchResult } from "@/lib/api";
+import { useSearchParams } from "next/navigation";
+import { searchAll, CatalogSong, CatalogArtist, CatalogGenre, CatalogAlbum, SearchResult } from "@/lib/api";
+import { MODULE_KEYS } from "@/lib/modules/module-keys";
+import { hasModule } from "@/lib/modules/module-registry";
+import { useModules } from "@/lib/modules/use-modules";
 import { formatSongArtists } from "@/lib/song-artists";
 import { usePlayerStore } from "@/lib/stores/player-store";
 
@@ -59,10 +63,24 @@ function SectionLabel({ icon: Icon, label, count }: { icon: any; label: string; 
 }
 
 export default function SearchPage() {
-  const [query, setQuery] = useState("");
+  return (
+    <Suspense fallback={<div className="h-40 animate-pulse rounded-3xl bg-violet-50" />}>
+      <SearchPageContent />
+    </Suspense>
+  );
+}
+
+function SearchPageContent() {
+  const modules = useModules();
+  const searchParams = useSearchParams();
+  const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [results, setResults] = useState<SearchResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const debouncedQuery = useDebounce(query, 350);
+
+  useEffect(() => {
+    setQuery(searchParams.get("q") ?? "");
+  }, [searchParams]);
 
   useEffect(() => {
     if (!debouncedQuery.trim()) {
@@ -77,14 +95,17 @@ export default function SearchPage() {
   }, [debouncedQuery]);
 
   const totalResults = results
-    ? results.songs.length + results.artists.length + results.genres.length
+    ? results.songs.length +
+      (hasModule(modules, MODULE_KEYS.artists) ? results.artists.length : 0) +
+      (hasModule(modules, MODULE_KEYS.albums) ? (results.albums?.length ?? 0) : 0) +
+      (hasModule(modules, MODULE_KEYS.genres) ? results.genres.length : 0)
     : 0;
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-extrabold text-slate-950">Search</h1>
-        <p className="mt-1 text-sm text-slate-500">Find songs, artists and genres</p>
+        <p className="mt-1 text-sm text-slate-500">Find songs, artists, albums and genres</p>
       </div>
 
       {/* Search Input */}
@@ -135,7 +156,7 @@ export default function SearchPage() {
           )}
 
           {/* Artists */}
-          {results.artists.length > 0 && (
+          {hasModule(modules, MODULE_KEYS.artists) && results.artists.length > 0 && (
             <section>
               <SectionLabel icon={Users} label="Artists" count={results.artists.length} />
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -165,8 +186,34 @@ export default function SearchPage() {
             </section>
           )}
 
+          {/* Albums */}
+          {hasModule(modules, MODULE_KEYS.albums) && (results.albums?.length ?? 0) > 0 && (
+            <section>
+              <SectionLabel icon={Disc3} label="Albums" count={results.albums?.length ?? 0} />
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {results.albums?.map((album: CatalogAlbum) => (
+                  <Link
+                    key={album.id}
+                    href={`/search?q=${encodeURIComponent(album.title)}`}
+                    className="flex items-center gap-4 rounded-2xl border border-borderSoft bg-white p-4 transition-colors hover:border-violet-300 hover:bg-violet-50"
+                  >
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-violet-100">
+                      <Disc3 className="h-5 w-5 text-violet-600" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-slate-950">{album.title}</p>
+                      <p className="truncate text-sm text-slate-500">
+                        {album.artist?.name ?? "Various artists"} · {(album._count?.songs ?? 0)} songs
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* Genres */}
-          {results.genres.length > 0 && (
+          {hasModule(modules, MODULE_KEYS.genres) && results.genres.length > 0 && (
             <section>
               <SectionLabel icon={Layers} label="Genres" count={results.genres.length} />
               <div className="flex flex-wrap gap-3">

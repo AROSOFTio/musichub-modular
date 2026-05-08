@@ -16,6 +16,8 @@ export const MODULE_KEYS = {
   heroBanners: "hero_banners",
   editorPicks: "editor_picks",
   popularArtists: "popular_artists",
+  events: "events",
+  testimonials: "testimonials",
   topDownloads: "top_downloads",
   continueListening: "continue_listening",
   browseByGenre: "browse_by_genre",

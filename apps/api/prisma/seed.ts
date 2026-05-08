@@ -19,6 +19,8 @@ const featureModules = [
   ["hero_banners", "Hero Banners", "Discovery"],
   ["editor_picks", "Editor Picks", "Discovery"],
   ["popular_artists", "Popular Artists", "Discovery"],
+  ["events", "Events", "Discovery"],
+  ["testimonials", "Testimonials", "Community"],
   ["top_downloads", "Top Downloads", "Discovery"],
   ["continue_listening", "Continue Listening", "Playback"],
   ["browse_by_genre", "Browse by Genre", "Discovery"],

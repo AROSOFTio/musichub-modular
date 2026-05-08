@@ -26,6 +26,8 @@ export const FEATURE_MODULE_DEFINITIONS: FeatureModuleDefinition[] = [
   { key: "albums", name: "Albums", description: "Album management and browsing.", category: "Discovery" },
   { key: "editor_picks", name: "Editor Picks", description: "Editorial picks sections and admin.", category: "Discovery" },
   { key: "popular_artists", name: "Popular Artists", description: "Popular artist rows.", category: "Discovery" },
+  { key: "events", name: "Events", description: "Upcoming event sections.", category: "Discovery" },
+  { key: "testimonials", name: "Testimonials", description: "Public reviews and social proof sections.", category: "Community" },
   { key: "top_downloads", name: "Top Downloads", description: "Top downloads sections.", category: "Discovery" },
   { key: "browse_by_genre", name: "Browse by Genre", description: "Genre quick browse widgets.", category: "Discovery" },
   { key: "library", name: "Library", description: "User library pages.", category: "Library" },

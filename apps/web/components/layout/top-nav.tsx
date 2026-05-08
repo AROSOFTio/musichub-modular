@@ -23,6 +23,11 @@ export function TopNav() {
         </div>
 
         <div className="flex items-center gap-3">
+          {hasModule(modules, MODULE_KEYS.proPlan) ? (
+            <Link href="/login" className="inline-flex items-center rounded-2xl bg-violet-700 px-4 py-2.5 text-sm font-black text-white shadow-sm hover:bg-violet-800">
+              Go Pro
+            </Link>
+          ) : null}
           <button
             onClick={toggleTheme}
             className="flex h-10 w-10 items-center justify-center rounded-2xl border border-borderSoft bg-[var(--card-bg)] text-[var(--foreground)] transition-colors hover:bg-violet-50 dark:hover:bg-violet-900/20"
@@ -35,7 +40,7 @@ export function TopNav() {
             <div className="h-11 w-52 animate-pulse rounded-2xl bg-violet-100 dark:bg-violet-900/20" />
           ) : isAuthenticated && user ? (
             <>
-              <NotificationsDropdown />
+              {hasModule(modules, MODULE_KEYS.notifications) ? <NotificationsDropdown /> : null}
               <div className="rounded-2xl border border-borderSoft bg-[var(--card-bg)] px-4 py-2">
                 <p className="text-sm font-semibold text-[var(--foreground)]">{user.displayName}</p>
                 <p className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">

@@ -2,6 +2,8 @@
 
 import { SlidersHorizontal, X } from "lucide-react";
 import type { CatalogSong } from "@/lib/api";
+import { MODULE_KEYS, type ModuleFlags } from "@/lib/modules/module-keys";
+import { hasModule } from "@/lib/modules/module-registry";
 
 export type DiscoveryFilterState = {
   artist: string;
@@ -111,17 +113,21 @@ export function DiscoveryFilters({
   filters,
   onChange,
   compact = false,
+  modules,
 }: {
   songs: CatalogSong[];
   filters: DiscoveryFilterState;
   onChange: (filters: DiscoveryFilterState) => void;
   compact?: boolean;
+  modules?: ModuleFlags;
 }) {
   const artistOptions = uniqueOptions(songs.flatMap((song) => [song.artist, ...(song.featuredArtists ?? [])]));
   const genreOptions = uniqueOptions(songs.map((song) => song.genre));
   const languageOptions = uniqueOptions(songs.map((song) => song.language));
   const typeOptions = uniqueOptions(songs.map((song) => song.musicType));
   const active = isDiscoveryFilterActive(filters);
+  const showArtist = hasModule(modules, MODULE_KEYS.artists);
+  const showGenre = hasModule(modules, MODULE_KEYS.genres);
 
   function setFilter(key: keyof DiscoveryFilterState, value: string) {
     onChange({ ...filters, [key]: value });
@@ -131,8 +137,8 @@ export function DiscoveryFilters({
 
   const content = (
     <div className={compact ? "grid gap-4 sm:grid-cols-2" : "space-y-4"}>
-      <SelectFilter label="Artist" value={filters.artist} options={artistOptions} placeholder="All artists" onChange={(value) => setFilter("artist", value)} />
-      <SelectFilter label="Genre" value={filters.genre} options={genreOptions} placeholder="All genres" onChange={(value) => setFilter("genre", value)} />
+      {showArtist ? <SelectFilter label="Artist" value={filters.artist} options={artistOptions} placeholder="All artists" onChange={(value) => setFilter("artist", value)} /> : null}
+      {showGenre ? <SelectFilter label="Genre" value={filters.genre} options={genreOptions} placeholder="All genres" onChange={(value) => setFilter("genre", value)} /> : null}
       <SelectFilter label="Language" value={filters.language} options={languageOptions} placeholder="All languages" onChange={(value) => setFilter("language", value)} />
       <SelectFilter label="Song type" value={filters.musicType} options={typeOptions} placeholder="All song types" onChange={(value) => setFilter("musicType", value)} />
       <label className="block">

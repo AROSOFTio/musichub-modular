@@ -295,6 +295,9 @@ model HeroBanner {
   title           String
   subtitle        String?
   image           String?
+  mobileImage     String?
+  sponsorLabel    String?
+  placement       String       @default("homepage_hero")
   linkedSongId    String?
   linkedArtistId  String?
   ctaLabel        String?
@@ -307,7 +310,40 @@ model HeroBanner {
   updatedAt       DateTime     @updatedAt
 
   @@index([status, priority])
+  @@index([placement, status, priority])
   @@map("hero_banners")
+}
+
+model Event {
+  id        String   @id @default(uuid())
+  title     String
+  location  String
+  date      DateTime
+  image     String?
+  ctaLabel  String?
+  ctaUrl    String?
+  isActive  Boolean  @default(true)
+  priority  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive, priority, date])
+  @@map("events")
+}
+
+model Testimonial {
+  id        String   @id @default(uuid())
+  name      String
+  text      String
+  avatar    String?
+  rating    Int?
+  isActive  Boolean  @default(true)
+  priority  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive, priority])
+  @@map("testimonials")
 }
 
 model TrendingSettings {

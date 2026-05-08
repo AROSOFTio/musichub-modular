@@ -12,12 +12,7 @@ export default function HomePage() {
 
   useEffect(() => {
     getHomeFeed()
-      .then((payload) => {
-        setFeed({
-          ...payload,
-          featured: payload.featured ?? (payload.trendingNow?.[0] ?? payload.latestUploads?.[0] ?? null),
-        });
-      })
+      .then((payload) => setFeed(payload))
       .catch(() => setFeed(null))
       .finally(() => setIsLoading(false));
   }, []);

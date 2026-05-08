@@ -23,7 +23,7 @@ export function RightRail({
 }) {
   return (
     <aside className="space-y-6">
-      <DiscoveryFilters songs={songs} filters={filters} onChange={onFiltersChange} />
+      <DiscoveryFilters songs={songs} filters={filters} onChange={onFiltersChange} modules={modules} />
       {hasModule(modules, MODULE_KEYS.continueListening) && continueListening.length ? (
         <section className="rounded-3xl border border-borderSoft bg-[var(--card-bg)] p-5">
           <h2 className="mb-4 text-lg font-black">Continue Listening</h2>

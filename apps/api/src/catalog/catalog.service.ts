@@ -177,7 +177,7 @@ export class CatalogService {
     const q = query?.trim();
     if (!q) return { songs: [], artists: [], genres: [] };
 
-    const [songs, artists, genres] = await Promise.all([
+    const [songs, artists, genres, albums] = await Promise.all([
       this.prisma.song.findMany({
         where: {
           isPublished: true,
@@ -207,12 +207,26 @@ export class CatalogService {
         include: { _count: { select: { songs: true } } },
         take: 10,
       }),
+      this.prisma.album.findMany({
+        where: {
+          OR: [
+            { title: { contains: q, mode: "insensitive" } },
+            { artist: { name: { contains: q, mode: "insensitive" } } },
+          ],
+        },
+        include: {
+          artist: { select: { id: true, name: true, slug: true } },
+          _count: { select: { songs: true } },
+        },
+        take: 10,
+      }),
     ]);
 
     return {
       songs: songs.map((s) => this.toSongResponse(s, modules)),
       artists,
       genres,
+      albums,
     };
   }
 
@@ -313,9 +327,18 @@ export class CatalogService {
     const feed: Record<string, any> = { modules };
 
     if (modules.hero_banners) {
-      const banner = await this.prisma.heroBanner.findFirst({
-        where: { status: "ACTIVE" },
+      const now = new Date();
+      const banners = await this.prisma.heroBanner.findMany({
+        where: {
+          status: "ACTIVE",
+          placement: "homepage_hero",
+          AND: [
+            { OR: [{ startDate: null }, { startDate: { lte: now } }] },
+            { OR: [{ endDate: null }, { endDate: { gte: now } }] },
+          ],
+        },
         orderBy: [{ priority: "asc" }, { updatedAt: "desc" }],
+        take: 5,
       });
       const fallbackSong = await this.prisma.song.findFirst({
         where: { isPublished: true, isEditorPick: true },
@@ -326,7 +349,7 @@ export class CatalogService {
         include: songInclude,
         orderBy: { playCount: "desc" },
       }));
-      feed.heroBanners = banner ? [banner] : fallbackSong ? [this.toSongResponse(fallbackSong as any, modules)] : [];
+      feed.heroBanners = banners;
       feed.featured = fallbackSong ? this.toSongResponse(fallbackSong as any, modules) : null;
     }
 
@@ -356,6 +379,20 @@ export class CatalogService {
         take: 12,
       });
       feed.genres = feed.browseGenres;
+    }
+    if (modules.events) {
+      feed.events = await this.prisma.event.findMany({
+        where: { isActive: true },
+        orderBy: [{ date: "asc" }, { priority: "asc" }],
+        take: 6,
+      });
+    }
+    if (modules.testimonials) {
+      feed.testimonials = await this.prisma.testimonial.findMany({
+        where: { isActive: true },
+        orderBy: [{ priority: "asc" }, { updatedAt: "desc" }],
+        take: 6,
+      });
     }
     if (modules.continue_listening) feed.continueListening = [];
 

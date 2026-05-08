@@ -3,15 +3,14 @@
 import { useMemo, useState } from "react";
 import type { HomeFeed } from "@/lib/api";
 import { emptyDiscoveryFilters, filterDiscoverySongs, isDiscoveryFilterActive } from "./discovery-filters";
-import { EditorPicksSection } from "./editor-picks-section";
-import { FeatureShortcuts } from "./feature-shortcuts";
 import { FilteredSongsSection } from "./filtered-songs-section";
-import { HeroCarousel } from "./hero-carousel";
-import { LatestUploadsSection } from "./latest-uploads-section";
+import { HeroAdCarousel } from "./hero-ad-carousel";
+import { HomeQuickLinks } from "./home-quick-links";
+import { HotThisPeriodSection } from "./hot-this-period-section";
 import { PopularArtistsSection } from "./popular-artists-section";
 import { RightRail } from "./right-rail";
-import { TopDownloadsSection } from "./top-downloads-section";
-import { TrendingSection } from "./trending-section";
+import { TestimonialsSection } from "./testimonials-section";
+import { UpcomingEventsSection } from "./upcoming-events-section";
 
 export function HomeDesktopLayout({ feed }: { feed: HomeFeed }) {
   const modules = feed.modules ?? {};
@@ -32,17 +31,18 @@ export function HomeDesktopLayout({ feed }: { feed: HomeFeed }) {
   return (
     <div className="hidden gap-8 lg:grid lg:grid-cols-[minmax(0,1fr)_320px]">
       <div className="space-y-10">
-        <HeroCarousel song={feed.featured ?? null} />
-        <FeatureShortcuts modules={modules} />
+        <HeroAdCarousel ads={feed.heroBanners} modules={modules} />
+        <HomeQuickLinks modules={modules} />
         {filtersActive ? (
           <FilteredSongsSection songs={filteredSongs} />
         ) : (
           <>
-            <TrendingSection songs={feed.trendingNow ?? feed.trending ?? []} />
-            <LatestUploadsSection songs={feed.latestUploads ?? feed.latest ?? []} />
-            <EditorPicksSection songs={feed.editorPicks ?? []} />
-            <TopDownloadsSection songs={feed.topDownloads ?? []} />
-            <PopularArtistsSection artists={feed.popularArtists ?? []} />
+            <HotThisPeriodSection songs={allSongs} modules={modules} />
+            <UpcomingEventsSection events={feed.events} modules={modules} />
+            <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+              <PopularArtistsSection artists={feed.popularArtists ?? []} modules={modules} />
+              <TestimonialsSection testimonials={feed.testimonials} modules={modules} />
+            </div>
           </>
         )}
       </div>
