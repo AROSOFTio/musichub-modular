@@ -56,7 +56,7 @@ export function HeroAdCarousel({ ads, modules }: { ads?: HeroBannerAd[]; modules
 
   return (
     <section
-      className="relative overflow-hidden rounded-[2rem] border border-violet-100 bg-[#100727] text-white shadow-xl"
+      className="relative overflow-hidden rounded-3xl border border-violet-100 bg-[#100727] text-white shadow-xl"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -76,11 +76,11 @@ export function HeroAdCarousel({ ads, modules }: { ads?: HeroBannerAd[]; modules
       <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-violet-950/35 to-transparent" />
       <div className="absolute inset-y-0 right-0 hidden w-1/2 opacity-70 lg:block" style={{ background: "repeating-linear-gradient(90deg, transparent 0 14px, rgba(236,72,153,.35) 15px 18px, transparent 19px 34px)" }} />
 
-      <div className="relative z-10 min-h-[235px] px-6 py-7 sm:min-h-[300px] sm:px-9 lg:min-h-[330px] lg:px-12">
+      <div className="relative z-10 min-h-[205px] px-5 py-6 sm:min-h-[230px] sm:px-8 lg:min-h-[260px] lg:px-10">
         <span className="inline-flex rounded-full bg-violet-600 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-white">
           {active.sponsorLabel || "Sponsored"}
         </span>
-        <h1 className="mt-5 max-w-xl text-3xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+        <h1 className="mt-4 max-w-xl text-3xl font-black leading-tight tracking-tight sm:text-4xl lg:text-5xl">
           {active.title}
         </h1>
         {active.subtitle ? (
@@ -88,8 +88,8 @@ export function HeroAdCarousel({ ads, modules }: { ads?: HeroBannerAd[]; modules
             {active.subtitle}
           </p>
         ) : null}
-        <div className="mt-7">
-          <Link href={active.ctaUrl || "/"} className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-black text-violet-700 shadow-lg hover:bg-violet-50">
+        <div className="mt-5">
+          <Link href={active.ctaUrl || "/"} className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-black text-violet-700 shadow-lg hover:bg-violet-50">
             {active.ctaLabel || "Learn More"}
             <ExternalLink className="h-4 w-4" />
           </Link>

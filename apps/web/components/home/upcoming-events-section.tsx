@@ -22,17 +22,17 @@ export function UpcomingEventsSection({ events, modules }: { events?: HomeEvent[
     <section>
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-xl font-black text-[var(--foreground)]">Upcoming Events</h2>
-        <Link href="/contact" className="text-xs font-black text-violet-700">View all</Link>
+        <Link href="/events" className="text-xs font-black text-violet-700">View all</Link>
       </div>
       {!visibleEvents.length ? (
         <div className="rounded-2xl border border-dashed border-borderSoft bg-[var(--card-bg)] p-6 text-sm text-[var(--muted)]">
           No upcoming events have been published yet.
         </div>
       ) : null}
-      <div className="flex gap-3 overflow-x-auto pb-2">
+      <div className="flex snap-x gap-4 overflow-x-auto pb-2">
         {visibleEvents.map((event) => (
-          <article key={event.id} className="flex w-80 shrink-0 gap-3 rounded-2xl border border-borderSoft bg-[var(--card-bg)] p-3 shadow-sm">
-            <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-violet-50 text-violet-500">
+          <article key={event.id} className="flex w-[22rem] max-w-[86vw] shrink-0 snap-start gap-3 rounded-2xl border border-borderSoft bg-[var(--card-bg)] p-3 shadow-sm transition hover:border-violet-200 hover:shadow-card">
+            <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-violet-50 text-violet-500">
               {event.image ? <img src={event.image} alt="" className="h-full w-full object-cover" /> : <CalendarDays className="h-7 w-7" />}
             </div>
             <div className="min-w-0 flex-1">

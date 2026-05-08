@@ -69,7 +69,7 @@ export function AudioPlayerBar() {
   if (!hasTrack) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-20 z-30 px-4 lg:bottom-0 lg:px-8">
+    <div className="fixed inset-x-0 bottom-20 z-30 px-3 lg:bottom-0 lg:px-8">
       <audio
         ref={audioRef}
         src={currentTrack?.streamUrl ?? undefined}
@@ -83,8 +83,8 @@ export function AudioPlayerBar() {
         }}
         onTimeUpdate={(event) => setProgress(event.currentTarget.currentTime)}
       />
-      <div className="mx-auto max-w-7xl rounded-[1.75rem] border border-borderSoft bg-[var(--card-bg)]/95 p-4 shadow-card backdrop-blur">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="mx-auto max-w-7xl rounded-2xl border border-borderSoft bg-[var(--card-bg)]/95 p-3 shadow-card backdrop-blur lg:rounded-[1.75rem] lg:p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">
               Audio player
@@ -101,10 +101,10 @@ export function AudioPlayerBar() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 lg:min-w-[22rem]">
+          <div className="flex flex-col gap-2 lg:min-w-[22rem] lg:gap-3">
             <div className="flex items-center gap-3">
               <button
-                className="button-secondary h-10 w-10 rounded-full p-0"
+                className="button-secondary hidden h-10 w-10 rounded-full p-0 sm:inline-flex"
                 disabled={!hasPrevious}
                 onClick={playPrevious}
                 type="button"
@@ -127,7 +127,7 @@ export function AudioPlayerBar() {
               >
                 <SkipForward className="h-4 w-4" />
               </button>
-              <div className="ml-auto flex items-center gap-2 rounded-full border border-borderSoft bg-[var(--surface)] px-3 py-2">
+              <div className="ml-auto hidden items-center gap-2 rounded-full border border-borderSoft bg-[var(--surface)] px-3 py-2 sm:flex">
                 <Volume2 className="h-4 w-4 text-violet-700" />
                 <input
                   aria-label="Volume"

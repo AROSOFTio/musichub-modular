@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Star } from "lucide-react";
 
 import type { HomeTestimonial } from "@/lib/api";
@@ -16,7 +15,9 @@ export function TestimonialsSection({ testimonials, modules }: { testimonials?: 
     <section className="rounded-3xl border border-borderSoft bg-[var(--card-bg)] p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between gap-4">
         <h2 className="text-lg font-black text-[var(--foreground)]">What People Say</h2>
-        <Link href="/admin" className="text-xs font-black text-violet-700">Admin posts</Link>
+        <span className="rounded-full bg-violet-50 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-violet-700">
+          Verified
+        </span>
       </div>
       {!visible.length ? (
         <div className="rounded-2xl border border-dashed border-borderSoft bg-[var(--surface)] p-5 text-sm text-[var(--muted)]">
@@ -25,7 +26,7 @@ export function TestimonialsSection({ testimonials, modules }: { testimonials?: 
       ) : null}
       <div className="space-y-4">
         {visible.slice(0, 2).map((item) => (
-          <article key={item.id} className="flex gap-3">
+          <article key={item.id} className="flex gap-3 rounded-2xl border border-borderSoft bg-[var(--surface)] p-3">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-violet-50 text-sm font-black text-violet-700">
               {item.avatar ? <img src={item.avatar} alt="" className="h-full w-full object-cover" /> : item.name.charAt(0)}
             </div>

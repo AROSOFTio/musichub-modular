@@ -11,14 +11,6 @@ import { PopularArtistsSection } from "./popular-artists-section";
 import { TestimonialsSection } from "./testimonials-section";
 import { UpcomingEventsSection } from "./upcoming-events-section";
 
-function AdSlot({ label }: { label: string }) {
-  return (
-    <aside className="sticky top-28 hidden h-[calc(100vh-8rem)] rounded-3xl border border-dashed border-borderSoft bg-[var(--card-bg)] p-4 text-center text-xs font-bold uppercase tracking-[0.18em] text-[var(--muted)] xl:flex xl:items-center xl:justify-center">
-      {label}
-    </aside>
-  );
-}
-
 export function HomeDesktopLayout({ feed }: { feed: HomeFeed }) {
   const modules = feed.modules ?? {};
   const [filters, setFilters] = useState(emptyDiscoveryFilters);
@@ -36,8 +28,7 @@ export function HomeDesktopLayout({ feed }: { feed: HomeFeed }) {
   const filtersActive = isDiscoveryFilterActive(filters);
 
   return (
-    <div className="hidden gap-6 lg:grid lg:grid-cols-1 xl:grid-cols-[minmax(120px,15%)_minmax(0,70%)_minmax(120px,15%)]">
-      <AdSlot label="Advert" />
+    <div className="hidden lg:block">
       <div className="space-y-8">
         <DiscoveryFilters songs={allSongs} filters={filters} onChange={setFilters} compact modules={modules} />
         <HeroAdCarousel ads={feed.heroBanners} modules={modules} />
@@ -55,7 +46,6 @@ export function HomeDesktopLayout({ feed }: { feed: HomeFeed }) {
           </>
         )}
       </div>
-      <AdSlot label="Advert" />
     </div>
   );
 }

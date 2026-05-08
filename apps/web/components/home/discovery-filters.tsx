@@ -58,7 +58,7 @@ function SelectFilter({
       <select
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="mt-2 h-11 w-full rounded-2xl border border-borderSoft bg-[var(--surface)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
+        className="mt-2 h-10 w-full rounded-xl border border-borderSoft bg-[var(--surface)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
       >
         <option value="">{placeholder}</option>
         {options.map((option) => (
@@ -136,14 +136,14 @@ export function DiscoveryFilters({
   if (!songs.length) return null;
 
   const content = (
-    <div className={compact ? "grid gap-3 sm:grid-cols-2 xl:grid-cols-6" : "space-y-4"}>
+    <div className={compact ? "grid gap-3 md:grid-cols-3 xl:grid-cols-6" : "space-y-4"}>
       {showArtist ? <SelectFilter label="Artist" value={filters.artist} options={artistOptions} placeholder="All artists" onChange={(value) => setFilter("artist", value)} /> : null}
       {showGenre ? <SelectFilter label="Genre" value={filters.genre} options={genreOptions} placeholder="All genres" onChange={(value) => setFilter("genre", value)} /> : null}
       <SelectFilter label="Language" value={filters.language} options={languageOptions} placeholder="All languages" onChange={(value) => setFilter("language", value)} />
       <SelectFilter label="Song type" value={filters.musicType} options={typeOptions} placeholder="All song types" onChange={(value) => setFilter("musicType", value)} />
       <label className="block">
         <span className="text-[11px] font-black uppercase tracking-widest text-[var(--muted)]">Release date</span>
-        <select value={filters.releaseWindow} onChange={(event) => setFilter("releaseWindow", event.target.value)} className="mt-2 h-11 w-full rounded-2xl border border-borderSoft bg-[var(--surface)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100">
+        <select value={filters.releaseWindow} onChange={(event) => setFilter("releaseWindow", event.target.value)} className="mt-2 h-10 w-full rounded-xl border border-borderSoft bg-[var(--surface)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100">
           <option value="">Any time</option>
           <option value="7d">Last 7 days</option>
           <option value="30d">Last 30 days</option>
@@ -153,7 +153,7 @@ export function DiscoveryFilters({
       </label>
       <label className="block">
         <span className="text-[11px] font-black uppercase tracking-widest text-[var(--muted)]">Sort</span>
-        <select value={filters.sort} onChange={(event) => setFilter("sort", event.target.value)} className="mt-2 h-11 w-full rounded-2xl border border-borderSoft bg-[var(--surface)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100">
+        <select value={filters.sort} onChange={(event) => setFilter("sort", event.target.value)} className="mt-2 h-10 w-full rounded-xl border border-borderSoft bg-[var(--surface)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100">
           <option value="latest">Latest first</option>
           <option value="plays">Most played</option>
           <option value="downloads">Most downloaded</option>
@@ -164,14 +164,14 @@ export function DiscoveryFilters({
   );
 
   return (
-    <section className={compact ? "rounded-3xl border border-borderSoft bg-[var(--card-bg)] p-4 shadow-sm" : "rounded-3xl border border-borderSoft bg-[var(--card-bg)] p-5"}>
-      <div className={compact ? "mb-3 flex items-center justify-between gap-3" : "mb-4 flex items-center justify-between gap-3"}>
+    <section className={compact ? "rounded-2xl border border-borderSoft bg-[var(--card-bg)] p-4 shadow-sm" : "rounded-3xl border border-borderSoft bg-[var(--card-bg)] p-5"}>
+      <div className={compact ? "mb-3 flex flex-wrap items-center justify-between gap-3" : "mb-4 flex items-center justify-between gap-3"}>
         <div className="flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-violet-50 text-violet-600">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
             <SlidersHorizontal className="h-4 w-4" />
           </span>
           <div>
-            <h2 className="text-lg font-black text-[var(--foreground)]">Filters</h2>
+            <h2 className="text-base font-black text-[var(--foreground)]">Filters</h2>
             <p className="text-xs text-[var(--muted)]">Refine the music feed</p>
           </div>
         </div>

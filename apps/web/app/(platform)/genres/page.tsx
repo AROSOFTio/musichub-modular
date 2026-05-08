@@ -30,18 +30,18 @@ export default function GenresPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-950">Browse Genres</h1>
-        <p className="mt-1 text-sm text-slate-500">Explore music by genre</p>
+        <h1 className="text-2xl font-extrabold text-[var(--foreground)]">Browse Genres</h1>
+        <p className="mt-1 text-sm text-[var(--muted)]">Explore music by genre</p>
       </div>
 
       {isLoading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="h-28 animate-pulse rounded-3xl bg-slate-100" />
+            <div key={i} className="h-28 animate-pulse rounded-3xl bg-violet-100/70" />
           ))}
         </div>
       ) : genres.length === 0 ? (
-        <div className="rounded-3xl border border-borderSoft bg-white p-10 text-center text-slate-500 shadow-card">
+        <div className="rounded-3xl border border-borderSoft bg-[var(--card-bg)] p-10 text-center text-[var(--muted)] shadow-card">
           No genres found. They are created automatically when songs are uploaded.
         </div>
       ) : (

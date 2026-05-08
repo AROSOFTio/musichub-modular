@@ -12,9 +12,9 @@ type ArtistWithSongs = CatalogArtist & { songs: CatalogSong[] };
 
 function StatBox({ label, value }: { label: string; value: number | string }) {
   return (
-    <div className="rounded-2xl border border-borderSoft bg-white p-4 text-center">
-      <p className="text-2xl font-extrabold text-slate-950">{value}</p>
-      <p className="mt-1 text-sm text-slate-500">{label}</p>
+    <div className="rounded-2xl border border-borderSoft bg-[var(--card-bg)] p-4 text-center">
+      <p className="text-2xl font-extrabold text-[var(--foreground)]">{value}</p>
+      <p className="mt-1 text-sm text-[var(--muted)]">{label}</p>
     </div>
   );
 }
@@ -55,7 +55,7 @@ export function ArtistProfilePageClient({ slug }: { slug: string }) {
       <Link href="/artists" className="inline-flex items-center gap-2 text-sm text-violet-600 hover:text-violet-700">
         <ArrowLeft className="h-4 w-4" /> All Artists
       </Link>
-      <article className="rounded-3xl border border-borderSoft bg-white p-6 shadow-card sm:p-8">
+      <article className="rounded-3xl border border-borderSoft bg-[var(--card-bg)] p-6 shadow-card sm:p-8">
         {artist.coverImage ? <img src={artist.coverImage} alt="" className="mb-6 h-48 w-full rounded-2xl object-cover" /> : (
           <div className="mb-6 flex h-48 w-full items-center justify-center rounded-2xl bg-slate-950 text-white">
             <div className="text-center"><Mic2 className="mx-auto h-10 w-10" /><p className="mt-3 text-sm font-bold uppercase tracking-[0.3em] text-slate-300">Artist Profile</p></div>
@@ -67,10 +67,10 @@ export function ArtistProfilePageClient({ slug }: { slug: string }) {
           </div>
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-3xl font-extrabold text-slate-950">{artist.name}</h1>
+              <h1 className="text-3xl font-extrabold text-[var(--foreground)]">{artist.name}</h1>
               {artist.verified ? <span className="rounded-full bg-violet-100 px-3 py-1 text-xs font-bold text-violet-700">Verified</span> : null}
             </div>
-            <p className="mt-3 text-sm leading-7 text-slate-600">{artist.bio || `Explore music by ${artist.name}, including published songs, genres and latest releases on Musichub.`}</p>
+            <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{artist.bio || `Explore music by ${artist.name}, including published songs, genres and latest releases on Musichub.`}</p>
             <div className="mt-4"><FollowArtistButton artistId={artist.id} /></div>
           </div>
         </div>
@@ -81,8 +81,8 @@ export function ArtistProfilePageClient({ slug }: { slug: string }) {
         <StatBox label="Total Downloads" value={totalDownloads.toLocaleString()} />
       </div>
       <section>
-        <h2 className="mb-4 text-xl font-bold text-slate-950">Songs by {artist.name}</h2>
-        {artist.songs.length ? <RankedSongList songs={artist.songs} showDownloads showRank showRemixes /> : <div className="rounded-3xl border border-borderSoft bg-white p-10 text-center text-slate-500 shadow-card">No published songs yet.</div>}
+        <h2 className="mb-4 text-xl font-bold text-[var(--foreground)]">Songs by {artist.name}</h2>
+        {artist.songs.length ? <RankedSongList songs={artist.songs} showDownloads showRank showRemixes /> : <div className="rounded-3xl border border-borderSoft bg-[var(--card-bg)] p-10 text-center text-[var(--muted)] shadow-card">No published songs yet.</div>}
       </section>
     </div>
   );

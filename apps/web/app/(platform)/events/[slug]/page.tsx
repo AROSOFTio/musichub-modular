@@ -18,11 +18,11 @@ export default async function EventPage({ params }: { params: { slug: string } }
   return (
     <div className="space-y-6">
       {jsonLd([eventJsonLd(event), breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Events", path: "/events" }, { name: event.title, path: `/events/${event.slug}` }])])}
-      <section className="rounded-3xl border border-borderSoft bg-white p-6 shadow-card">
+      <section className="rounded-3xl border border-borderSoft bg-[var(--card-bg)] p-6 shadow-card">
         {event.image ? <img src={event.image} alt="" className="mb-6 h-64 w-full rounded-2xl object-cover" /> : null}
-        <h1 className="text-3xl font-black text-slate-950">{event.title}</h1>
-        <p className="mt-2 text-sm font-semibold text-slate-500">{event.location} · {new Date(event.date).toLocaleDateString()}</p>
-        <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-600">Event information, location and timing for {event.title}.</p>
+        <h1 className="text-3xl font-black text-[var(--foreground)]">{event.title}</h1>
+        <p className="mt-2 text-sm font-semibold text-[var(--muted)]">{event.location} - {new Date(event.date).toLocaleDateString()}</p>
+        <p className="mt-4 max-w-3xl text-sm leading-7 text-[var(--muted)]">Event information, location and timing for {event.title}.</p>
       </section>
     </div>
   );

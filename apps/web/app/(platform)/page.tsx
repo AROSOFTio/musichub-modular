@@ -20,7 +20,7 @@ export default function HomePage() {
   if (isLoading) {
     return (
       <div className="space-y-7">
-        <div className="h-[340px] animate-pulse rounded-[2rem] bg-violet-100" />
+        <div className="h-[230px] animate-pulse rounded-3xl bg-violet-100" />
         <div className="grid grid-cols-5 gap-4">
           {[1, 2, 3, 4, 5].map((item) => <div key={item} className="h-20 animate-pulse rounded-2xl bg-slate-100" />)}
         </div>

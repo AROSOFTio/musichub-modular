@@ -16,10 +16,10 @@ export function PopularArtistsSection({ artists, modules }: { artists: CatalogAr
         <h2 className="text-xl font-black text-[var(--foreground)]">Popular Artists</h2>
         <Link href="/artists" className="text-xs font-black text-violet-700">View all</Link>
       </div>
-      <div className="flex gap-5 overflow-x-auto pb-2">
-        {artists.slice(0, 10).map((artist) => (
-          <Link key={artist.id} href={`/artists/${artist.slug}`} className="group w-24 shrink-0 text-center">
-            <span className="relative mx-auto flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-violet-400 bg-violet-50 text-xl font-black text-violet-600 shadow-sm transition group-hover:scale-105">
+      <div className="flex snap-x gap-3 overflow-x-auto pb-2">
+        {artists.map((artist) => (
+          <Link key={artist.id} href={`/artists/${artist.slug}`} className="group w-24 shrink-0 snap-start rounded-2xl border border-borderSoft bg-[var(--card-bg)] p-2.5 text-center shadow-sm transition hover:border-violet-200 hover:shadow-card">
+            <span className="relative mx-auto flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-violet-300 bg-violet-50 text-xl font-black text-violet-600 transition group-hover:scale-105">
               {artist.avatar ? <img src={artist.avatar} alt="" className="h-full w-full object-cover" /> : artist.name.charAt(0)}
               {artist.verified ? (
                 <span className="absolute bottom-0 right-0 rounded-full bg-blue-500 p-0.5 text-white">

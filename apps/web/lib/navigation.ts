@@ -42,6 +42,15 @@ export const secondaryNavigation: NavItem[] = [
   { href: "/artists", label: "Artists", icon: Mic2, moduleKey: MODULE_KEYS.artists },
 ];
 
+export const publicTopNavigation: NavItem[] = [
+  { href: "/", label: "Home", icon: Home, moduleKey: MODULE_KEYS.home },
+  { href: "/trending", label: "Trending", icon: Flame, moduleKey: MODULE_KEYS.trending },
+  { href: "/latest", label: "Latest", icon: Clock3, moduleKey: MODULE_KEYS.latest },
+  { href: "/top-50", label: "Top 50", icon: Trophy, moduleKey: MODULE_KEYS.top50 },
+  { href: "/genres", label: "Genres", icon: Tags, moduleKey: MODULE_KEYS.genres },
+  { href: "/artists", label: "Artists", icon: Mic2, moduleKey: MODULE_KEYS.artists },
+];
+
 export const mobileNavigation: NavItem[] = [
   { href: "/", label: "Home", icon: Home, moduleKey: MODULE_KEYS.home },
   { href: "/trending", label: "Trending", icon: Flame, moduleKey: MODULE_KEYS.trending },

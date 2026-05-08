@@ -23,19 +23,19 @@ export default function Top50Page() {
           <Trophy className="h-5 w-5 text-yellow-600" />
         </div>
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-950">Top 50</h1>
-          <p className="text-sm text-slate-500">Most downloaded &amp; streamed songs</p>
+          <h1 className="text-2xl font-extrabold text-[var(--foreground)]">Top 50</h1>
+          <p className="text-sm text-[var(--muted)]">Most downloaded &amp; streamed songs</p>
         </div>
       </div>
 
       {isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 10 }).map((_, i) => (
-            <div key={i} className="h-16 animate-pulse rounded-2xl bg-slate-100" />
+            <div key={i} className="h-16 animate-pulse rounded-2xl bg-violet-100/70" />
           ))}
         </div>
       ) : songs.length === 0 ? (
-        <div className="rounded-3xl border border-borderSoft bg-white p-10 text-center text-slate-500 shadow-card">
+        <div className="rounded-3xl border border-borderSoft bg-[var(--card-bg)] p-10 text-center text-[var(--muted)] shadow-card">
           No songs ranked yet. Downloads and plays drive this chart.
         </div>
       ) : (

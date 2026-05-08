@@ -35,17 +35,17 @@ export function GenreDetailPageClient({ slug }: { slug: string }) {
   return (
     <div className="space-y-6">
       <Link href="/genres" className="inline-flex items-center gap-2 text-sm text-violet-600 hover:text-violet-700"><ArrowLeft className="h-4 w-4" /> All Genres</Link>
-      <article className="rounded-3xl border border-borderSoft bg-white p-6 shadow-card sm:p-8">
+      <article className="rounded-3xl border border-borderSoft bg-[var(--card-bg)] p-6 shadow-card sm:p-8">
         <div className="flex items-center gap-4">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-violet-100"><Music className="h-8 w-8 text-violet-600" /></div>
           <div>
-            <h1 className="text-3xl font-extrabold text-slate-950">{genre.name}</h1>
-            <p className="mt-1 text-sm text-slate-500">{genre._count?.songs ?? genre.songs.length} songs in this genre</p>
+            <h1 className="text-3xl font-extrabold text-[var(--foreground)]">{genre.name}</h1>
+            <p className="mt-1 text-sm text-[var(--muted)]">{genre._count?.songs ?? genre.songs.length} songs in this genre</p>
           </div>
         </div>
-        <p className="mt-5 max-w-3xl text-sm leading-7 text-slate-600">{genre.description || `Explore ${genre.name} songs, artists and new releases on Musichub.`}</p>
+        <p className="mt-5 max-w-3xl text-sm leading-7 text-[var(--muted)]">{genre.description || `Explore ${genre.name} songs, artists and new releases on Musichub.`}</p>
       </article>
-      {genre.songs.length ? <RankedSongList songs={genre.songs} showRank /> : <div className="rounded-3xl border border-borderSoft bg-white p-10 text-center text-slate-500 shadow-card">No published songs in this genre yet.</div>}
+      {genre.songs.length ? <RankedSongList songs={genre.songs} showRank /> : <div className="rounded-3xl border border-borderSoft bg-[var(--card-bg)] p-10 text-center text-[var(--muted)] shadow-card">No published songs in this genre yet.</div>}
     </div>
   );
 }

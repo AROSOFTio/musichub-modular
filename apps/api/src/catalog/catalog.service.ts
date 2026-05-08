@@ -490,7 +490,7 @@ export class CatalogService {
       feed.popularArtists = await this.prisma.artist.findMany({
         orderBy: { songs: { _count: "desc" } },
         include: { _count: { select: { songs: true, followers: true } } },
-        take: 8,
+        take: 20,
       });
     }
     if (modules.browse_by_genre && modules.genres) {
