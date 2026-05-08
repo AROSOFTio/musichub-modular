@@ -46,8 +46,9 @@ export function ArtistProfilePageClient({ slug }: { slug: string }) {
     );
   }
 
-  const totalPlays = artist.songs.reduce((sum, song) => sum + song.playCount, 0);
-  const totalDownloads = artist.songs.reduce((sum, song) => sum + song.downloadCount, 0);
+  const totalSongs = artist.stats?.totalSongs ?? artist._count?.songs ?? artist.songs.length;
+  const totalPlays = artist.stats?.totalPlays ?? artist.songs.reduce((sum, song) => sum + song.playCount, 0);
+  const totalDownloads = artist.stats?.totalDownloads ?? artist.songs.reduce((sum, song) => sum + song.downloadCount, 0);
 
   return (
     <div className="space-y-8">
@@ -75,13 +76,13 @@ export function ArtistProfilePageClient({ slug }: { slug: string }) {
         </div>
       </article>
       <div className="grid grid-cols-3 gap-4">
-        <StatBox label="Songs" value={artist._count?.songs ?? artist.songs.length} />
+        <StatBox label="Songs" value={totalSongs} />
         <StatBox label="Total Plays" value={totalPlays.toLocaleString()} />
-        <StatBox label="Downloads" value={totalDownloads.toLocaleString()} />
+        <StatBox label="Total Downloads" value={totalDownloads.toLocaleString()} />
       </div>
       <section>
         <h2 className="mb-4 text-xl font-bold text-slate-950">Songs by {artist.name}</h2>
-        {artist.songs.length ? <RankedSongList songs={artist.songs} showRank /> : <div className="rounded-3xl border border-borderSoft bg-white p-10 text-center text-slate-500 shadow-card">No published songs yet.</div>}
+        {artist.songs.length ? <RankedSongList songs={artist.songs} showDownloads showRank showRemixes /> : <div className="rounded-3xl border border-borderSoft bg-white p-10 text-center text-slate-500 shadow-card">No published songs yet.</div>}
       </section>
     </div>
   );

@@ -36,6 +36,7 @@ const songInclude = {
       role: true,
     },
   },
+  _count: { select: { remixProjects: true } },
 } as const;
 
 @Injectable()
@@ -297,12 +298,18 @@ export class CatalogService {
 
   async listArtists() {
     await this.featureModules.assertEnabled("artists", "api");
-    return this.prisma.artist.findMany({
+    const artists = await this.prisma.artist.findMany({
       orderBy: { name: "asc" },
       include: {
         _count: { select: { songs: true, followers: true } },
       },
     });
+    const stats = await this.getArtistStats(artists.map((artist) => artist.id));
+
+    return artists.map((artist) => ({
+      ...artist,
+      stats: stats.get(artist.id) ?? { totalSongs: 0, totalPlays: 0, totalDownloads: 0 },
+    }));
   }
 
   async getArtistBySlug(slug: string) {
@@ -322,9 +329,11 @@ export class CatalogService {
 
     if (!artist) throw new NotFoundException("Artist not found.");
     const modules = await this.featureModules.getFlags("public");
+    const stats = await this.getArtistStats([artist.id]);
 
     return {
       ...artist,
+      stats: stats.get(artist.id) ?? { totalSongs: 0, totalPlays: 0, totalDownloads: 0 },
       songs: artist.songs.map((s) => this.toSongResponse(s, modules)),
     };
   }
@@ -871,7 +880,27 @@ export class CatalogService {
     return value === "true" || value === "1" || value === "on";
   }
 
-  private toSongResponse(song: Song & { artist: any; featuredArtists?: Array<{ artist: any }>; genre: any; language?: any; musicType?: any }, modules?: Record<string, boolean>) {
+  private async getArtistStats(artistIds: string[]) {
+    if (!artistIds.length) return new Map<string, { totalSongs: number; totalPlays: number; totalDownloads: number }>();
+
+    const rows = await this.prisma.song.groupBy({
+      by: ["artistId"],
+      where: { artistId: { in: artistIds }, isPublished: true },
+      _count: { _all: true },
+      _sum: { playCount: true, downloadCount: true },
+    });
+
+    return new Map(rows.map((row) => [
+      row.artistId,
+      {
+        totalSongs: row._count._all,
+        totalPlays: row._sum.playCount ?? 0,
+        totalDownloads: row._sum.downloadCount ?? 0,
+      },
+    ]));
+  }
+
+  private toSongResponse(song: Song & { artist: any; featuredArtists?: Array<{ artist: any }>; genre: any; language?: any; musicType?: any; _count?: { remixProjects?: number } }, modules?: Record<string, boolean>) {
     const canStream = modules?.streaming ?? true;
     const canDownload = modules?.downloads ?? true;
     const canRemix = modules?.remix ?? true;
@@ -896,6 +925,7 @@ export class CatalogService {
       isEditorPick: (song as any).isEditorPick ?? false,
       downloadCount: song.downloadCount,
       playCount: song.playCount,
+      remixCount: canRemix ? song._count?.remixProjects ?? 0 : 0,
       seoTitle: (song as any).seoTitle ?? null,
       seoDescription: (song as any).seoDescription ?? null,
       createdAt: song.createdAt,

@@ -34,6 +34,7 @@ export type CatalogArtist = {
   seoTitle?: string | null;
   seoDescription?: string | null;
   _count?: { songs: number; followers: number };
+  stats?: { totalSongs: number; totalPlays: number; totalDownloads: number };
 };
 
 export type AdminArtist = CatalogArtist & {
@@ -186,6 +187,7 @@ export type CatalogSong = {
   isEditorPick: boolean;
   downloadCount: number;
   playCount: number;
+  remixCount?: number;
   seoTitle?: string | null;
   seoDescription?: string | null;
   createdAt: string;

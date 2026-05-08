@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { Download, Play } from "lucide-react";
 
 import { CatalogSong, getSong } from "@/lib/api";
+import { MODULE_KEYS } from "@/lib/modules/module-keys";
+import { hasModule } from "@/lib/modules/module-registry";
+import { useModules } from "@/lib/modules/use-modules";
 import { formatSongArtists } from "@/lib/song-artists";
 import { usePlayerStore } from "@/lib/stores/player-store";
 import { EngagementButtons } from "./engagement-buttons";
@@ -19,6 +22,7 @@ export function SongDetail({ slug }: SongDetailProps) {
   const [song, setSong] = useState<CatalogSong | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const modules = useModules();
   const playTrack = usePlayerStore((state) => state.playTrack);
 
   useEffect(() => {
@@ -120,19 +124,19 @@ export function SongDetail({ slug }: SongDetailProps) {
 
         <div className="mt-6 grid gap-3 text-sm text-slate-500 sm:grid-cols-3">
           <div className="rounded-2xl border border-borderSoft bg-surface p-4">
+            <p className="font-semibold text-slate-950">{song.playCount}</p>
+            <p>Plays</p>
+          </div>
+          <div className="rounded-2xl border border-borderSoft bg-surface p-4">
             <p className="font-semibold text-slate-950">{song.downloadCount}</p>
             <p>Downloads</p>
           </div>
-          <div className="rounded-2xl border border-borderSoft bg-surface p-4">
-            <p className="font-semibold text-slate-950">{song.playCount}</p>
-            <p>Streams</p>
-          </div>
-          <div className="rounded-2xl border border-borderSoft bg-surface p-4">
-            <p className="font-semibold text-slate-950">
-              {song.allowRemix ? "Available later" : "Disabled"}
-            </p>
-            <p>Remix</p>
-          </div>
+          {hasModule(modules, MODULE_KEYS.remix) ? (
+            <div className="rounded-2xl border border-borderSoft bg-surface p-4">
+              <p className="font-semibold text-slate-950">{song.remixCount ?? 0}</p>
+              <p>Remixes</p>
+            </div>
+          ) : null}
         </div>
 
         <CommentsSection songId={song.id} />

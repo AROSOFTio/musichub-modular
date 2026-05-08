@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Play, Download, Music } from "lucide-react";
+import { Play, Download, Music, SlidersHorizontal } from "lucide-react";
 import { CatalogSong } from "@/lib/api";
+import { MODULE_KEYS } from "@/lib/modules/module-keys";
+import { hasModule } from "@/lib/modules/module-registry";
+import { useModules } from "@/lib/modules/use-modules";
 import { formatSongArtists } from "@/lib/song-artists";
 import { usePlayerStore } from "@/lib/stores/player-store";
 
@@ -10,6 +13,7 @@ type Props = {
   songs: CatalogSong[];
   showRank?: boolean;
   showDownloads?: boolean;
+  showRemixes?: boolean;
 };
 
 function formatCount(n: number) {
@@ -18,8 +22,10 @@ function formatCount(n: number) {
   return String(n);
 }
 
-export function RankedSongList({ songs, showRank = false, showDownloads = false }: Props) {
+export function RankedSongList({ songs, showRank = false, showDownloads = false, showRemixes = false }: Props) {
+  const modules = useModules();
   const playTrack = usePlayerStore((s) => s.playTrack);
+  const showRemixStats = showRemixes && hasModule(modules, MODULE_KEYS.remix);
 
   const toTrack = (song: CatalogSong) => ({
     id: song.id,
@@ -74,6 +80,11 @@ export function RankedSongList({ songs, showRank = false, showDownloads = false 
               <span className="text-slate-300"> · </span>
               {song.genre.name}
             </Link>
+            <p className="mt-1 text-[11px] font-medium text-slate-400 sm:hidden">
+              {formatCount(song.playCount)} plays
+              {showDownloads ? ` - ${formatCount(song.downloadCount)} downloads` : ""}
+              {showRemixStats ? ` - ${formatCount(song.remixCount ?? 0)} remixes` : ""}
+            </p>
           </div>
 
           {/* Stats */}
@@ -93,6 +104,15 @@ export function RankedSongList({ songs, showRank = false, showDownloads = false 
             </div>
           )}
 
+          {showRemixStats && (
+            <div className="hidden shrink-0 text-right xl:block">
+              <p className="text-sm font-semibold text-slate-800">
+                {formatCount(song.remixCount ?? 0)}
+              </p>
+              <p className="text-xs text-slate-400">remixes</p>
+            </div>
+          )}
+
           {/* Actions */}
           <div className="flex shrink-0 items-center gap-2">
             {song.downloadUrl && (
@@ -104,6 +124,15 @@ export function RankedSongList({ songs, showRank = false, showDownloads = false 
                 <Download className="h-3.5 w-3.5" />
               </a>
             )}
+            {showRemixStats && song.allowRemix ? (
+              <Link
+                href={`/remix-studio?song=${song.id}`}
+                className="hidden h-8 w-8 items-center justify-center rounded-full border border-borderSoft bg-white text-slate-500 transition-colors hover:border-violet-300 hover:text-violet-600 sm:flex"
+                title="Remix"
+              >
+                <SlidersHorizontal className="h-3.5 w-3.5" />
+              </Link>
+            ) : null}
             <button
               onClick={() => playTrack(toTrack(song), queue)}
               className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-600 text-white transition-colors hover:bg-violet-700"
